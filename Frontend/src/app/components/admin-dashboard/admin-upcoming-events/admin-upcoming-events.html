@@ -1,0 +1,238 @@
+<!-- Header -->
+<app-header
+  [title]="'Upcoming Events'"
+  [buttons]="adminButtons"
+  (buttonClick)="handleHeaderAction($event)"
+>
+</app-header>
+
+<!-- Main Content -->
+<div class="admin-upcoming-events-container">
+  <!-- Alert Component -->
+  <app-custom-alert
+    [alertData]="customAlert"
+    [autoCloseDuration]="2000"
+    (alertClosed)="closeAlert()"
+    (alertConfirmed)="handleAlertConfirm()"
+    (alertCancelled)="handleAlertCancel()"
+  >
+  </app-custom-alert>
+
+  <!-- Upcoming Events Section -->
+
+  <!-- No Events Message -->
+  <div *ngIf="filteredEvents.length === 0" class="no-events-message">
+    <h3>No upcoming events found</h3>
+    <p>There are currently no upcoming events to display.</p>
+  </div>
+
+  <!-- Events Grid -->
+  <div class="admin-events-grid">
+    <div *ngFor="let event of filteredEvents" class="admin-event-card">
+      <div class="event-header">
+        <h3>{{ event.title }}</h3>
+        <span class="event-category" *ngIf="event.category"
+          >{{ event.category }}</span
+        >
+      </div>
+
+      <div class="event-details">
+        <p><strong>Date</strong> {{ event.date | date: 'MMM d, y' }}</p>
+        <p><strong>Time</strong> {{ event.timeSlot }}</p>
+        <p><strong>Location</strong> {{ event.location }}</p>
+        <p><strong>Price</strong> ₹{{ event.price }}</p>
+        <p *ngIf="event.artist"><strong>Artist</strong> {{ event.artist }}</p>
+        <p *ngIf="event.organization">
+          <strong>Organization</strong> {{ event.organization }}
+        </p>
+      </div>
+
+      <div class="event-actions">
+        <button
+          class="delete-btn"
+          (click)="confirmDeleteEvent(event._id, event.title)"
+        >
+          Delete Event
+        </button>
+        <button class="view-details-btn" (click)="showEventDetail(event)">
+          <span class="btn-icon">👁️</span>
+          <span class="btn-text">Details</span>
+        </button>
+      </div>
+
+      <div class="registered-users-section">
+        <h4>Registered Users</h4>
+
+        <div *ngIf="usersMap[event._id]" class="users-dropdown">
+          <button
+            class="users-toggle-btn"
+            (click)="toggleUsersDropdown(event._id)"
+            [attr.aria-expanded]="showUsersDropdown[event._id]"
+            [attr.aria-controls]="'usersList-' + event._id"
+          >
+            Registered users: {{ usersMap[event._id].currentRegistration }}
+            <span
+              class="dropdown-icon"
+              [class.rotated]="showUsersDropdown[event._id]"
+            >
+              ▼
+            </span>
+          </button>
+
+          <ul
+            id="usersList-{{ event._id }}"
+            class="users-list"
+            *ngIf="showUsersDropdown[event._id]"
+          >
+            <li
+              *ngFor="let user of usersMap[event._id].users"
+              class="user-item"
+            >
+              <div class="user-info">
+                <span class="user-name">{{ user.name }}</span>
+                <span class="user-email">{{ user.email }}</span>
+              </div>
+              <button
+                class="remove-user-btn"
+                (click)="confirmRemoveUser(event._id, user._id, user.name)"
+                title="Remove user"
+              >
+                Remove
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Details Modal -->
+  <div
+    class="admin-modal-overlay"
+    *ngIf="showEventDetails"
+    (click)="closeEventDetails()"
+    style="
+      display: flex !important;
+      z-index: 9999 !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+    "
+  >
+    <div class="admin-event-modal" (click)="$event.stopPropagation()">
+      <div class="admin-modal-header">
+        <h2 class="admin-modal-title">{{ selectedEvent?.title }}</h2>
+        <button
+          class="admin-modal-close-btn"
+          (click)="closeEventDetails()"
+          aria-label="Close event details"
+        >
+          <span>✕</span>
+        </button>
+      </div>
+
+      <div class="admin-modal-content" *ngIf="selectedEvent">
+        <div class="admin-modal-category">
+          <span class="admin-category-badge"
+            >{{ selectedEvent.category || 'Event' }}</span
+          >
+        </div>
+
+        <div class="admin-modal-description">
+          <h3>About This Event</h3>
+          <p>{{ selectedEvent.description }}</p>
+        </div>
+
+        <div class="admin-modal-details-grid">
+          <div class="admin-modal-detail-card">
+            <div class="admin-detail-header">
+              <span class="admin-detail-icon">📅</span>
+              <span class="admin-detail-title">Date & Time</span>
+            </div>
+            <div class="admin-detail-content">
+              <p>
+                <strong>Date:</strong> {{ selectedEvent.date | date: 'MMM d, y'
+                }}
+              </p>
+              <p><strong>Time:</strong> {{ selectedEvent.timeSlot }}</p>
+              <p><strong>Duration:</strong> {{ selectedEvent.duration }}</p>
+            </div>
+          </div>
+
+          <div class="admin-modal-detail-card">
+            <div class="admin-detail-header">
+              <span class="admin-detail-icon">📍</span>
+              <span class="admin-detail-title">Location</span>
+            </div>
+            <div class="admin-detail-content">
+              <p>{{ selectedEvent.location }}</p>
+            </div>
+          </div>
+
+          <div class="admin-modal-detail-card">
+            <div class="admin-detail-header">
+              <span class="admin-detail-icon">💰</span>
+              <span class="admin-detail-title">Pricing</span>
+            </div>
+            <div class="admin-detail-content">
+              <p class="admin-price-highlight">₹{{ selectedEvent.price }}</p>
+            </div>
+          </div>
+
+          <div class="admin-modal-detail-card">
+            <div class="admin-detail-header">
+              <span class="admin-detail-icon">👥</span>
+              <span class="admin-detail-title">Capacity</span>
+            </div>
+            <div class="admin-detail-content">
+              <p>Max {{ selectedEvent.maxRegistrations }} attendees</p>
+              <p *ngIf="usersMap[selectedEvent._id]">
+                Current: {{ usersMap[selectedEvent._id].currentRegistration }}
+                registered
+              </p>
+            </div>
+          </div>
+
+          <div class="admin-modal-detail-card" *ngIf="selectedEvent.artist">
+            <div class="admin-detail-header">
+              <span class="admin-detail-icon">🎭</span>
+              <span class="admin-detail-title">Artist</span>
+            </div>
+            <div class="admin-detail-content">
+              <p>{{ selectedEvent.artist }}</p>
+            </div>
+          </div>
+
+          <div
+            class="admin-modal-detail-card"
+            *ngIf="selectedEvent.organization"
+          >
+            <div class="admin-detail-header">
+              <span class="admin-detail-icon">🏢</span>
+              <span class="admin-detail-title">Organization</span>
+            </div>
+            <div class="admin-detail-content">
+              <p>{{ selectedEvent.organization }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin-specific actions in modal -->
+        <div class="admin-modal-actions">
+          <button
+            class="admin-modal-delete-btn"
+            (click)="confirmDeleteEvent(selectedEvent._id, selectedEvent.title); closeEventDetails()"
+          >
+            <span class="btn-icon">🗑️</span>
+            <span class="btn-text">Delete Event</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<app-footer></app-footer>

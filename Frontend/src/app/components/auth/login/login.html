@@ -1,0 +1,394 @@
+<div class="auth-wrapper">
+  <!-- Custom Success Popup -->
+  <div class="success-popup" [class.show]="showSuccessPopup">
+    <div class="popup-content">
+      <div class="popup-icon">✅</div>
+      <div class="popup-message">{{ successMessage }}</div>
+    </div>
+  </div>
+
+  <!-- Custom Alert Popup -->
+  <div class="alert-popup" [class.show]="showAlertPopup" [class.error]="alertType === 'error'" [class.warning]="alertType === 'warning'" [class.info]="alertType === 'info'">
+    <div class="alert-content">
+      <div class="alert-header">
+        <div class="alert-icon">
+          <span *ngIf="alertType === 'error'">❌</span>
+          <span *ngIf="alertType === 'warning'">⚠️</span>
+          <span *ngIf="alertType === 'info'">ℹ️</span>
+        </div>
+        <button class="alert-close" (click)="hideAlert()">×</button>
+      </div>
+      <div class="alert-message">{{ alertMessage }}</div>
+      <div class="alert-actions">
+        <button class="alert-btn" (click)="hideAlert()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Animated Background Elements -->
+  <div class="bg-animation">
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+    <div class="floating-shape shape-3"></div>
+    <div class="floating-shape shape-4"></div>
+  </div>
+
+  <!-- Logo Section -->
+  <div class="logo-container">
+    <h1 class="brand-title">
+      <span class="brand-text">Welcome to</span>
+      <span class="brand-highlight"> Happenin</span>
+    </h1>
+  </div>
+
+  <!-- Enhanced Toggle -->
+  <div class="auth-toggle">
+    <div class="toggle-background" [class.login-active]="isLogin"></div>
+    <button
+      [class.active]="isLogin"
+      (click)="toggleForm(true)"
+      class="toggle-btn"
+    >
+      <span class="btn-icon">🔑</span>
+      <span class="btn-text">Login</span>
+    </button>
+    <button
+      [class.active]="!isLogin"
+      (click)="toggleForm(false)"
+      class="toggle-btn"
+    >
+      <span class="btn-icon">👤</span>
+      <span class="btn-text">Register</span>
+    </button>
+  </div>
+
+ <!-- Login Form -->
+<div class="form-container" *ngIf="isLogin">
+  <div class="glass-form login-form">
+    <div class="form-header">
+      <div class="header-icon">🎉</div>
+      <h2 class="form-title">Welcome Back</h2>
+      <p class="form-subtitle">Sign in to continue your journey</p>
+    </div>
+
+    <!-- Login Method Toggle -->
+    <div class="login-method-toggle">
+      <div class="method-toggle-background" [class.otp-active]="isOtpLogin"></div>
+      <button
+        type="button"
+        [class.active]="!isOtpLogin"
+        (click)="toggleLoginMethod(false)"
+        class="method-toggle-btn"
+      >
+        <span class="method-icon">🔒</span>
+        <span class="method-text">Password</span>
+      </button>
+      <button
+        type="button"
+        [class.active]="isOtpLogin"
+        (click)="toggleLoginMethod(true)"
+        class="method-toggle-btn"
+      >
+        <span class="method-icon">📱</span>
+        <span class="method-text">OTP</span>
+      </button>
+    </div>
+
+    <!-- Password Login Form -->
+    <form
+      *ngIf="!isOtpLogin"
+      [formGroup]="loginForm"
+      (ngSubmit)="onLoginSubmit()"
+      class="auth-form"
+    >
+      <div class="input-group">
+        <div class="input-icon">📧</div>
+        <input
+          formControlName="email"
+          placeholder="Enter your email"
+          type="email"
+          class="form-input"
+          [class.error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+        />
+        <div class="input-highlight"></div>
+        <div class="error-message" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+          <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
+          <span *ngIf="loginForm.get('email')?.errors?.['email']">Please enter a valid email address</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <div class="input-icon">🔒</div>
+        <input
+          formControlName="password"
+          placeholder="Enter your password"
+          type="password"
+          class="form-input"
+          [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+        />
+        <div class="input-highlight"></div>
+        <div class="error-message" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+          <span>{{ getPasswordError(loginForm) }}</span>
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="loginForm.invalid"
+        class="submit-btn login-btn"
+      >
+        <span class="btn-content">
+          <span class="btn-icon">🚀</span>
+          <span class="btn-text">Sign In</span>
+        </span>
+        <div class="btn-shine"></div>
+      </button>
+    </form>
+
+    <!-- OTP Login Form -->
+    <form
+      *ngIf="isOtpLogin"
+      [formGroup]="otpForm"
+      class="auth-form otp-form"
+    >
+      <div class="input-group">
+        <div class="input-icon">📧</div>
+        <input
+          formControlName="email"
+          placeholder="Enter your email"
+          type="email"
+          class="form-input"
+          [class.error]="otpForm.get('email')?.invalid && otpForm.get('email')?.touched"
+          [disabled]="otpSent"
+        />
+        <div class="input-highlight"></div>
+        <div class="error-message" *ngIf="otpForm.get('email')?.invalid && otpForm.get('email')?.touched">
+          <span>{{ getOtpEmailError() }}</span>
+        </div>
+      </div>
+
+      <div class="otp-actions" *ngIf="!otpSent">
+        <button
+          type="button"
+          (click)="onSendOtp()"
+          [disabled]="otpForm.get('email')?.invalid"
+          class="submit-btn otp-send-btn"
+        >
+          <span class="btn-content">
+            <span class="btn-icon">📤</span>
+            <span class="btn-text">Send OTP</span>
+          </span>
+          <div class="btn-shine"></div>
+        </button>
+      </div>
+
+      <div class="otp-verify-section" *ngIf="otpSent">
+        <div class="input-group">
+          <div class="input-icon">🔢</div>
+          <input
+            formControlName="otp"
+            placeholder="Enter 6-digit OTP"
+            type="text"
+            maxlength="6"
+            class="form-input otp-input"
+            [class.error]="otpForm.get('otp')?.invalid && otpForm.get('otp')?.touched"
+          />
+          <div class="input-highlight"></div>
+          <div class="error-message" *ngIf="otpForm.get('otp')?.invalid && otpForm.get('otp')?.touched">
+            <span>{{ getOtpError() }}</span>
+          </div>
+        </div>
+
+        <div class="otp-actions">
+          <button
+            type="button"
+            (click)="onVerifyOtp()"
+            [disabled]="otpForm.get('otp')?.invalid"
+            class="submit-btn otp-verify-btn"
+          >
+            <span class="btn-content">
+              <span class="btn-icon">✅</span>
+              <span class="btn-text">Verify OTP</span>
+            </span>
+            <div class="btn-shine"></div>
+          </button>
+
+          <!-- <button
+            type="button"
+            (click)="onResendOtp()"
+            [disabled]="resendDisabled"
+            class="resend-btn"
+            [class.disabled]="resendDisabled"
+          >
+            <span class="resend-text" *ngIf="!resendDisabled">Resend OTP</span>
+            <span class="resend-text timer-text" *ngIf="resendDisabled">
+              Resend in {{ getFormattedTimer() }}
+            </span>
+          </button> -->
+        </div>
+
+        <div class="resend-section" *ngIf="otpSent">
+          <button
+      type="button"
+      (click)="onResendOtp()"
+      [disabled]="resendDisabled"
+      class="resend-btn"
+      [class.disabled]="resendDisabled"
+    >
+      <span class="resend-text" *ngIf="!resendDisabled">
+        <span class="btn-icon">🔄</span>
+        Resend OTP
+      </span>
+      <span class="resend-text timer-text" *ngIf="resendDisabled">
+        <span class="btn-icon">⏱️</span>
+        Resend in {{ getFormattedTimer() }}
+      </span>
+    </button>
+        </div>
+      </div>
+    </form>
+
+    <div class="form-footer">
+      <p class="footer-text">
+        New to Happenin?
+        <span class="switch-link" (click)="toggleForm(false)"
+          >Create an account</span
+        >
+      </p>
+    </div>
+  </div>
+</div>
+
+  <!-- Register Form -->
+  <div class="form-container" *ngIf="!isLogin">
+    <div class="glass-form register-form">
+      <div class="form-header">
+        <div class="header-icon">✨</div>
+        <h2 class="form-title">Join Happenin</h2>
+        <p class="form-subtitle">Create your account and start exploring</p>
+      </div>
+
+      <form
+        [formGroup]="registerForm"
+        (ngSubmit)="onRegisterSubmit()"
+        class="auth-form"
+      >
+        <div class="input-group">
+          <div class="input-icon">👤</div>
+          <input
+            formControlName="name"
+            placeholder="Enter your full name"
+            type="text"
+            class="form-input"
+            [class.error]="registerForm.get('name')?.invalid && registerForm.get('name')?.touched"
+          />
+          <div class="input-highlight"></div>
+          <div class="error-message" *ngIf="registerForm.get('name')?.invalid && registerForm.get('name')?.touched">
+            <span *ngIf="registerForm.get('name')?.errors?.['required']">Full name is required</span>
+            <span *ngIf="registerForm.get('name')?.errors?.['minlength']">Name must be at least 2 characters long</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-icon">📱</div>
+          <input
+            formControlName="phone"
+            placeholder="Enter your phone number"
+            type="tel"
+            class="form-input"
+            [class.error]="registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched"
+          />
+          <div class="input-highlight"></div>
+          <div class="error-message" *ngIf="registerForm.get('phone')?.invalid && registerForm.get('phone')?.touched">
+            <span *ngIf="registerForm.get('phone')?.errors?.['required']">Phone number is required</span>
+            <span *ngIf="registerForm.get('phone')?.errors?.['pattern']">Please enter a valid 10-digit phone number</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-icon">📧</div>
+          <input
+            formControlName="email"
+            placeholder="Enter your email"
+            type="email"
+            class="form-input"
+            [class.error]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+          />
+          <div class="input-highlight"></div>
+          <div class="error-message" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+            <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</span>
+            <span *ngIf="registerForm.get('email')?.errors?.['email']">Please enter a valid email address</span>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-icon">🔒</div>
+          <input
+            formControlName="password"
+            placeholder="Create a password"
+            type="password"
+            class="form-input"
+            [class.error]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+          />
+          <div class="input-highlight"></div>
+          <div class="error-message" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+            <span>{{ getPasswordError(registerForm) }}</span>
+          </div>
+        </div>
+
+        <!-- NEW: Confirm Password Field -->
+        <div class="input-group">
+          <div class="input-icon">🔐</div>
+          <input
+            formControlName="confirmPassword"
+            placeholder="Confirm your password"
+            type="password"
+            class="form-input"
+            [class.error]="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched"
+            [class.success]="registerForm.get('confirmPassword')?.valid && registerForm.get('confirmPassword')?.value && registerForm.get('password')?.value === registerForm.get('confirmPassword')?.value"
+          />
+          <div class="input-highlight"></div>
+          <div class="error-message" *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched">
+            <span>{{ getConfirmPasswordError() }}</span>
+          </div>
+          <!-- Success message when passwords match -->
+          <div class="success-message" *ngIf="registerForm.get('confirmPassword')?.valid && registerForm.get('confirmPassword')?.value && registerForm.get('password')?.value === registerForm.get('confirmPassword')?.value && registerForm.get('confirmPassword')?.touched">
+            <span>✅ Passwords match!</span>
+          </div>
+        </div>
+
+        <div class="input-group select-group">
+          <div class="input-icon">🎭</div>
+          <select formControlName="role" class="form-select">
+            <option value="user">🎪 Event Enthusiast</option>
+            <option value="organizer">🎨 Event Organizer</option>
+            <!-- <option value="admin">👑 Administrator</option> -->
+          </select>
+          <div class="select-arrow">▼</div>
+          <div class="input-highlight"></div>
+        </div>
+
+        <button
+          type="submit"
+          [disabled]="registerForm.invalid"
+          class="submit-btn register-btn"
+        >
+          <span class="btn-content">
+            <span class="btn-icon">🌟</span>
+            <span class="btn-text">Create Account</span>
+          </span>
+          <div class="btn-shine"></div>
+        </button>
+      </form>
+
+      <div class="form-footer">
+        <p class="footer-text">
+          Already have an account?
+          <span class="switch-link" (click)="toggleForm(true)"
+            >Sign in here</span
+          >
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

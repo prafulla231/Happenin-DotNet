@@ -1,0 +1,188 @@
+<app-header
+  [title]="'Expired Events'"
+  [buttons]="adminButtons"
+  (buttonClick)="handleHeaderAction($event)"
+>
+</app-header>
+
+<div class="expired-events-container">
+  <div class="admin-events-grid" *ngIf="expiredEvents.length > 0">
+    <div *ngFor="let event of expiredEvents" class="admin-event-card">
+      <div class="event-header">
+        <h3>{{ event.title }}</h3>
+        <span class="event-category" *ngIf="event.category"
+          >{{ event.category }}</span
+        >
+      </div>
+
+      <div class="event-details">
+        <p><strong>Date:</strong> {{ event.date | date: 'MMM d, y' }}</p>
+        <p><strong>Time:</strong> {{ event.timeSlot }}</p>
+        <p><strong>Location:</strong> {{ event.location }}</p>
+        <p><strong>Price:</strong> ₹{{ event.price }}</p>
+        <p *ngIf="event.artist"><strong>Artist:</strong> {{ event.artist }}</p>
+        <p *ngIf="event.organization">
+          <strong>Organization:</strong> {{ event.organization }}
+        </p>
+      </div>
+
+      <div class="event-actions">
+        <button
+          class="delete-btn"
+          (click)="confirmDeleteEvent(event._id, event.title)"
+        >
+          Delete Event
+        </button>
+        <button class="view-details-btn" (click)="showEventDetail(event)">
+          <span class="btn-icon">👁️</span>
+          <span class="btn-text">Details</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="expiredEvents.length === 0" class="no-events-message">
+    <h3>No expired events found</h3>
+    <p>There are currently no expired events to display.</p>
+  </div>
+</div>
+
+<!-- Event Details Modal -->
+<div
+  class="admin-modal-overlay"
+  *ngIf="showEventDetails"
+  (click)="closeEventDetails()"
+  style="
+    display: flex !important;
+    z-index: 9999 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  "
+>
+  <div class="admin-event-modal" (click)="$event.stopPropagation()">
+    <div class="admin-modal-header">
+      <h2 class="admin-modal-title">{{ selectedEvent?.title }}</h2>
+      <button
+        class="admin-modal-close-btn"
+        (click)="closeEventDetails()"
+        aria-label="Close event details"
+      >
+        <span>✕</span>
+      </button>
+    </div>
+
+    <div class="admin-modal-content" *ngIf="selectedEvent">
+      <div class="admin-modal-category">
+        <span class="admin-category-badge"
+          >{{ selectedEvent.category || 'Event' }}</span
+        >
+      </div>
+
+      <div class="admin-modal-description">
+        <h3>About This Event</h3>
+        <p>{{ selectedEvent.description }}</p>
+      </div>
+
+      <div class="admin-modal-details-grid">
+        <div class="admin-modal-detail-card">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">📅</span>
+            <span class="admin-detail-title">Date & Time</span>
+          </div>
+          <div class="admin-detail-content">
+            <p>
+              <strong>Date:</strong> {{ selectedEvent.date | date: 'MMM d, y' }}
+            </p>
+            <p><strong>Time:</strong> {{ selectedEvent.timeSlot }}</p>
+            <p><strong>Duration:</strong> {{ selectedEvent.duration }}</p>
+          </div>
+        </div>
+
+        <div class="admin-modal-detail-card">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">📍</span>
+            <span class="admin-detail-title">Location</span>
+          </div>
+          <div class="admin-detail-content">
+            <p>{{ selectedEvent.location }}</p>
+            <p><strong>City:</strong> {{ selectedEvent.city }}</p>
+          </div>
+        </div>
+
+        <div class="admin-modal-detail-card">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">💰</span>
+            <span class="admin-detail-title">Pricing</span>
+          </div>
+          <div class="admin-detail-content">
+            <p class="admin-price-highlight">₹{{ selectedEvent.price }}</p>
+          </div>
+        </div>
+
+        <div class="admin-modal-detail-card">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">👥</span>
+            <span class="admin-detail-title">Capacity</span>
+          </div>
+          <div class="admin-detail-content">
+            <p>Max {{ selectedEvent.maxRegistrations }} attendees</p>
+            <p *ngIf="usersMap[selectedEvent._id]">
+              Current: {{ usersMap[selectedEvent._id].currentRegistration }}
+              registered
+            </p>
+          </div>
+        </div>
+
+        <div class="admin-modal-detail-card" *ngIf="selectedEvent.artist">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">🎭</span>
+            <span class="admin-detail-title">Artist</span>
+          </div>
+          <div class="admin-detail-content">
+            <p>{{ selectedEvent.artist }}</p>
+          </div>
+        </div>
+
+        <div class="admin-modal-detail-card" *ngIf="selectedEvent.organization">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">🏢</span>
+            <span class="admin-detail-title">Organization</span>
+          </div>
+          <div class="admin-detail-content">
+            <p>{{ selectedEvent.organization }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="registered-users" *ngIf="usersMap[selectedEvent._id]">
+        <h3>
+          Registered Users ({{ usersMap[selectedEvent._id].currentRegistration
+          }})
+        </h3>
+        <div class="users-list">
+          <div
+            *ngFor="let user of usersMap[selectedEvent._id].users"
+            class="user-item"
+          >
+            <span class="user-name">{{ user.name }}</span>
+            <span class="user-email">{{ user.email }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-custom-alert
+  [alertData]="customAlert"
+  [autoCloseDuration]="2000"
+  (alertClosed)="closeAlert()"
+  (alertConfirmed)="handleAlertConfirm()"
+  (alertCancelled)="handleAlertCancel()"
+>
+</app-custom-alert>
+
+<app-footer></app-footer>

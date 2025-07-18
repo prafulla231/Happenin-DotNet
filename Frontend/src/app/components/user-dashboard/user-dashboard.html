@@ -1,0 +1,617 @@
+<!-- user-dashboard -->
+<div class="dashboard-container">
+  <app-header
+    [userName]="displayUserName"
+    [title]="'Dashboard'"
+    [buttons]="headerButtons"
+    (buttonClick)="handleHeaderAction($event)"
+  >
+  </app-header>
+  <!-- <app-event-filter></app-event-filter> -->
+
+  <section class="filters-section">
+    <div class="filters-container">
+      <div class="filters-header">
+        <div class="header-actions">
+          <button class="toggle-filters-btn" (click)="toggleFilters()">
+            <span class="btn-icon">{{ showFilters ? '📁' : '📂' }}</span>
+            <span class="btn-text"
+              >{{ showFilters ? 'Hide Filters' : 'Show Filters' }}</span
+            >
+            <span class="dropdown-arrow" [class.rotated]="showFilters">▼</span>
+          </button>
+          <button
+            class="clear-filters-btn"
+            (click)="clearFilters()"
+            *ngIf="hasActiveFilters()"
+          >
+            <span class="btn-icon">✕</span>
+            <span class="btn-text">Clear All</span>
+          </button>
+          <div class="search-container">
+            <div class="search-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input
+                type="text"
+                class="search-input"
+                placeholder="Search events..."
+                [(ngModel)]="searchQuery"
+                (input)="onSearchChange()"
+                (keyup.enter)="onSearchChange()"
+                #searchInput
+              />
+              <button
+                class="search-clear-btn"
+                (click)="clearSearch()"
+                *ngIf="searchQuery && searchQuery.trim()"
+                type="button"
+              >
+                <span>✕</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible Filter Controls -->
+      <div class="filter-dropdown" [class.show]="showFilters">
+        <div class="filter-dropdown-content">
+          <div class="filter-controls">
+            <!-- Category Filter -->
+            <div class="filter-group">
+              <label class="filter-label">
+                <span class="label-icon">🏷️</span>
+                Category
+              </label>
+              <select
+                class="filter-select"
+                [(ngModel)]="selectedCategory"
+                (change)="onFilterChange()"
+              >
+                <option value="">All Categories</option>
+                <option *ngFor="let category of categories" [value]="category">
+                  {{ category }}
+                </option>
+              </select>
+            </div>
+
+            <!-- City Filter -->
+            <div class="filter-group">
+              <label class="filter-label">
+                <span class="label-icon">🏙️</span>
+                Location
+              </label>
+
+              <select
+                class="filter-select"
+                [(ngModel)]="selectedCity"
+                (change)="onFilterChange()"
+              >
+                <option value="">All Cities</option>
+                <option *ngFor="let city of availableCiti" [value]="city">
+                  {{ city }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="filter-group date-range-group">
+              <label class="filter-label">
+                <span class="label-icon">📅</span>
+                Date Range
+              </label>
+              <div class="date-inputs">
+                <input
+                  type="date"
+                  class="date-input"
+                  placeholder="From"
+                  [(ngModel)]="dateFrom"
+                  (change)="onFilterChange()"
+                />
+                <span class="date-separator">to</span>
+                <input
+                  type="date"
+                  class="date-input"
+                  placeholder="To"
+                  [(ngModel)]="dateTo"
+                  (change)="onFilterChange()"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Filters Display -->
+      <div class="active-filters" *ngIf="hasActiveFilters()">
+        <div class="active-filters-header">
+          <span class="active-filters-title">Active Filters:</span>
+        </div>
+        <div class="filter-tags">
+          <span class="filter-tag" *ngIf="searchQuery">
+            <span class="tag-icon">🔍</span>
+            Search: "{{ searchQuery }}"
+            <button class="tag-remove" (click)="clearSearch()">✕</button>
+          </span>
+          <span class="filter-tag" *ngIf="selectedCategory">
+            <span class="tag-icon">🏷️</span>
+            {{ selectedCategory }}
+            <button
+              class="tag-remove"
+              (click)="selectedCategory = ''; onSearchChange()"
+            >
+              ✕
+            </button>
+          </span>
+          <span class="filter-tag" *ngIf="selectedCity">
+            <span class="tag-icon">🏙️</span>
+            {{ selectedCity }}
+            <button
+              class="tag-remove"
+              (click)="selectedCity = ''; onSearchChange()"
+            >
+              ✕
+            </button>
+          </span>
+          <span class="filter-tag" *ngIf="dateFrom || dateTo">
+            <span class="tag-icon">📅</span>
+            {{ formatDateRange() }}
+            <button
+              class="tag-remove"
+              (click)="dateFrom = ''; dateTo = ''; onSearchChange()"
+            >
+              ✕
+            </button>
+          </span>
+          <span class="filter-tag" *ngIf="selectedPriceRange">
+            <span class="tag-icon">💰</span>
+            {{ formatPriceRange() }}
+            <button
+              class="tag-remove"
+              (click)="selectedPriceRange = ''; onSearchChange()"
+            >
+              ✕
+            </button>
+          </span>
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <!-- <div class="results-info">
+  <span class="results-count">
+    <span *ngIf="searchQuery && searchQuery.trim()" class="search-indicator">
+      🔍 Search results for "{{ searchQuery }}":
+    </span>
+    {{ paginatedEvents.length }} {{ paginatedEvents.length === 1 ? 'event' : 'events' }} found
+    <span *ngIf="totalPages > 1" class="page-info">
+      (Page {{ currentPage }} of {{ totalPages }})
+    </span>
+  </span>
+  <div class="sort-controls">
+    <label class="sort-label">Sort by:</label>
+    <select class="sort-select" [(ngModel)]="sortBy" (change)="applySorting()">
+      <option value="date">Date</option>
+      <option value="title">Title</option>
+      <option value="price">Price</option>
+      <option value="category">Category</option>
+    </select>
+  </div>
+</div> -->
+      <div class="results-info">
+        <span class="results-count">
+          <span
+            *ngIf="searchQuery && searchQuery.trim()"
+            class="search-indicator"
+          >
+            🔍 Search results for "{{ searchQuery }}":
+          </span>
+          {{ events.length }} {{ events.length === 1 ? 'event' : 'events' }}
+          found
+          <span *ngIf="totalPages > 1" class="page-info">
+            (Page {{ currentPage }} of {{ totalPages }})
+          </span>
+        </span>
+        <div class="sort-controls">
+          <label class="sort-label">Sort by:</label>
+          <select
+            class="sort-select"
+            [(ngModel)]="sortBy"
+            (change)="applySorting()"
+          >
+            <option value="date">Date</option>
+            <option value="title">Title</option>
+            <option value="price">Price</option>
+            <option value="category">Category</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="events-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="title-icon">🎉</span>
+        Available Events
+        <div class="title-underline"></div>
+      </h2>
+    </div>
+
+    <!-- No Results Message -->
+    <div *ngIf="events.length === 0" class="no-results">
+      <div class="no-results-icon">🔍</div>
+      <h3 class="no-results-title">No events found</h3>
+      <p class="no-results-message">
+        Try adjusting your search criteria or filters to find more events.
+      </p>
+      <button class="clear-filters-btn" (click)="clearFilters()">
+        <span class="btn-icon">🔄</span>
+        <span class="btn-text">Clear All Filters</span>
+      </button>
+    </div>
+
+    <!-- Events Grid - Updated to use paginatedEvents -->
+    <div class="events-grid" *ngIf="events.length > 0">
+      <div
+        *ngFor="let event of events"
+        class="event-card"
+        [class.registered-card]="isRegistered(event._id)"
+      >
+        <div class="card-gradient-bg"></div>
+        <div class="card-content">
+          <div class="card-header">
+            <h3 class="event-title">{{ event.title }}</h3>
+          </div>
+          <div class="event-category">{{ event.category || 'Event' }}</div>
+
+          <p class="event-description">{{ event.description }}</p>
+
+          <div class="event-details">
+            <div class="detail-item">
+              <span class="detail-icon">📅</span>
+              <span class="detail-label">Date:</span>
+              <span class="detail-value"
+                >{{ event.date | date: 'MMM d, y'}}</span
+              >
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">⏰</span>
+              <span class="detail-label">Time:</span>
+              <span class="detail-value">{{ event.timeSlot }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">📍</span>
+              <span class="detail-label">Location:</span>
+              <span class="detail-value">{{ event.location }}</span>
+            </div>
+            <div class="detail-item price-item">
+              <span class="detail-icon">💰</span>
+              <span class="detail-label">Price:</span>
+              <span class="price-value">₹{{ event.price }}</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button
+              class="register-btn"
+              (click)="registerForEvent(event._id)"
+              [disabled]="isRegistered(event._id)"
+              [class.registered-btn]="isRegistered(event._id)"
+            >
+              <span class="register-btn-content">
+                <span class="btn-icon"
+                  >{{ isRegistered(event._id) ? '✓' : '+' }}</span
+                >
+                <span class="register-btn-text"
+                  >{{ isRegistered(event._id) ? 'Booked' : 'Book Now' }}</span
+                >
+              </span>
+              <div class="btn-ripple"></div>
+            </button>
+
+            <!-- View Details Button -->
+            <button class="view-details-btn" (click)="showEventDetail(event)">
+              <span class="btn-icon">👁️</span>
+              <span class="btn-text">Details</span>
+            </button>
+          </div>
+        </div>
+        <div class="card-shine"></div>
+      </div>
+    </div>
+
+    <!-- Pagination Controls - Add this new section -->
+
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      (pageChanged)="fetchEvents($event)"
+    >
+    </app-pagination>
+
+    <!-- Page Numbers -->
+
+    <!-- Next Button -->
+  </section>
+
+  <!-- <section class="events-section registered-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="title-icon">🎫</span>
+        My Registered Events
+        <div class="title-underline registered-underline"></div>
+      </h2>
+    </div>
+
+    <div *ngIf="registeredEvents.length === 0" class="empty-state">
+      <div class="empty-icon">🎭</div>
+      <p class="empty-message">You haven't registered for any events yet.</p>
+      <p class="empty-submessage">
+        Browse available events above to get started!
+      </p>
+    </div>
+
+    <div class="events-grid" *ngIf="registeredEvents.length > 0">
+      <div
+        *ngFor="let event of registeredEvents"
+        class="event-card registered-event-card"
+      >
+        <div class="card-gradient-bg registered-bg"></div>
+        <div class="card-content">
+          <div class="card-header">
+            <h3 class="event-title">{{ event.title }}</h3>
+            <div class="registered-badge">
+              <span class="badge-icon">✓</span>
+              <span class="badge-text">Registered</span>
+            </div>
+          </div>
+
+          <p class="event-description">{{ event.description }}</p>
+
+          <div class="event-details">
+            <div class="detail-item">
+              <span class="detail-icon">📅</span>
+              <span class="detail-label">Date:</span>
+              <span class="detail-value"
+                >{{ event.date | date: 'MMM d, y'}}</span
+              >
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">⏰</span>
+              <span class="detail-label">Time:</span>
+              <span class="detail-value">{{ event.timeSlot }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">📍</span>
+              <span class="detail-label">Location:</span>
+              <span class="detail-value">{{ event.location }}</span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <button class="download-ticket-btn" (click)="downloadTicket(event)">
+              <span class="btn-icon">📥</span>
+              <span class="btn-text">Download Ticket</span>
+            </button>
+
+            <button
+              class="deregister-button"
+              (click)="deregister(userId!, event._id)"
+            >
+              <span class="btn-text">Cancel</span>
+            </button>
+          </div>
+        </div>
+        <div class="card-shine"></div>
+      </div>
+    </div>
+  </section> -->
+  <!-- Event Details Modal -->
+  <div
+    class="modal-overlay"
+    *ngIf="showEventDetails"
+    (click)="closeEventDetails()"
+  >
+    <div class="event-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title">{{ selectedEvent?.title }}</h2>
+        <button class="modal-close-btn" (click)="closeEventDetails()">
+          <span>✕</span>
+        </button>
+      </div>
+
+      <div class="modal-content" *ngIf="selectedEvent">
+        <div class="modal-category">
+          <span class="category-badge"
+            >{{ selectedEvent.category || 'Event' }}</span
+          >
+        </div>
+        <button class="share-btn" (click)="copyEventToClipboard()">
+          📋 Share
+        </button>
+        <div class="modal-description">
+          <h3>About This Event</h3>
+          <p>{{ selectedEvent.description }}</p>
+        </div>
+
+        <div class="modal-details-grid">
+          <div class="modal-detail-card">
+            <div class="detail-header">
+              <span class="detail-icon">📅</span>
+              <span class="detail-title">Date & Time</span>
+            </div>
+            <div class="detail-content">
+              <p>
+                <strong>Date:</strong> {{ selectedEvent.date | date: 'MMM d, y'
+                }}
+              </p>
+              <p><strong>Time:</strong> {{ selectedEvent.timeSlot }}</p>
+              <p><strong>Duration:</strong> {{ selectedEvent.duration }}</p>
+            </div>
+          </div>
+
+          <div class="modal-detail-card">
+            <div class="detail-header">
+              <span class="detail-icon">📍</span>
+              <span class="detail-title">Location</span>
+            </div>
+            <div class="detail-content">
+              <p>{{ selectedEvent.location }}</p>
+            </div>
+          </div>
+
+          <div class="modal-detail-card">
+            <div class="detail-header">
+              <span class="detail-icon">💰</span>
+              <span class="detail-title">Pricing</span>
+            </div>
+            <div class="detail-content">
+              <p class="price-highlight">₹{{ selectedEvent.price }}</p>
+            </div>
+          </div>
+
+          <div class="modal-detail-card">
+            <div class="detail-header">
+              <span class="detail-icon">👥</span>
+              <span class="detail-title">Capacity</span>
+            </div>
+            <div class="detail-content">
+              <p>Max {{ selectedEvent.maxRegistrations }} attendees</p>
+            </div>
+          </div>
+
+          <div class="modal-detail-card" *ngIf="selectedEvent.artist">
+            <div class="detail-header">
+              <span class="detail-icon">🎭</span>
+              <span class="detail-title">Artist</span>
+            </div>
+            <div class="detail-content">
+              <p>{{ selectedEvent.artist }}</p>
+            </div>
+          </div>
+
+          <div class="modal-detail-card" *ngIf="selectedEvent.organization">
+            <div class="detail-header">
+              <span class="detail-icon">🏢</span>
+              <span class="detail-title">Organization</span>
+            </div>
+            <div class="detail-content">
+              <p>{{ selectedEvent.organization }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button
+            class="modal-register-btn"
+            (click)="registerForEvent(selectedEvent._id)"
+            [disabled]="isRegistered(selectedEvent._id)"
+            [class.registered-btn]="isRegistered(selectedEvent._id)"
+          >
+            <span class="btn-icon"
+              >{{ isRegistered(selectedEvent._id) ? '✓' : '+' }}</span
+            >
+            <span class="btn-text"
+              >{{ isRegistered(selectedEvent._id) ? 'Booked' : 'Book Now'
+              }}</span
+            >
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-custom-alert
+    [alertData]="customAlert"
+    [autoCloseDuration]="2000"
+    (alertClosed)="closeAlert()"
+    (alertConfirmed)="handleAlertConfirm()"
+    (alertCancelled)="handleAlertCancel()"
+  >
+  </app-custom-alert>
+
+  <app-footer
+    brandName="Happenin'"
+    contactEmail="happenin.events.app@gmail.com"
+    [showSocials]="false"
+  >
+  </app-footer>
+
+  <!-- Custom Alert/Confirmation Modal -->
+  <div
+    class="custom-alert-overlay"
+    *ngIf="customAlert.show"
+    (click)="closeAlert()"
+  >
+    <div
+      class="custom-alert-modal"
+      (click)="$event.stopPropagation()"
+      [class.alert-success]="customAlert.type === 'success'"
+      [class.alert-error]="customAlert.type === 'error'"
+      [class.alert-warning]="customAlert.type === 'warning'"
+      [class.alert-info]="customAlert.type === 'info'"
+      [class.alert-confirm]="customAlert.type === 'confirm'"
+    >
+      <!-- Alert Header -->
+      <div class="custom-alert-header">
+        <div class="alert-icon-container">
+          <div class="alert-icon">
+            <span *ngIf="customAlert.type === 'success'">✅</span>
+            <span *ngIf="customAlert.type === 'error'">❌</span>
+            <span *ngIf="customAlert.type === 'warning'">⚠️</span>
+            <span *ngIf="customAlert.type === 'info'">ℹ️</span>
+            <span *ngIf="customAlert.type === 'confirm'">❓</span>
+          </div>
+        </div>
+        <div class="alert-title-container">
+          <h3 class="alert-title">{{ customAlert.title }}</h3>
+          <button class="alert-close-btn" (click)="closeAlert()">
+            <span>✕</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Alert Content -->
+      <div class="custom-alert-content">
+        <p class="alert-message">{{ customAlert.message }}</p>
+      </div>
+
+      <!-- Alert Actions -->
+      <div class="custom-alert-actions">
+        <!-- Show OK button only if autoClose is false -->
+        <button
+          *ngIf="customAlert.type !== 'confirm' && !customAlert.autoClose"
+          class="alert-btn alert-ok-btn"
+          (click)="closeAlert()"
+        >
+          <span class="btn-text">OK</span>
+          <div class="btn-ripple"></div>
+        </button>
+
+        <div
+          *ngIf="customAlert.type === 'confirm'"
+          class="confirmation-buttons"
+        >
+          <button
+            class="alert-btn alert-cancel-btn"
+            (click)="handleAlertCancel()"
+          >
+            <span class="btn-text">Cancel</span>
+            <div class="btn-ripple"></div>
+          </button>
+          <button
+            class="alert-btn alert-confirm-btn"
+            (click)="handleAlertConfirm()"
+          >
+            <span class="btn-text">Confirm</span>
+            <div class="btn-ripple"></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Animated border -->
+      <div class="alert-border-animation"></div>
+    </div>
+  </div>
+  <router-outlet></router-outlet>
+</div>

@@ -1,0 +1,70 @@
+
+
+<div class="analytics-container">
+
+  <app-header
+  [title]="'Analytics Dashboard'"
+  [buttons]="adminButtons"
+  (buttonClick)="handleHeaderAction($event)">
+</app-header>
+
+  <!-- Key Metrics Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-value">{{ analyticsData.totalEvents }}</div>
+      <div class="metric-label">Total Events</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">{{ analyticsData.upcomingEvents }}</div>
+      <div class="metric-label">Upcoming Events</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">{{ analyticsData.expiredEvents }}</div>
+      <div class="metric-label">Expired Events</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">{{ analyticsData.totalRegistrations }}</div>
+      <div class="metric-label">Total Registrations</div>
+    </div>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="charts-grid">
+    <!-- Overview Chart -->
+    <!-- <div class="chart-container">
+      <div id="overviewChart" class="chart"></div>
+    </div> -->
+
+    <!-- Category Distribution Chart -->
+    <div class="chart-container">
+      <div id="categoryChart" class="chart"></div>
+    </div>
+
+    <!-- Monthly Trends Chart -->
+    <!-- <div class="chart-container">
+      <div id="monthlyTrendsChart" class="chart"></div>
+    </div> -->
+
+    <!-- Registrations Chart -->
+    <div class="chart-container">
+      <div id="registrationsChart" class="chart"></div>
+    </div>
+
+    <!-- Revenue Chart -->
+    <div class="chart-container">
+      <div id="revenueChart" class="chart"></div>
+    </div>
+
+    <!-- Event Status Chart -->
+    <div class="chart-container">
+      <div id="eventStatusChart" class="chart"></div>
+    </div>
+  </div>
+
+  <app-footer
+  brandName="Happenin' Admin"
+  contactEmail="happenin.events.app@gmail.com"
+  [showSocials]="false">
+</app-footer>
+</div>
+

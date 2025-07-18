@@ -1,0 +1,190 @@
+<app-header
+  [userName]="displayUserName"
+  [title]="'My Registered Events'"
+  [buttons]="headerButtons"
+  (buttonClick)="handleHeaderAction($event)"
+>
+</app-header>
+
+<main class="main-content">
+  <div class="container">
+    <section class="events-section registered-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-icon">🎫</span>
+          My Registered Events
+          <div class="title-underline registered-underline"></div>
+        </h2>
+      </div>
+
+      <div *ngIf="registeredEvents.length === 0" class="empty-state">
+        <div class="empty-icon">🎭</div>
+        <p class="empty-message">You haven't registered for any events yet.</p>
+        <p class="empty-submessage">Browse available events to get started!</p>
+        <button
+          class="browse-events-btn"
+          (click)="handleHeaderAction('goToAvailableEvents')"
+        >
+          <span class="btn-icon">🎉</span>
+          <span class="btn-text">Browse Available Events</span>
+        </button>
+      </div>
+
+      <div class="events-grid" *ngIf="registeredEvents.length > 0">
+        <div
+          *ngFor="let event of registeredEvents"
+          class="event-card registered-event-card"
+        >
+          <div class="card-gradient-bg registered-bg"></div>
+          <div class="card-content">
+            <div class="card-header">
+              <h3 class="event-title">{{ event.title }}</h3>
+              <div class="registered-badge">
+                <span class="badge-icon">✓</span>
+                <span class="badge-text">Registered</span>
+              </div>
+            </div>
+
+            <div class="event-category">{{ event.category || 'Event' }}</div>
+
+            <p class="event-description">{{ event.description }}</p>
+
+            <div class="event-details">
+              <div class="detail-item">
+                <span class="detail-icon">📅</span>
+                <span class="detail-label">Date:</span>
+                <span class="detail-value"
+                  >{{ event.date | date: 'MMM d, y'}}</span
+                >
+              </div>
+              <div class="detail-item">
+                <span class="detail-icon">⏰</span>
+                <span class="detail-label">Time:</span>
+                <span class="detail-value">{{ event.timeSlot }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-icon">📍</span>
+                <span class="detail-label">Location:</span>
+                <span class="detail-value">{{ event.location }}</span>
+              </div>
+              <div class="detail-item price-item">
+                <span class="detail-icon">💰</span>
+                <span class="detail-label">Price:</span>
+                <span class="price-value">₹{{ event.price }}</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <!-- Download Ticket Button -->
+              <button
+                class="download-ticket-btn"
+                (click)="downloadTicket(event)"
+              >
+                <span class="btn-icon">📥</span>
+                <span class="btn-text">Download Ticket</span>
+              </button>
+
+              <!-- Deregister button -->
+              <button
+                class="deregister-button"
+                (click)="deregister(userId!, event._id)"
+              >
+                <span class="btn-text">Cancel Registration</span>
+              </button>
+            </div>
+          </div>
+          <div class="card-shine"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<app-footer
+  brandName="Happenin'"
+  contactEmail="happenin.events.app@gmail.com"
+  [showSocials]="false"
+>
+</app-footer>
+
+<app-custom-alert
+  [alertData]="customAlert"
+  [autoCloseDuration]="2000"
+  (alertClosed)="closeAlert()"
+  (alertConfirmed)="handleAlertConfirm()"
+  (alertCancelled)="handleAlertCancel()"
+>
+</app-custom-alert>
+
+<div
+  class="custom-alert-overlay"
+  *ngIf="customAlert.show"
+  (click)="closeAlert()"
+>
+  <div
+    class="custom-alert-modal"
+    (click)="$event.stopPropagation()"
+    [class.alert-success]="customAlert.type === 'success'"
+    [class.alert-error]="customAlert.type === 'error'"
+    [class.alert-warning]="customAlert.type === 'warning'"
+    [class.alert-info]="customAlert.type === 'info'"
+    [class.alert-confirm]="customAlert.type === 'confirm'"
+  >
+    <!-- Alert Header -->
+    <div class="custom-alert-header">
+      <div class="alert-icon-container">
+        <div class="alert-icon">
+          <span *ngIf="customAlert.type === 'success'">✅</span>
+          <span *ngIf="customAlert.type === 'error'">❌</span>
+          <span *ngIf="customAlert.type === 'warning'">⚠️</span>
+          <span *ngIf="customAlert.type === 'info'">ℹ️</span>
+          <span *ngIf="customAlert.type === 'confirm'">❓</span>
+        </div>
+      </div>
+      <div class="alert-title-container">
+        <h3 class="alert-title">{{ customAlert.title }}</h3>
+        <button class="alert-close-btn" (click)="closeAlert()">
+          <span>✕</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Alert Content -->
+    <div class="custom-alert-content">
+      <p class="alert-message">{{ customAlert.message }}</p>
+    </div>
+
+    <!-- Alert Actions -->
+    <div class="custom-alert-actions">
+      <!-- Show OK button only if autoClose is false -->
+      <button
+        *ngIf="customAlert.type !== 'confirm' && !customAlert.autoClose"
+        class="alert-btn alert-ok-btn"
+        (click)="closeAlert()"
+      >
+        <span class="btn-text">OK</span>
+        <div class="btn-ripple"></div>
+      </button>
+
+      <div *ngIf="customAlert.type === 'confirm'" class="confirmation-buttons">
+        <button
+          class="alert-btn alert-cancel-btn"
+          (click)="handleAlertCancel()"
+        >
+          <span class="btn-text">Cancel</span>
+          <div class="btn-ripple"></div>
+        </button>
+        <button
+          class="alert-btn alert-confirm-btn"
+          (click)="handleAlertConfirm()"
+        >
+          <span class="btn-text">Confirm</span>
+          <div class="btn-ripple"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Animated border -->
+    <div class="alert-border-animation"></div>
+  </div>
+</div>

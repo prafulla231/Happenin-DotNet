@@ -1,0 +1,6 @@
+@HappeninApi_HostAddress = http://localhost:5134
+
+GET {{HappeninApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

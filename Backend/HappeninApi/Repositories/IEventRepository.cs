@@ -1,0 +1,19 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using HappeninApi.Models;
+
+namespace HappeninApi.Repositories
+{
+    public interface IEventRepository
+    {   
+        // Task<List<Event>>   GetAllAsync();
+        // Task<Event?>        GetByIdAsync(Guid id);
+        // Task                CreateAsync(Event evt);
+        // Task                UpdateAsync(Guid id, Event evt);
+        // Task                DeleteAsync(Guid id);
+
+          Task<Event> CreateEventAsync(Event evnt);
+        Task<Event?> GetByIdAsync(Guid id);
+    }
+}

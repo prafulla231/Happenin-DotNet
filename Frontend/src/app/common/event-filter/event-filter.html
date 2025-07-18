@@ -1,0 +1,62 @@
+<div class="filter-container">
+  <!-- Search Input -->
+  <div class="filter-group">
+    <label for="search">Search</label>
+    <input id="search" type="text" [(ngModel)]="filters.searchQuery" (input)="onFilterChange()" placeholder="Search by title, artist, city..." />
+  </div>
+
+  <!-- Category Dropdown -->
+  <div class="filter-group">
+    <label for="category">Category</label>
+    <select id="category" [(ngModel)]="filters.selectedCategory" (change)="onFilterChange()">
+      <option value="">All Categories</option>
+      <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+    </select>
+  </div>
+
+  <!-- City Dropdown -->
+  <div class="filter-group">
+    <label for="city">City</label>
+    <select id="city" [(ngModel)]="filters.selectedCity" (change)="onFilterChange()">
+      <option value="">All Cities</option>
+      <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+    </select>
+  </div>
+
+  <!-- Date Range -->
+  <div class="filter-group">
+    <label>Date From</label>
+    <input type="date" [(ngModel)]="filters.dateFrom" (change)="onFilterChange()" />
+
+    <label>Date To</label>
+    <input type="date" [(ngModel)]="filters.dateTo" (change)="onFilterChange()" />
+  </div>
+
+  <!-- Price Range -->
+  <div class="filter-group">
+    <label for="price">Price Range</label>
+    <select id="price" [(ngModel)]="filters.selectedPriceRange" (change)="onFilterChange()">
+      <option value="">All</option>
+      <option value="0-500">Free - ₹500</option>
+      <option value="500-1000">₹500 - ₹1000</option>
+      <option value="1000-2000">₹1000 - ₹2000</option>
+      <option value="2000+">₹2000+</option>
+    </select>
+  </div>
+
+  <!-- Sort By -->
+  <div class="filter-group">
+    <label for="sortBy">Sort By</label>
+    <select id="sortBy" [(ngModel)]="filters.sortBy" (change)="onFilterChange()">
+      <option value="date">Date</option>
+      <option value="title">Title</option>
+      <option value="price">Price</option>
+      <option value="category">Category</option>
+    </select>
+  </div>
+
+  <!-- Clear Filters Button -->
+  <div class="filter-actions">
+    <button type="button" (click)="clearFilters()">Clear Filters</button>
+  </div>
+</div>

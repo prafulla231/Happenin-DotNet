@@ -1,0 +1,44 @@
+.filter-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.filter-group label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: end;
+}
+
+.filter-actions button {
+  padding: 8px 12px;
+  background-color: #ef4444;
+  border: none;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filter-actions button:hover {
+  background-color: #dc2626;
+}

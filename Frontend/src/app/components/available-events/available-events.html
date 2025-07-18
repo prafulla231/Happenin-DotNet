@@ -1,0 +1,368 @@
+<div class="available-events-container">
+  <!-- Filters Section -->
+  <section class="filters-section" *ngIf="showFilters">
+    <div class="filters-container">
+      <div class="filters-header">
+        <div class="header-actions">
+          <button class="toggle-filters-btn" (click)="toggleFilters()">
+            <span class="btn-icon">{{ showFiltersPanel ? '📁' : '📂' }}</span>
+            <span class="btn-text">{{ showFiltersPanel ? 'Hide Filters' : 'Show Filters' }}</span>
+            <span class="dropdown-arrow" [class.rotated]="showFiltersPanel">▼</span>
+          </button>
+          <button class="clear-filters-btn" (click)="clearFilters()" *ngIf="hasActiveFilters()">
+            <span class="btn-icon">✕</span>
+            <span class="btn-text">Clear All</span>
+          </button>
+          <div class="search-container">
+            <div class="search-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input
+                type="text"
+                class="search-input"
+                placeholder="Search events..."
+                [(ngModel)]="searchQuery"
+                (input)="onSearchChange()"
+              />
+              <button class="search-clear-btn" (click)="clearSearch()" *ngIf="searchQuery">
+                <span>✕</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible Filter Controls -->
+      <div class="filter-dropdown" [class.show]="showFiltersPanel">
+        <div class="filter-dropdown-content">
+          <div class="filter-controls">
+            <!-- Category Filter -->
+            <div class="filter-group">
+              <label class="filter-label">
+                <span class="label-icon">🏷️</span>
+                Category
+              </label>
+              <select class="filter-select" [(ngModel)]="selectedCategory" (change)="applyFilters()">
+                <option value="">All Categories</option>
+                <option *ngFor="let category of availableCategories" [value]="category">
+                  {{ category }}
+                </option>
+              </select>
+            </div>
+
+            <!-- City Filter -->
+            <div class="filter-group">
+              <label class="filter-label">
+                <span class="label-icon">🏙️</span>
+                City
+              </label>
+              <select class="filter-select" [(ngModel)]="selectedCity" (change)="applyFilters()">
+                <option value="">All Cities</option>
+                <option *ngFor="let city of availableCities" [value]="city">
+                  {{ city }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Date Range Filter -->
+            <div class="filter-group date-range-group">
+              <label class="filter-label">
+                <span class="label-icon">📅</span>
+                Date Range
+              </label>
+              <div class="date-inputs">
+                <input
+                  type="date"
+                  class="date-input"
+                  placeholder="From"
+                  [(ngModel)]="dateFrom"
+                  (change)="applyFilters()"
+                />
+                <span class="date-separator">to</span>
+                <input
+                  type="date"
+                  class="date-input"
+                  placeholder="To"
+                  [(ngModel)]="dateTo"
+                  (change)="applyFilters()"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Filters Display -->
+      <div class="active-filters" *ngIf="hasActiveFilters()">
+        <div class="active-filters-header">
+          <span class="active-filters-title">Active Filters:</span>
+        </div>
+        <div class="filter-tags">
+          <span class="filter-tag" *ngIf="searchQuery">
+            <span class="tag-icon">🔍</span>
+            Search: "{{ searchQuery }}"
+            <button class="tag-remove" (click)="clearSearch()">✕</button>
+          </span>
+          <span class="filter-tag" *ngIf="selectedCategory">
+            <span class="tag-icon">🏷️</span>
+            {{ selectedCategory }}
+            <button class="tag-remove" (click)="selectedCategory = ''; applyFilters()">✕</button>
+          </span>
+          <span class="filter-tag" *ngIf="selectedCity">
+            <span class="tag-icon">🏙️</span>
+            {{ selectedCity }}
+            <button class="tag-remove" (click)="selectedCity = ''; applyFilters()">✕</button>
+          </span>
+          <span class="filter-tag" *ngIf="dateFrom || dateTo">
+            <span class="tag-icon">📅</span>
+            {{ formatDateRange() }}
+            <button class="tag-remove" (click)="dateFrom = ''; dateTo = ''; applyFilters()">✕</button>
+          </span>
+          <span class="filter-tag" *ngIf="selectedPriceRange">
+            <span class="tag-icon">💰</span>
+            {{ formatPriceRange() }}
+            <button class="tag-remove" (click)="selectedPriceRange = ''; applyFilters()">✕</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <div class="results-info">
+        <span class="results-count">
+          {{ filteredEvents.length }} {{ filteredEvents.length === 1 ? 'event' : 'events' }} found
+          <span *ngIf="totalPages > 1" class="page-info">
+            (Page {{ currentPage }} of {{ totalPages }})
+          </span>
+        </span>
+        <div class="sort-controls">
+          <label class="sort-label">Sort by:</label>
+          <select class="sort-select" [(ngModel)]="sortBy" (change)="applySorting()">
+            <option value="date">Date</option>
+            <option value="title">Title</option>
+            <option value="price">Price</option>
+            <option value="category">Category</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Events Section -->
+  <section class="events-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="title-icon">{{ sectionIcon }}</span>
+        {{ sectionTitle }}
+        <div class="title-underline"></div>
+      </h2>
+    </div>
+
+    <!-- No Results Message -->
+    <div *ngIf="filteredEvents.length === 0" class="no-results">
+      <div class="no-results-icon">🔍</div>
+      <h3 class="no-results-title">No events found</h3>
+      <p class="no-results-message">
+        Try adjusting your search criteria or filters to find more events.
+      </p>
+      <button class="clear-filters-btn" (click)="clearFilters()" *ngIf="showFilters">
+        <span class="btn-icon">🔄</span>
+        <span class="btn-text">Clear All Filters</span>
+      </button>
+    </div>
+
+    <!-- Events Grid -->
+    <div class="events-grid" *ngIf="filteredEvents.length > 0">
+      <div
+        *ngFor="let event of paginatedEvents"
+        class="event-card"
+        [class.registered-card]="isRegistered(event._id)"
+        [class.admin-card]="isAdminMode"
+      >
+        <div class="card-gradient-bg"></div>
+        <div class="card-content">
+          <div class="card-header">
+            <h3 class="event-title">{{ event.title }}</h3>
+          </div>
+          <div class="event-category">{{ event.category || 'Event' }}</div>
+
+          <p class="event-description">{{ event.description }}</p>
+
+          <div class="event-details">
+            <div class="detail-item">
+              <span class="detail-icon">📅</span>
+              <span class="detail-label">Date:</span>
+              <span class="detail-value">{{ event.date | date: 'MMM d, y'}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">⏰</span>
+              <span class="detail-label">Time:</span>
+              <span class="detail-value">{{ event.timeSlot }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-icon">📍</span>
+              <span class="detail-label">Location:</span>
+              <span class="detail-value">{{ event.location }}</span>
+            </div>
+            <div class="detail-item price-item">
+              <span class="detail-icon">💰</span>
+              <span class="detail-label">Price:</span>
+              <span class="price-value">₹{{ event.price }}</span>
+            </div>
+            <div class="detail-item" *ngIf="event.artist">
+              <span class="detail-icon">🎭</span>
+              <span class="detail-label">Artist:</span>
+              <span class="detail-value">{{ event.artist }}</span>
+            </div>
+            <div class="detail-item" *ngIf="event.organization">
+              <span class="detail-icon">🏢</span>
+              <span class="detail-label">Organization:</span>
+              <span class="detail-value">{{ event.organization }}</span>
+            </div>
+          </div>
+
+          <!-- Admin-specific Registered Users Section -->
+          <div class="registered-users-section" *ngIf="isAdminMode">
+            <div *ngIf="usersMap[event._id]" class="users-dropdown">
+              <button
+                class="users-toggle-btn"
+                (click)="onToggleUsersDropdown(event._id)"
+                [attr.aria-expanded]="showUsersDropdown[event._id]"
+                [attr.aria-controls]="'usersList-' + event._id"
+              >
+                <span class="users-icon">👥</span>
+                Registered: {{ usersMap[event._id].currentRegistration }}
+                <span
+                  class="dropdown-icon"
+                  [class.rotated]="showUsersDropdown[event._id]"
+                >
+                  ▼
+                </span>
+              </button>
+
+              <ul
+                id="usersList-{{ event._id }}"
+                class="users-list"
+                *ngIf="showUsersDropdown[event._id]"
+              >
+                <li *ngFor="let user of usersMap[event._id].users" class="user-item">
+                  <div class="user-info">
+                    <span class="user-name">{{ user.name }}</span>
+                    <span class="user-email">{{ user.email }}</span>
+                  </div>
+                  <button
+                    class="remove-user-btn"
+                    (click)="onRemoveUser(event._id, user._id, user.name)"
+                    title="Remove user"
+                  >
+                    <span class="btn-icon">🗑️</span>
+                    Remove
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <!-- User Registration Button -->
+            <button
+              *ngIf="allowRegistration && !isAdminMode"
+              class="register-btn"
+              (click)="onRegisterClick(event._id)"
+              [disabled]="isRegistered(event._id)"
+              [class.registered-btn]="isRegistered(event._id)"
+            >
+              <span class="register-btn-content">
+                <span class="btn-icon">{{ isRegistered(event._id) ? '✓' : '+' }}</span>
+                <span class="register-btn-text">{{ isRegistered(event._id) ? 'Booked' : 'Book Now' }}</span>
+              </span>
+              <div class="btn-ripple"></div>
+            </button>
+
+            <!-- Admin Delete Button -->
+            <button 
+              *ngIf="isAdminMode" 
+              class="delete-btn admin-delete-btn" 
+              (click)="onDeleteEvent(event._id, event.title)"
+            >
+              <span class="btn-icon">🗑️</span>
+              <span class="btn-text">Delete Event</span>
+            </button>
+
+            <!-- View Details Button -->
+            <button class="view-details-btn" (click)="onShowDetails(event)">
+              <span class="btn-icon">👁️</span>
+              <span class="btn-text">Details</span>
+            </button>
+          </div>
+        </div>
+        <div class="card-shine"></div>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-container" *ngIf="filteredEvents.length > 0 && totalPages > 1">
+      <div class="pagination-info">
+        <span class="pagination-text">
+          Showing {{ (currentPage - 1) * eventsPerPage + 1 }} -
+          {{ getMaxValue(currentPage * eventsPerPage, filteredEvents.length) }}
+          of {{ filteredEvents.length }} events
+        </span>
+      </div>
+
+      <div class="pagination-controls">
+        <!-- Previous Button -->
+        <button
+          class="pagination-btn prev-btn"
+          (click)="previousPage()"
+          [disabled]="currentPage === 1"
+          [class.disabled]="currentPage === 1">
+          <span class="btn-icon">◀</span>
+          <span class="btn-text">Previous</span>
+        </button>
+
+        <!-- Page Numbers -->
+        <div class="page-numbers">
+          <!-- First page if not in range -->
+          <button
+            *ngIf="getPageNumbers()[0] > 1"
+            class="page-btn"
+            (click)="goToPage(1)">
+            1
+          </button>
+
+          <!-- Ellipsis before current range -->
+          <span *ngIf="getPageNumbers()[0] > 2" class="page-ellipsis">...</span>
+
+          <!-- Page number buttons -->
+          <button
+            *ngFor="let page of getPageNumbers()"
+            class="page-btn"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+
+          <!-- Ellipsis after current range -->
+          <span *ngIf="getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1" class="page-ellipsis">...</span>
+
+          <!-- Last page if not in range -->
+          <button
+            *ngIf="getPageNumbers()[getPageNumbers().length - 1] < totalPages"
+            class="page-btn"
+            (click)="goToPage(totalPages)">
+            {{ totalPages }}
+          </button>
+        </div>
+
+        <!-- Next Button -->
+        <button
+          class="pagination-btn next-btn"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+          [class.disabled]="currentPage === totalPages">
+          <span class="btn-text">Next</span>
+          <span class="btn-icon">▶</span>
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

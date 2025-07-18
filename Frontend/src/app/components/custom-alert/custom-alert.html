@@ -1,0 +1,64 @@
+<!-- Custom Alert/Confirmation Modal -->
+<div class="custom-alert-overlay" *ngIf="alertData.show" (click)="onOverlayClick()">
+  <div class="custom-alert-modal" (click)="$event.stopPropagation()"
+       [class.alert-success]="alertData.type === 'success'"
+       [class.alert-error]="alertData.type === 'error'"
+       [class.alert-warning]="alertData.type === 'warning'"
+       [class.alert-info]="alertData.type === 'info'"
+       [class.alert-confirm]="alertData.type === 'confirm'">
+
+    <!-- Alert Header -->
+    <div class="custom-alert-header">
+      <div class="alert-icon-container">
+        <div class="alert-icon">
+          <span *ngIf="alertData.type === 'success'">✅</span>
+          <span *ngIf="alertData.type === 'error'">❌</span>
+          <span *ngIf="alertData.type === 'warning'">⚠️</span>
+          <span *ngIf="alertData.type === 'info'">ℹ️</span>
+          <span *ngIf="alertData.type === 'confirm'">❓</span>
+        </div>
+      </div>
+      <div class="alert-title-container">
+        <h3 class="alert-title">{{ alertData.title }}</h3>
+        <button class="alert-close-btn" (click)="closeAlert()">
+          <span>✕</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Alert Content -->
+    <div class="custom-alert-content">
+      <p class="alert-message">{{ alertData.message }}</p>
+    </div>
+
+    <!-- Alert Actions -->
+    <div class="custom-alert-actions">
+      <!-- Show OK button only if autoClose is false -->
+      <button
+        *ngIf="alertData.type !== 'confirm' && !alertData.autoClose"
+        class="alert-btn alert-ok-btn"
+        (click)="closeAlert()">
+        <span class="btn-text">OK</span>
+        <div class="btn-ripple"></div>
+      </button>
+
+      <div *ngIf="alertData.type === 'confirm'" class="confirmation-buttons">
+        <button
+          class="alert-btn alert-cancel-btn"
+          (click)="onCancel()">
+          <span class="btn-text">Cancel</span>
+          <div class="btn-ripple"></div>
+        </button>
+        <button
+          class="alert-btn alert-confirm-btn"
+          (click)="onConfirm()">
+          <span class="btn-text">Confirm</span>
+          <div class="btn-ripple"></div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Animated border -->
+    <div class="alert-border-animation"></div>
+  </div>
+</div>

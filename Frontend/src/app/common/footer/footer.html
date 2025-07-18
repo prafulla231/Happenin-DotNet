@@ -1,0 +1,49 @@
+<footer class="dashboard-footer">
+  <div class="footer-background-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-10 col-lg-8">
+        <div class="footer-content">
+          <div class="brand-section text-center mb-4">
+            <h2 class="footer-title mb-3">
+              <span class="brand-highlight">{{brandName}}</span>
+            </h2>
+            <div class="brand-underline mx-auto"></div>
+          </div>
+
+          <div class="contact-section text-center mb-4">
+            <p class="footer-text mb-3" *ngIf="!customMessage">
+              <span class="contact-label d-block mb-3">For any queries please reach out to us at</span>
+              <span class="contact-email d-inline-flex align-items-center justify-content-center">
+                <i class="email-icon me-2">✉</i>
+                <span class="gmailid">{{contactEmail}}</span>
+              </span>
+            </p>
+            <p class="footer-text mb-3" *ngIf="customMessage">
+              <span class="contact-label d-block mb-3">{{customMessage}}</span>
+              <span class="contact-email d-inline-flex align-items-center justify-content-center" *ngIf="contactEmail">
+                <i class="email-icon me-2">✉</i>
+                <span class="gmailid">{{contactEmail}}</span>
+              </span>
+            </p>
+          </div>
+
+          <div class="footer-decoration">
+            <div class="decoration-dots d-flex justify-content-center align-items-center">
+              <span class="dot me-2"></span>
+              <span class="dot me-2"></span>
+              <span class="dot"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-glow"></div>
+</footer>
