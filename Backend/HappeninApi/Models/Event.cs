@@ -15,7 +15,7 @@ public class Event
 
     public DateTime Date { get; set; }
 
-    public required string TimeSlot { get; set; }
+    public required string TimeSlot { get; set; } //starting time
 
     public int Duration { get; set; } // In minutes
 

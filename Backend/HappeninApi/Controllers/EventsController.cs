@@ -19,6 +19,8 @@ namespace HappeninApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto)
         {
+            Console.WriteLine($"📥 Creating Event: {dto.Title} by {dto.CreatedById}");
+
             var evnt = new Event
             {
                 Id = Guid.NewGuid(),
@@ -39,14 +41,16 @@ namespace HappeninApi.Controllers
                 Status = EventStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                Location = new Location {
+                Location = new Location
+                {
                     Id = dto.LocationId,
                     State = "",
                     City = "",
                     PlaceName = "",
                     Address = ""
                 },
-                CreatedBy = new User {
+                CreatedBy = new User
+                {
                     Id = dto.CreatedById,
                     Name = "",
                     Phone = "",
@@ -57,17 +61,78 @@ namespace HappeninApi.Controllers
 
             var created = await _repository.CreateEventAsync(evnt);
 
+            Console.WriteLine("✅ Event created with ID: " + created.Id);
+
             return CreatedAtAction(nameof(GetEvent), new { id = created.Id }, created);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("by-id/{id}")]
         public async Task<IActionResult> GetEvent(Guid id)
         {
+            Console.WriteLine("🔍 Fetching Event with ID: " + id);
             var evnt = await _repository.GetByIdAsync(id);
             if (evnt == null)
+            {
+                Console.WriteLine("❌ Event not found.");
                 return NotFound();
+            }
 
             return Ok(evnt);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            Console.WriteLine("📄 Fetching ALL events, Page: " + page);
+            await _repository.MarkExpiredEventsAsync();
+            var events = await _repository.GetAllEventsAsync(page, pageSize);
+            return Ok(events);
+        }
+
+        [HttpGet("pending")]
+        public async Task<IActionResult> GetPendingEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            Console.WriteLine("📄 Fetching PENDING events, Page: " + page);
+            await _repository.MarkExpiredEventsAsync();
+            var events = await _repository.GetEventsByStatusAsync(EventStatus.Pending, page, pageSize);
+            return Ok(events);
+        }
+
+        [HttpGet("approved")]
+        public async Task<IActionResult> GetApprovedEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            Console.WriteLine("📄 Fetching APPROVED events, Page: " + page);
+            await _repository.MarkExpiredEventsAsync();
+            var events = await _repository.GetEventsByStatusAsync(EventStatus.Approved, page, pageSize);
+            return Ok(events);
+        }
+
+        [HttpGet("rejected")]
+        public async Task<IActionResult> GetRejectedEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            Console.WriteLine("📄 Fetching REJECTED events, Page: " + page);
+            await _repository.MarkExpiredEventsAsync();
+            var events = await _repository.GetEventsByStatusAsync(EventStatus.Rejected, page, pageSize);
+            return Ok(events);
+        }
+
+        [HttpGet("expired")]
+        public async Task<IActionResult> GetExpiredEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            Console.WriteLine("📄 Fetching EXPIRED events, Page: " + page);
+            await _repository.MarkExpiredEventsAsync();
+            var events = await _repository.GetEventsByStatusAsync(EventStatus.Expired, page, pageSize);
+            return Ok(events);
+        }
+
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> UpdateEventStatus(Guid id, [FromBody] EventStatusUpdateDto dto)
+        {
+            if (!Enum.TryParse<EventStatus>(dto.Status, true, out var newStatus))
+                return BadRequest("Invalid status value.");
+
+            var success = await _repository.UpdateEventStatusAsync(id, newStatus);
+            return success ? NoContent() : NotFound();
         }
     }
 }

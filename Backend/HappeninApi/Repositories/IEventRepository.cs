@@ -5,15 +5,21 @@ using HappeninApi.Models;
 
 namespace HappeninApi.Repositories
 {
-    public interface IEventRepository
-    {   
-        // Task<List<Event>>   GetAllAsync();
-        // Task<Event?>        GetByIdAsync(Guid id);
-        // Task                CreateAsync(Event evt);
-        // Task                UpdateAsync(Guid id, Event evt);
-        // Task                DeleteAsync(Guid id);
+  public interface IEventRepository
+  {
+    // Task<List<Event>>   GetAllAsync();
+    // Task<Event?>        GetByIdAsync(Guid id);
+    // Task                CreateAsync(Event evt);
+    // Task                UpdateAsync(Guid id, Event evt);
+    // Task                DeleteAsync(Guid id);
 
-          Task<Event> CreateEventAsync(Event evnt);
-        Task<Event?> GetByIdAsync(Guid id);
-    }
+    Task<Event> CreateEventAsync(Event evnt);
+    Task<Event?> GetByIdAsync(Guid id);
+    Task<List<Event>> GetEventsByStatusAsync(EventStatus status, int page, int pageSize);
+    Task MarkExpiredEventsAsync(); // Optional: if you want to update status in DB
+    Task<bool> UpdateEventStatusAsync(Guid id, EventStatus newStatus);
+  Task<List<Event>> GetAllEventsAsync(int page, int pageSize);
+
+
+  }
 }

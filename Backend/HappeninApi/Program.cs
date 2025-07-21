@@ -13,13 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
 // 1) Bind MongoSettings from appsettings.json
 builder.Services.Configure<MongoSettings>(
     builder.Configuration.GetSection("MongoSettings"));
-Console.WriteLine("MongoSettings bound from appsettings.json");
+// Console.WriteLine("MongoSettings bound from appsettings.json");
 
 // 2) Register IMongoClient as a singleton
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
     var opts = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
-    Console.WriteLine($"Connecting to MongoDB with connection string: {opts.ConnectionString}");
+    // Console.WriteLine($"Connecting to MongoDB with connection string: {opts.ConnectionString}");
     return new MongoClient(opts.ConnectionString);
 });
 
@@ -28,16 +28,18 @@ builder.Services.AddScoped(sp =>
 {
     var opts   = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
     var client = sp.GetRequiredService<IMongoClient>();
-    Console.WriteLine($"Getting database: {opts.DatabaseName}");
+    // Console.WriteLine($"Getting database: {opts.DatabaseName}");
     return client.GetDatabase(opts.DatabaseName);
 });
 
 // 4) Register your repository
 builder.Services.AddScoped<IEventRepository, EventRepository>();
-Console.WriteLine("Repository registered");
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+
+// Console.WriteLine("Repository registered");
 
 builder.Services.AddControllers();
-Console.WriteLine("Controllers registered");
+// Console.WriteLine("Controllers registered");
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
@@ -65,6 +67,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapControllers();
-Console.WriteLine("Controllers mapped");
+// Console.WriteLine("Controllers mapped");
 
 app.Run();
