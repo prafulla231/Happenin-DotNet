@@ -1,4 +1,3 @@
-// File: Repositories/LocationRepository.cs
 using HappeninApi.Models;
 using MongoDB.Driver;
 

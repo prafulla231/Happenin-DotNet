@@ -134,5 +134,37 @@ namespace HappeninApi.Controllers
             var success = await _repository.UpdateEventStatusAsync(id, newStatus);
             return success ? NoContent() : NotFound();
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEvent(Guid id)
+        {
+            Console.WriteLine("🗑️ Deleting Event with ID: " + id);
+            var deleted = await _repository.DeleteEventAsync(id);
+            if (!deleted)
+            {
+                Console.WriteLine("❌ Failed to delete. Event not found.");
+                return NotFound();
+            }
+
+            Console.WriteLine("✅ Event deleted successfully.");
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateEvent(Guid id, [FromBody] UpdateEventDto dto)
+        {
+            Console.WriteLine("✏️ Updating Event with ID: " + id);
+
+            var updated = await _repository.UpdateEventAsync(id, dto);
+            if (!updated)
+            {
+                Console.WriteLine("❌ Update failed. Event not found.");
+                return NotFound();
+            }
+
+            Console.WriteLine("✅ Event updated successfully.");
+            return NoContent();
+        }
+
     }
 }

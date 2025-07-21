@@ -82,28 +82,30 @@ namespace HappeninApi.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+public async Task<IActionResult> Login([FromBody] LoginDto dto)
+{
+    var user = await _users.Find(u => u.Email == dto.Email).FirstOrDefaultAsync();
+
+    if (user == null || !VerifyPassword(dto.Password, user.Password))
+        return Unauthorized("Invalid email or password.");
+
+    
+    var token = JwtHelper.GenerateJwtToken(user, _config);
+
+    return Ok(new
+    {
+        message = "Login successful",
+        token,
+        user = new
         {
-            var user = await _users.Find(u => u.Email == dto.Email).FirstOrDefaultAsync();
-
-            if (user == null || !VerifyPassword(dto.Password, user.Password))
-                return Unauthorized("Invalid email or password.");
-
-            var token = GenerateJwtToken(user);
-
-            return Ok(new
-            {
-                message = "Login successful",
-                token,
-                user = new
-                {
-                    userId = user.Id,
-                    user.Name,
-                    user.Email,
-                    user.Role
-                }
-            });
+            userId = user.Id,
+            user.Name,
+            user.Email,
+            user.Role
         }
+    });
+}
+
 
         private string HashPassword(string password)
         {
@@ -121,29 +123,7 @@ namespace HappeninApi.Controllers
             return CryptographicOperations.FixedTimeEquals(storedHash, inputHash);
         }
 
-        private string GenerateJwtToken(User user)
-{
-    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Secret"] ?? throw new ArgumentNullException("Jwt:Secret")));
-    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-    var claims = new[]
-    {
-        new Claim("userId", user.Id.ToString()),
-        new Claim("name", user.Name),
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Role, user.Role.ToString()) // Convert enum to string
-    };
-
-    var token = new JwtSecurityToken(
-        issuer: _config["Jwt:Issuer"],
-        audience: _config["Jwt:Audience"],
-        claims: claims,
-        expires: DateTime.UtcNow.AddHours(1),
-        signingCredentials: creds
-    );
-
-    return new JwtSecurityTokenHandler().WriteToken(token);
-}
+        
 
     }
 }

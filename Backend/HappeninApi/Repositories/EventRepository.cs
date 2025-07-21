@@ -1,5 +1,6 @@
 using HappeninApi.Models;
 using MongoDB.Driver;
+using HappeninApi.DTOs;
 
 namespace HappeninApi.Repositories
 {
@@ -59,18 +60,54 @@ namespace HappeninApi.Repositories
             var result = await _events.UpdateOneAsync(filter, update);
             return result.ModifiedCount > 0;
         }
-          public async Task<List<Event>> GetAllEventsAsync(int page, int pageSize)
-    {
-        var filter = Builders<Event>.Filter.Eq(e => e.IsDeleted, false);
+        public async Task<List<Event>> GetAllEventsAsync(int page, int pageSize)
+        {
+            var filter = Builders<Event>.Filter.Eq(e => e.IsDeleted, false);
 
-        return await _events.Find(filter)
-                            .Skip((page - 1) * pageSize)
-                            .Limit(pageSize)
-                            .SortByDescending(e => e.CreatedAt)
-                            .ToListAsync();
-    }
+            return await _events.Find(filter)
+                                .Skip((page - 1) * pageSize)
+                                .Limit(pageSize)
+                                .SortByDescending(e => e.CreatedAt)
+                                .ToListAsync();
+        }
 
-    
+        public async Task<bool> DeleteEventAsync(Guid id)
+        {
+            var filter = Builders<Event>.Filter.Eq(e => e.Id, id);
+            var update = Builders<Event>.Update
+                .Set(e => e.IsDeleted, true)
+                .Set(e => e.UpdatedAt, DateTime.UtcNow);
+
+            var result = await _events.UpdateOneAsync(filter, update);
+            return result.ModifiedCount > 0;
+        }
+
+        public async Task<bool> UpdateEventAsync(Guid id, UpdateEventDto dto)
+{
+    var filter = Builders<Event>.Filter.Eq(e => e.Id, id) & Builders<Event>.Filter.Eq(e => e.IsDeleted, false);
+
+    var update = Builders<Event>.Update
+        .Set(e => e.Title, dto.Title)
+        .Set(e => e.Description, dto.Description)
+        .Set(e => e.Date, dto.Date)
+        .Set(e => e.TimeSlot, dto.TimeSlot)
+        .Set(e => e.Duration, dto.Duration)
+        .Set(e => e.LocationId, dto.LocationId)
+        .Set(e => e.Category, dto.Category)
+        .Set(e => e.Price, dto.Price)
+        .Set(e => e.MaxRegistrations, dto.MaxRegistrations)
+        .Set(e => e.Artist, dto.Artist)
+        .Set(e => e.Organization, dto.Organization)
+        .Set(e => e.UpdatedAt, DateTime.UtcNow);
+
+    var result = await _events.UpdateOneAsync(filter, update);
+    return result.MatchedCount > 0;
+}
+
+
+        
+
+
 
 
 
