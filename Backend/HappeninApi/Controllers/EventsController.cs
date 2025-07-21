@@ -166,5 +166,13 @@ namespace HappeninApi.Controllers
             return NoContent();
         }
 
+         [HttpGet("by-organizer/{organizerId}")]
+        public async Task<IActionResult> GetEventsByOrganizer(Guid organizerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            Console.WriteLine($"📄 Fetching events by Organizer ID: {organizerId}, Page: {page}");
+            var events = await _repository.GetEventsByOrganizerAsync(organizerId, page, pageSize);
+            return Ok(events);
+        }
+
     }
 }

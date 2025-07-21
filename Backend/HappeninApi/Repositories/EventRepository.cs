@@ -83,27 +83,35 @@ namespace HappeninApi.Repositories
         }
 
         public async Task<bool> UpdateEventAsync(Guid id, UpdateEventDto dto)
-{
-    var filter = Builders<Event>.Filter.Eq(e => e.Id, id) & Builders<Event>.Filter.Eq(e => e.IsDeleted, false);
+        {
+            var filter = Builders<Event>.Filter.Eq(e => e.Id, id) & Builders<Event>.Filter.Eq(e => e.IsDeleted, false);
 
-    var update = Builders<Event>.Update
-        .Set(e => e.Title, dto.Title)
-        .Set(e => e.Description, dto.Description)
-        .Set(e => e.Date, dto.Date)
-        .Set(e => e.TimeSlot, dto.TimeSlot)
-        .Set(e => e.Duration, dto.Duration)
-        .Set(e => e.LocationId, dto.LocationId)
-        .Set(e => e.Category, dto.Category)
-        .Set(e => e.Price, dto.Price)
-        .Set(e => e.MaxRegistrations, dto.MaxRegistrations)
-        .Set(e => e.Artist, dto.Artist)
-        .Set(e => e.Organization, dto.Organization)
-        .Set(e => e.UpdatedAt, DateTime.UtcNow);
+            var update = Builders<Event>.Update
+                .Set(e => e.Title, dto.Title)
+                .Set(e => e.Description, dto.Description)
+                .Set(e => e.Date, dto.Date)
+                .Set(e => e.TimeSlot, dto.TimeSlot)
+                .Set(e => e.Duration, dto.Duration)
+                .Set(e => e.LocationId, dto.LocationId)
+                .Set(e => e.Category, dto.Category)
+                .Set(e => e.Price, dto.Price)
+                .Set(e => e.MaxRegistrations, dto.MaxRegistrations)
+                .Set(e => e.Artist, dto.Artist)
+                .Set(e => e.Organization, dto.Organization)
+                .Set(e => e.UpdatedAt, DateTime.UtcNow);
 
-    var result = await _events.UpdateOneAsync(filter, update);
-    return result.MatchedCount > 0;
-}
+            var result = await _events.UpdateOneAsync(filter, update);
+            return result.MatchedCount > 0;
+        }
 
+     public async Task<IEnumerable<Event>> GetEventsByOrganizerAsync(Guid organizerId, int page, int pageSize)
+    {
+        return await _events
+            .Find(e => !e.IsDeleted && e.CreatedById == organizerId)
+            .Skip((page - 1) * pageSize)
+            .Limit(pageSize)
+            .ToListAsync();
+    }
 
         
 

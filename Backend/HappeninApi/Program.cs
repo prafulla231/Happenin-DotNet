@@ -35,6 +35,8 @@ builder.Services.AddScoped(sp =>
 // 4) Register your repository
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 
 // Console.WriteLine("Repository registered");
 

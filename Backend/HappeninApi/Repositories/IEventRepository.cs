@@ -24,6 +24,9 @@ namespace HappeninApi.Repositories
     Task<bool> DeleteEventAsync(Guid id);
     Task<bool> UpdateEventAsync(Guid id, UpdateEventDto dto);
 
+    Task<IEnumerable<Event>> GetEventsByOrganizerAsync(Guid organizerId, int page, int pageSize);
+
+
 
 
 
