@@ -39,6 +39,9 @@ export interface Event {
   organization?: string;
 }
 
+
+
+
 export interface CustomAlert {
   show: boolean;
   type: 'success' | 'error' | 'warning' | 'info' | 'confirm';
@@ -121,6 +124,7 @@ export class UserDashboardComponent implements OnDestroy {
   get displayUserName(): string {
     return this.userName || 'Guest';
   }
+tempcity: string ='';
 
   headerButtons: HeaderButton[] = [
     { text: 'Available Events', action: 'scrollToAvailableEvents' },
@@ -420,48 +424,36 @@ export class UserDashboardComponent implements OnDestroy {
   }
 
   fetchEvents(page: number = 1): void {
-    this.isLoading = true;
-    const filters: any = {};
-    if (this.searchQuery?.trim()) {
-      filters.search = this.searchQuery.trim();
-    }
-    if (this.selectedCategory) {
-      filters.category = this.selectedCategory;
-    }
-    if (this.selectedCity) {
-      filters.city = this.selectedCity;
-    }
-    if (this.dateFrom) {
-      filters.fromDate = this.dateFrom;
-    }
-    if (this.dateTo) {
-      filters.toDate = this.dateTo;
-    }
-    if (this.selectedPriceRange) {
-      filters.priceRange = this.selectedPriceRange;
-    }
-    this.eventService
-      .getPaginatedEvents(page, this.eventsPerPage, filters)
-      .subscribe({
-        next: (response) => {
-          this.events = response.data.events;
-          this.paginatedEvents = response.data.events;
+  this.isLoading = true;
+
+  this.eventService
+    .getPaginatedEvents(page, this.eventsPerPage)
+    .subscribe({
+      next: (response) => {
+        if (response && Array.isArray(response.data)) {
+          this.events = response.data;
+          this.paginatedEvents = [...this.events];
           this.filteredEvents = [...this.events];
+
           this.applySorting();
-          const pagination = response.data.pagination;
-          this.currentPage = pagination.currentPage;
-          this.totalPages = pagination.totalPages;
-          this.eventsPerPage = pagination.perPage;
-        },
-        error: (error) => {
-          console.error('❌ Error fetching events:', error);
-          this.showAlert('error', 'Load Failed', 'Failed to load events');
-        },
-        complete: () => {
-          this.isLoading = false;
-        },
-      });
-  }
+
+          this.currentPage = response.currentPage || 1;
+          this.totalPages = response.totalPages || 1;
+          this.eventsPerPage = response.pageSize || this.eventsPerPage;
+        } else {
+          this.showAlert('error', 'Invalid Response', 'Unexpected data format');
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error fetching events:', error);
+        this.showAlert('error', 'Load Failed', 'Failed to load events');
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
+}
+
 
   registerForEvent(eventId: string) {
     // Validate that we have a user ID
@@ -493,18 +485,10 @@ export class UserDashboardComponent implements OnDestroy {
       'Register for Event',
       `Are you sure you want to register for "${eventTitle}"?`,
       () => {
-        // this.loadingService.show();
-
-        // Use the service method
         this.eventService.registerForEvent(this.userId!, eventId).subscribe({
           next: (response) => {
-            // IMPORTANT: Reload registered events to update the UI
             this.loadRegisteredEvents();
-
-            // Send confirmation email after successful registration
             this.sendRegistrationEmail(event!);
-
-            // this.loadingService.hide();
             this.showAlert(
               'success',
               'Registration Successful',
@@ -528,7 +512,7 @@ export class UserDashboardComponent implements OnDestroy {
               if (err.error?.message === 'User not found') {
                 errorMessage =
                   'Your account was not found. Please log in again.';
-                this.logout(); // Force logout if user not found
+                this.logout();
               } else if (err.error?.message === 'Event not found or deleted') {
                 errorMessage = 'This event is no longer available.';
               }
@@ -675,12 +659,12 @@ export class UserDashboardComponent implements OnDestroy {
 
       this.userId = decoded.userId || decoded.id || null;
       this.userName = decoded.userName || decoded.name || null;
-      this.userEmail = decoded.userEmail || decoded.email || null; // Add this line
+      this.userEmail = decoded.userEmail || decoded.email || null;
     } catch (err) {
       console.error('Token decode error:', err);
       this.userId = null;
       this.userName = null;
-      this.userEmail = null; // Add this line
+      this.userEmail = null;
       this.showAlert(
         'warning',
         'Session Warning',

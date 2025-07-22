@@ -46,25 +46,19 @@ export class EventService {
 //   });
 // }
 
-getPaginatedEvents(page: number = 1, limit: number = 10, filters: any = {}): Observable<any> {
+getPaginatedEvents(page: number = 1, pageSize: number = 10): Observable<any> {
   let params = new HttpParams()
     .set('page', page)
-    .set('limit', limit);
+    .set('pageSize', pageSize);
 
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value) {
-      params = params.set(key, String(value));
-
-    }
-  });
-
-  const url = `${environment.apiBaseUrl}/events/paginatedEvents`;
+  const url = `${environment.apiBaseUrl}/events`;
 
   return this.http.get<any>(url, {
     headers: this.getAuthHeaders(),
     params
   });
 }
+
 
 
   getUpcomingEvents(): Observable<Event[]> {

@@ -205,11 +205,12 @@
           >
             🔍 Search results for "{{ searchQuery }}":
           </span>
-          {{ events.length }} {{ events.length === 1 ? 'event' : 'events' }}
-          found
-          <span *ngIf="totalPages > 1" class="page-info">
-            (Page {{ currentPage }} of {{ totalPages }})
-          </span>
+          {{ events.length || 0 }} {{ (events.length || 0) === 1 ? 'event' : 'events' }}
+
+
+  <span *ngIf="totalPages > 1" class="page-info">
+    (Page {{ currentPage }} of {{ totalPages }})
+  </span>
         </span>
         <div class="sort-controls">
           <label class="sort-label">Sort by:</label>
@@ -238,7 +239,8 @@
     </div>
 
     <!-- No Results Message -->
-    <div *ngIf="events.length === 0" class="no-results">
+    <div *ngIf="(events?.length || 0) === 0" class="no-results">
+
       <div class="no-results-icon">🔍</div>
       <h3 class="no-results-title">No events found</h3>
       <p class="no-results-message">

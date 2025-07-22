@@ -11,11 +11,13 @@ namespace HappeninApi.Controllers
     public class EventsController : ControllerBase
     {
         private readonly IEventRepository _repository;
+        private readonly ILocationRepository _locationRepo;
 
-        public EventsController(IEventRepository repository)
-        {
-            _repository = repository;
-        }
+       public EventsController(IEventRepository repository, ILocationRepository locationRepo)
+{
+    _repository = repository;
+    _locationRepo = locationRepo;
+}
 
         [HttpPost]
         public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto)
@@ -85,21 +87,36 @@ namespace HappeninApi.Controllers
         public async Task<IActionResult> GetAllEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
             Console.WriteLine($"📄 Fetching ALL events, Page: {paginationRequest.Page}");
-            
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
             await _repository.MarkExpiredEventsAsync();
-            
+
             var pagination = new PaginationHelper(paginationRequest);
             var (events, totalCount) = await _repository.GetAllEventsAsync(pagination);
-            
+
+            // Populate Location data for each event
+            foreach (var ev in events)
+            {
+                if (ev.LocationId != Guid.Empty)
+                {
+                    Location? location = await _locationRepo.GetByIdAsync(ev.LocationId); // ✅
+                    if (location != null)
+                        {
+                            ev.Location = location;
+                        }
+
+                }
+            }
+
             var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
-            
+
             return Ok(response);
         }
+
 
         [HttpGet("pending")]
         public async Task<IActionResult> GetPendingEvents([FromQuery] PaginationRequestDto paginationRequest)
