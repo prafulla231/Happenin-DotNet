@@ -2,6 +2,7 @@ using HappeninApi.DTOs;
 using HappeninApi.Models;
 using HappeninApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using HappeninApi.Helpers;
 
 namespace HappeninApi.Controllers
 {
@@ -81,48 +82,121 @@ namespace HappeninApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAllEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
-            Console.WriteLine("📄 Fetching ALL events, Page: " + page);
+            Console.WriteLine($"📄 Fetching ALL events, Page: {paginationRequest.Page}");
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             await _repository.MarkExpiredEventsAsync();
-            var events = await _repository.GetAllEventsAsync(page, pageSize);
-            return Ok(events);
+            
+            var pagination = new PaginationHelper(paginationRequest);
+            var (events, totalCount) = await _repository.GetAllEventsAsync(pagination);
+            
+            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
+            
+            return Ok(response);
         }
 
         [HttpGet("pending")]
-        public async Task<IActionResult> GetPendingEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetPendingEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
-            Console.WriteLine("📄 Fetching PENDING events, Page: " + page);
+            Console.WriteLine($"📄 Fetching PENDING events, Page: {paginationRequest.Page}");
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             await _repository.MarkExpiredEventsAsync();
-            var events = await _repository.GetEventsByStatusAsync(EventStatus.Pending, page, pageSize);
-            return Ok(events);
+            
+            var pagination = new PaginationHelper(paginationRequest);
+            var (events, totalCount) = await _repository.GetEventsByStatusAsync(EventStatus.Pending, pagination);
+            
+            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
+            
+            return Ok(response);
         }
 
         [HttpGet("approved")]
-        public async Task<IActionResult> GetApprovedEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetApprovedEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
-            Console.WriteLine("📄 Fetching APPROVED events, Page: " + page);
+            Console.WriteLine($"📄 Fetching APPROVED events, Page: {paginationRequest.Page}");
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             await _repository.MarkExpiredEventsAsync();
-            var events = await _repository.GetEventsByStatusAsync(EventStatus.Approved, page, pageSize);
-            return Ok(events);
+            
+            var pagination = new PaginationHelper(paginationRequest);
+            var (events, totalCount) = await _repository.GetEventsByStatusAsync(EventStatus.Approved, pagination);
+            
+            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
+            
+            return Ok(response);
         }
 
         [HttpGet("rejected")]
-        public async Task<IActionResult> GetRejectedEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetRejectedEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
-            Console.WriteLine("📄 Fetching REJECTED events, Page: " + page);
+            Console.WriteLine($"📄 Fetching REJECTED events, Page: {paginationRequest.Page}");
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             await _repository.MarkExpiredEventsAsync();
-            var events = await _repository.GetEventsByStatusAsync(EventStatus.Rejected, page, pageSize);
-            return Ok(events);
+            
+            var pagination = new PaginationHelper(paginationRequest);
+            var (events, totalCount) = await _repository.GetEventsByStatusAsync(EventStatus.Rejected, pagination);
+            
+            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
+            
+            return Ok(response);
         }
 
         [HttpGet("expired")]
-        public async Task<IActionResult> GetExpiredEvents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetExpiredEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
-            Console.WriteLine("📄 Fetching EXPIRED events, Page: " + page);
+            Console.WriteLine($"📄 Fetching EXPIRED events, Page: {paginationRequest.Page}");
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             await _repository.MarkExpiredEventsAsync();
-            var events = await _repository.GetEventsByStatusAsync(EventStatus.Expired, page, pageSize);
-            return Ok(events);
+            
+            var pagination = new PaginationHelper(paginationRequest);
+            var (events, totalCount) = await _repository.GetEventsByStatusAsync(EventStatus.Expired, pagination);
+            
+            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
+            
+            return Ok(response);
+        }
+
+        [HttpGet("by-organizer/{organizerId}")]
+        public async Task<IActionResult> GetEventsByOrganizer(Guid organizerId, [FromQuery] PaginationRequestDto paginationRequest)
+        {
+            Console.WriteLine($"📄 Fetching events by Organizer ID: {organizerId}, Page: {paginationRequest.Page}");
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var pagination = new PaginationHelper(paginationRequest);
+            var (events, totalCount) = await _repository.GetEventsByOrganizerAsync(organizerId, pagination);
+            
+            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
+            
+            return Ok(response);
         }
 
         [HttpPatch("{id}/status")]
@@ -165,14 +239,5 @@ namespace HappeninApi.Controllers
             Console.WriteLine("✅ Event updated successfully.");
             return NoContent();
         }
-
-         [HttpGet("by-organizer/{organizerId}")]
-        public async Task<IActionResult> GetEventsByOrganizer(Guid organizerId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            Console.WriteLine($"📄 Fetching events by Organizer ID: {organizerId}, Page: {page}");
-            var events = await _repository.GetEventsByOrganizerAsync(organizerId, page, pageSize);
-            return Ok(events);
-        }
-
     }
 }

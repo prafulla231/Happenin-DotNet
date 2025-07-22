@@ -1,6 +1,7 @@
 using HappeninApi.Models;
 using MongoDB.Driver;
 using HappeninApi.DTOs;
+using HappeninApi.Helpers;
 
 namespace HappeninApi.Repositories
 {
@@ -25,22 +26,66 @@ namespace HappeninApi.Repositories
             return await _events.Find(filter).FirstOrDefaultAsync();
         }
 
-        public async Task<List<Event>> GetEventsByStatusAsync(EventStatus status, int page, int pageSize)
+        public async Task<(IEnumerable<Event> Events, int TotalCount)> GetEventsByStatusAsync(EventStatus status, PaginationHelper pagination)
         {
-            var filter = Builders<Event>.Filter.Eq(e => e.Status, status);
-            return await _events
+            var filter = Builders<Event>.Filter.And(
+                Builders<Event>.Filter.Eq(e => e.Status, status),
+                Builders<Event>.Filter.Eq(e => e.IsDeleted, false)
+            );
+
+            var totalCount = (int)await _events.CountDocumentsAsync(filter);
+            
+            var events = await _events
                 .Find(filter)
-                .Skip((page - 1) * pageSize)
-                .Limit(pageSize)
+                .Skip(pagination.Skip)
+                .Limit(pagination.Take)
+                .SortByDescending(e => e.CreatedAt)
                 .ToListAsync();
+
+            return (events, totalCount);
         }
 
-        // Optional: If you want to mark events as Expired in DB
+        public async Task<(IEnumerable<Event> Events, int TotalCount)> GetAllEventsAsync(PaginationHelper pagination)
+        {
+            var filter = Builders<Event>.Filter.Eq(e => e.IsDeleted, false);
+
+            var totalCount = (int)await _events.CountDocumentsAsync(filter);
+            
+            var events = await _events
+                .Find(filter)
+                .Skip(pagination.Skip)
+                .Limit(pagination.Take)
+                .SortByDescending(e => e.CreatedAt)
+                .ToListAsync();
+
+            return (events, totalCount);
+        }
+
+        public async Task<(IEnumerable<Event> Events, int TotalCount)> GetEventsByOrganizerAsync(Guid organizerId, PaginationHelper pagination)
+        {
+            var filter = Builders<Event>.Filter.And(
+                Builders<Event>.Filter.Eq(e => e.CreatedById, organizerId),
+                Builders<Event>.Filter.Eq(e => e.IsDeleted, false)
+            );
+
+            var totalCount = (int)await _events.CountDocumentsAsync(filter);
+            
+            var events = await _events
+                .Find(filter)
+                .Skip(pagination.Skip)
+                .Limit(pagination.Take)
+                .SortByDescending(e => e.CreatedAt)
+                .ToListAsync();
+
+            return (events, totalCount);
+        }
+
         public async Task MarkExpiredEventsAsync()
         {
             var filter = Builders<Event>.Filter.And(
                 Builders<Event>.Filter.Lt(e => e.Date, DateTime.UtcNow),
-                Builders<Event>.Filter.Ne(e => e.Status, EventStatus.Expired)
+                Builders<Event>.Filter.Ne(e => e.Status, EventStatus.Expired),
+                Builders<Event>.Filter.Eq(e => e.IsDeleted, false)
             );
 
             var update = Builders<Event>.Update
@@ -52,23 +97,17 @@ namespace HappeninApi.Repositories
 
         public async Task<bool> UpdateEventStatusAsync(Guid id, EventStatus newStatus)
         {
-            var filter = Builders<Event>.Filter.Eq(e => e.Id, id);
+            var filter = Builders<Event>.Filter.And(
+                Builders<Event>.Filter.Eq(e => e.Id, id),
+                Builders<Event>.Filter.Eq(e => e.IsDeleted, false)
+            );
+            
             var update = Builders<Event>.Update
                 .Set(e => e.Status, newStatus)
                 .Set(e => e.UpdatedAt, DateTime.UtcNow);
 
             var result = await _events.UpdateOneAsync(filter, update);
             return result.ModifiedCount > 0;
-        }
-        public async Task<List<Event>> GetAllEventsAsync(int page, int pageSize)
-        {
-            var filter = Builders<Event>.Filter.Eq(e => e.IsDeleted, false);
-
-            return await _events.Find(filter)
-                                .Skip((page - 1) * pageSize)
-                                .Limit(pageSize)
-                                .SortByDescending(e => e.CreatedAt)
-                                .ToListAsync();
         }
 
         public async Task<bool> DeleteEventAsync(Guid id)
@@ -84,7 +123,10 @@ namespace HappeninApi.Repositories
 
         public async Task<bool> UpdateEventAsync(Guid id, UpdateEventDto dto)
         {
-            var filter = Builders<Event>.Filter.Eq(e => e.Id, id) & Builders<Event>.Filter.Eq(e => e.IsDeleted, false);
+            var filter = Builders<Event>.Filter.And(
+                Builders<Event>.Filter.Eq(e => e.Id, id),
+                Builders<Event>.Filter.Eq(e => e.IsDeleted, false)
+            );
 
             var update = Builders<Event>.Update
                 .Set(e => e.Title, dto.Title)
@@ -103,24 +145,5 @@ namespace HappeninApi.Repositories
             var result = await _events.UpdateOneAsync(filter, update);
             return result.MatchedCount > 0;
         }
-
-     public async Task<IEnumerable<Event>> GetEventsByOrganizerAsync(Guid organizerId, int page, int pageSize)
-    {
-        return await _events
-            .Find(e => !e.IsDeleted && e.CreatedById == organizerId)
-            .Skip((page - 1) * pageSize)
-            .Limit(pageSize)
-            .ToListAsync();
-    }
-
-        
-
-
-
-
-
-
-
-
     }
 }

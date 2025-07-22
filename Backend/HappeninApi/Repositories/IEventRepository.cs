@@ -2,33 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using HappeninApi.Models;
+using HappeninApi.Helpers;
 using HappeninApi.DTOs;
 
 namespace HappeninApi.Repositories
 {
-  public interface IEventRepository
-  {
-    // Task<List<Event>>   GetAllAsync();
-    // Task<Event?>        GetByIdAsync(Guid id);
-    // Task                CreateAsync(Event evt);
-    // Task                UpdateAsync(Guid id, Event evt);
-    // Task                DeleteAsync(Guid id);
-
-    Task<Event> CreateEventAsync(Event evnt);
-    Task<Event?> GetByIdAsync(Guid id);
-    Task<List<Event>> GetEventsByStatusAsync(EventStatus status, int page, int pageSize);
-    Task MarkExpiredEventsAsync(); // Optional: if you want to update status in DB
-    Task<bool> UpdateEventStatusAsync(Guid id, EventStatus newStatus);
-    Task<List<Event>> GetAllEventsAsync(int page, int pageSize);
-
-    Task<bool> DeleteEventAsync(Guid id);
-    Task<bool> UpdateEventAsync(Guid id, UpdateEventDto dto);
-
-    Task<IEnumerable<Event>> GetEventsByOrganizerAsync(Guid organizerId, int page, int pageSize);
-
-
-
-
-
-  }
+    public interface IEventRepository
+    {
+        Task<Event> CreateEventAsync(Event evnt);
+        Task<Event?> GetByIdAsync(Guid id);
+        
+        // Updated methods with pagination support
+        Task<(IEnumerable<Event> Events, int TotalCount)> GetEventsByStatusAsync(EventStatus status, PaginationHelper pagination);
+        Task<(IEnumerable<Event> Events, int TotalCount)> GetAllEventsAsync(PaginationHelper pagination);
+        Task<(IEnumerable<Event> Events, int TotalCount)> GetEventsByOrganizerAsync(Guid organizerId, PaginationHelper pagination);
+        
+        Task MarkExpiredEventsAsync();
+        Task<bool> UpdateEventStatusAsync(Guid id, EventStatus newStatus);
+        Task<bool> DeleteEventAsync(Guid id);
+        Task<bool> UpdateEventAsync(Guid id, UpdateEventDto dto);
+    }
 }

@@ -7,7 +7,7 @@ using MongoDB.Bson;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Mvc;
 
-
+// BsonDefaults.GuidRepresentation = GuidRepresentation.Standard;
 var builder = WebApplication.CreateBuilder(args);
 
 // 1) Bind MongoSettings from appsettings.json
@@ -36,6 +36,7 @@ builder.Services.AddScoped(sp =>
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRegistrationRepository, RegistrationRepository>();
 
 
 // Console.WriteLine("Repository registered");
