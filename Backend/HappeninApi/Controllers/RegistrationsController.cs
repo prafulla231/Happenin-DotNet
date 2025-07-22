@@ -37,17 +37,18 @@ public class RegistrationsController : ControllerBase
         return success ? Ok("Deregistered successfully.") : NotFound("Registration not found.");
     }
 
-    [HttpGet("{eventId}/registered-users")]
-    public async Task<IActionResult> GetRegisteredUsers(Guid eventId)
-    {
-        var users = await _repository.GetUsersForEventAsync(eventId);
-        return Ok(new
-        {
-            message = "Registered users fetched",
-            data = users.Select(u => new { u.Id, u.Name, u.Email })
-        });
-    }
+  [HttpGet("{eventId}/registered-users")]
+public async Task<IActionResult> GetRegisteredUsers(Guid eventId)
+{
+    var users = await _repository.GetUsersForEventAsync(eventId);
 
+    return Ok(new
+    {
+        message = "Registered users fetched",
+        count = users.Count(),
+        data = users.Select(u => new { u.Id, u.Name, u.Email })
+    });
+}
     [HttpDelete("{eventId}/users/{userId}")]
     public async Task<IActionResult> DeleteRegistration(Guid eventId, Guid userId)
     {
