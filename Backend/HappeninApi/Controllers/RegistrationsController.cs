@@ -55,7 +55,7 @@ public class RegistrationsController : ControllerBase
         return success ? NoContent() : NotFound("Registration not found.");
     }
 
-    [HttpGet("registered/{userId}")]
+    [HttpGet("registered-events/{userId}")]
     public async Task<IActionResult> GetRegisteredEvents(Guid userId)
     {
         var events = await _repository.GetRegisteredEventsAsync(userId);
