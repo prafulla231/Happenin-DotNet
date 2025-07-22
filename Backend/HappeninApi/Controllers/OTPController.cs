@@ -64,7 +64,7 @@ namespace HappeninApi.Controllers
             user.Otp = null;
             await _users.ReplaceOneAsync(u => u.Id == user.Id, user);
 
-var token = JwtHelper.GenerateJwtToken(user, _config);
+            var token = JwtHelper.GenerateJwtToken(user, _config);
 
             return Ok(new
             {

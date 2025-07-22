@@ -271,30 +271,20 @@ ngOnDestroy(): void {
 verifyOtp(email: string, otp: string) {
   this.http.post(`${environment.apiBaseUrl}${environment.apis.verifyOtp}`, { email, otp }).subscribe({
         next: (response: any) => {
-          const userRole = response.data.user?.role;
+          const userRole = response.user?.role;
 
-          if (response.data.token) {
-            localStorage.setItem('token', response.data.token);
-            sessionStorage.setItem('token', response.data.token);
+          if (response.token) {
+            localStorage.setItem('token', response.token);
+            sessionStorage.setItem('token', response.token);
           }
-          if (response.data.user) {
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            sessionStorage.setItem('user', JSON.stringify(response.data.user));
+          if (response.user) {
+            localStorage.setItem('user', JSON.stringify(response.user));
+            sessionStorage.setItem('user', JSON.stringify(response.user));
           }
 
           // Show success message
           this.showSuccessMessage('Logged in successfully! 🎉');
 
-          // Navigate after showing success message
-          // setTimeout(() => {
-          //   if (userRole === 'organizer') {
-          //     this.router.navigate(['/organizer-dashboard']);
-          //   } else if (userRole === 'admin') {
-          //     this.router.navigate(['/admin-dashboard']);
-          //   } else {
-          //     this.router.navigate(['/user-dashboard']);
-          //   }
-          // }, 1000);
            setTimeout(() => {
             this.getRoleAndNavigate();
           }, 2000);
@@ -353,30 +343,22 @@ getRoleAndNavigate() {
 
       this.authService.loginUser(data).subscribe({
         next: (response: any) => {
-          const userRole = response.data.user?.role;
+          const userRole = response.user?.role;
+          console.log('User Role:', userRole);
 
-          if (response.data.token) {
-            localStorage.setItem('token', response.data.token);
-            sessionStorage.setItem('token', response.data.token);
+          if (response.token) {
+            console.log('Token:', response.token);
+            localStorage.setItem('token', response.token);
+            sessionStorage.setItem('token', response.token);
           }
-          if (response.data.user) {
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            sessionStorage.setItem('user', JSON.stringify(response.data.user));
+          if (response.user) {
+            console.log('User:', response.user);
+            localStorage.setItem('user', JSON.stringify(response.user));
+            sessionStorage.setItem('user', JSON.stringify(response.user));
           }
 
           // Show success message
           this.showSuccessMessage('Logged in successfully! 🎉');
-
-          // Navigate after showing success message
-          // setTimeout(() => {
-          //   if (userRole === 'organizer') {
-          //     this.router.navigate(['/organizer-dashboard']);
-          //   } else if (userRole === 'admin') {
-          //     this.router.navigate(['/admin-dashboard']);
-          //   } else {
-          //     this.router.navigate(['/user-dashboard']);
-          //   }
-          // }, 2000);
           setTimeout(() => {
             this.getRoleAndNavigate();
           }, 2000);
@@ -423,30 +405,14 @@ getRoleAndNavigate() {
 
           this.authService.loginUser(loginData).subscribe({
             next: (response: any) => {
-              const userRole = response.data.user?.role;
+              const userRole = response.user?.role;
 
-              if (response.data.token) {
-                localStorage.setItem('token', response.data.token);
-                sessionStorage.setItem('token', response.data.token);
+              if (response.token) {
+                localStorage.setItem('token', response.token);
+                sessionStorage.setItem('token', response.token);
               }
-              // if (response.data.user) {
-              //   localStorage.setItem('user', JSON.stringify(response.data.user));
-              //   sessionStorage.setItem('user', JSON.stringify(response.data.user));
-              // }
 
-              // Show success message
               this.showSuccessMessage('Registered and logged in successfully! 🎉');
-
-              // Navigate after showing success message
-              // setTimeout(() => {
-              //   if (userRole === 'organizer') {
-              //     this.router.navigate(['/organizer-dashboard']);
-              //   } else if (userRole === 'admin') {
-              //     this.router.navigate(['/admin-dashboard']);
-              //   } else {
-              //     this.router.navigate(['/user-dashboard']);
-              //   }
-              // }, 2000);
                setTimeout(() => {
             this.getRoleAndNavigate();
           }, 2000);

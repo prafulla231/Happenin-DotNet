@@ -1,58 +1,137 @@
-using System;
+using System.Text;
 using HappeninApi.DTOs;
 using HappeninApi.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Bson;       
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
 
-// BsonDefaults.GuidRepresentation = GuidRepresentation.Standard;
 var builder = WebApplication.CreateBuilder(args);
 
-// 1) Bind MongoSettings from appsettings.json
+// 1. Add Services to the container
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost4200", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// MongoDB Settings
 builder.Services.Configure<MongoSettings>(
     builder.Configuration.GetSection("MongoSettings"));
-// Console.WriteLine("MongoSettings bound from appsettings.json");
 
-// 2) Register IMongoClient as a singleton
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
     var opts = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
-    // Console.WriteLine($"Connecting to MongoDB with connection string: {opts.ConnectionString}");
     return new MongoClient(opts.ConnectionString);
 });
 
-// 3) Register IMongoDatabase so you can inject it
 builder.Services.AddScoped(sp =>
 {
-    var opts   = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
+    var opts = sp.GetRequiredService<IOptions<MongoSettings>>().Value;
     var client = sp.GetRequiredService<IMongoClient>();
-    // Console.WriteLine($"Getting database: {opts.DatabaseName}");
     return client.GetDatabase(opts.DatabaseName);
 });
 
-// 4) Register your repository
+// Repositories
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRegistrationRepository, RegistrationRepository>();
 
+// Add JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
 
-// Console.WriteLine("Repository registered");
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
 
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
+    };
+});
+
+builder.Services.AddAuthorization(); // ✅ Must come after AddAuthentication()
+
+// MVC + Swagger
 builder.Services.AddControllers();
-// Console.WriteLine("Controllers registered");
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Happenin API",
+        Version = "v1",
+        Description = "API for the Happenin event management system"
+    });
+
+    // 🔐 Swagger JWT Authorization Support
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Enter JWT token with Bearer prefix (e.g., Bearer eyJ...)",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        {
+            new OpenApiSecurityScheme {
+                Reference = new OpenApiReference {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
+// 2. Build App
 var app = builder.Build();
+
+// 3. Middleware pipeline
+app.UseCors("AllowLocalhost4200");
+
+app.UseAuthentication(); // 🟢 Must come before UseAuthorization
+app.UseAuthorization();
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Happenin API V1");
+    c.RoutePrefix = string.Empty;
+});
+
+// 4. MongoDB ping test
 using (var scope = app.Services.CreateScope())
 {
     var provider = scope.ServiceProvider;
     try
     {
-        // Resolve the scoped IMongoDatabase
         var db = provider.GetRequiredService<IMongoDatabase>();
-
-        // Send the ping command
         var pingResult = db.RunCommand<BsonDocument>(new BsonDocument("ping", 1));
 
         Console.ForegroundColor = ConsoleColor.Green;
@@ -64,12 +143,9 @@ using (var scope = app.Services.CreateScope())
         Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine($"❌ MongoDB connection failed: {ex.Message}");
         Console.ResetColor();
-        // If you want the app to stop on failure, uncomment the next line:
-        // throw;
     }
 }
 
+// 5. Routing
 app.MapControllers();
-// Console.WriteLine("Controllers mapped");
-
 app.Run();

@@ -12,7 +12,7 @@ namespace HappeninApi.Helpers
     {
         public static string GenerateJwtToken(User user, IConfiguration config)
         {
-            var jwtKey = config["Jwt:Key"];
+            var jwtKey = config["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key", "JWT Key is missing in configuration");
             var jwtIssuer = config["Jwt:Issuer"];
             var jwtAudience = config["Jwt:Audience"];
 
