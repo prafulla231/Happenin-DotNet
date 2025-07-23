@@ -28,9 +28,7 @@ export class AuthGuard implements CanActivate {
 
       const expectedRole = route.data['role'];
 
-      console.log('✅ Decoded Token Payload (full):', JSON.stringify(decodedPayload, null, 2));
-      console.log('🔑 User role:', userRole);
-      console.log('📌 Expected role:', expectedRole);
+
 
       if (expectedRole && userRole?.toLowerCase() !== expectedRole.toLowerCase()) {
         console.warn('🚫 Role mismatch. Access denied.');
@@ -40,7 +38,7 @@ export class AuthGuard implements CanActivate {
 
       return true;
     } catch (err) {
-      console.error('❌ Error decoding token:', err);
+
       this.router.navigate(['/login']);
       return false;
     }

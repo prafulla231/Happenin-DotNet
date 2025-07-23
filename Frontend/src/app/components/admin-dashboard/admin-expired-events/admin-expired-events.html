@@ -29,7 +29,7 @@
       <div class="event-actions">
         <button
           class="delete-btn"
-          (click)="confirmDeleteEvent(event._id, event.title)"
+          (click)="confirmDeleteEvent(event.id, event.title)"
         >
           Delete Event
         </button>
@@ -129,8 +129,8 @@
           </div>
           <div class="admin-detail-content">
             <p>Max {{ selectedEvent.maxRegistrations }} attendees</p>
-            <p *ngIf="usersMap[selectedEvent._id]">
-              Current: {{ usersMap[selectedEvent._id].currentRegistration }}
+            <p *ngIf="usersMap[selectedEvent.id]">
+              Current: {{ usersMap[selectedEvent.id].currentRegistration }}
               registered
             </p>
           </div>
@@ -157,14 +157,14 @@
         </div>
       </div>
 
-      <div class="registered-users" *ngIf="usersMap[selectedEvent._id]">
+      <div class="registered-users" *ngIf="usersMap[selectedEvent.id]">
         <h3>
-          Registered Users ({{ usersMap[selectedEvent._id].currentRegistration
+          Registered Users ({{ usersMap[selectedEvent.id].currentRegistration
           }})
         </h3>
         <div class="users-list">
           <div
-            *ngFor="let user of usersMap[selectedEvent._id].users"
+            *ngFor="let user of usersMap[selectedEvent.id].users"
             class="user-item"
           >
             <span class="user-name">{{ user.name }}</span>

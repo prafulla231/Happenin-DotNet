@@ -18,17 +18,16 @@ import { HeaderComponent, HeaderButton } from '../../common/header/header';
 import { FooterComponent } from '../../common/footer/footer';
 import { CustomAlertComponent } from '../custom-alert/custom-alert';
 import { PaginationComponent } from '../../common/pagination/pagination';
-// import { EventFilter } from '../../common/event-filter/event-filter';
-// import { MyRegisteredEvents } from './my-registered-events/my-registered-events';
 
 export interface Event {
-  _id: string;
+  id: string;
   title: string;
   description: string;
   date: string;
   timeSlot: string;
   duration: string;
   city: string;
+  tempCity: string;
 
   location: string;
   category: string;
@@ -117,6 +116,8 @@ export class UserDashboardComponent implements OnDestroy {
   ];
 
   private searchTimeout: any;
+  // tempCity: string = '';
+
 
   //  userName = 'John Doe';
   //  Math = Math;
@@ -124,7 +125,7 @@ export class UserDashboardComponent implements OnDestroy {
   get displayUserName(): string {
     return this.userName || 'Guest';
   }
-tempcity: string ='';
+// tempcity: string ='';
 
   headerButtons: HeaderButton[] = [
     { text: 'Available Events', action: 'scrollToAvailableEvents' },
@@ -193,22 +194,27 @@ tempcity: string ='';
   isLoading = false;
 
   constructor(
-    private http: HttpClient,
-    private router: Router,
-    private loadingService: LoadingService,
-    private authService: AuthService,
-    private eventService: EventService,
-    private locationService: LocationService,
-    private ApprovalService: ApprovalService,
-    private emailService: EmailService
-  ) {
-    this.showFilters = false;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    this.decodeToken();
-    // this.loadAllEvents();
+  private http: HttpClient,
+  private router: Router,
+  private loadingService: LoadingService,
+  private authService: AuthService,
+  private eventService: EventService,
+  private locationService: LocationService,
+  private ApprovalService: ApprovalService,
+  private emailService: EmailService
+) {
+  this.showFilters = false;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Decode token first, then fetch events
+  this.decodeToken();
+
+  // Add a small delay to ensure token decoding completes
+  setTimeout(() => {
     this.fetchEvents(this.currentPage);
     this.loadRegisteredEvents();
-  }
+  }, 100);
+}
   showFilters: boolean = false;
   // Custom Alert Methods
   showAlert(
@@ -347,65 +353,6 @@ tempcity: string ='';
     this.router.navigate(['/contact']);
   }
 
-  //   loadAllEvents() {
-  //   this.loadingService.show();
-  //   this.eventService.getUpcomingEvents().subscribe({
-  //     next: (res) => {
-  //       this.events = res;
-  //       this.filteredEvents = [...this.events];
-  //       this.extractFilterOptions();
-  //       this.applySorting();
-  //       this.calculatePagination(); // Add this line
-  //       this.loadingService.hide();
-  //       this.showAlert('success', 'Events Loaded', 'Successfully loaded all available events!');
-  //     },
-  //     error: (err) => {
-  //       console.error('Error loading events', err);
-  //       this.loadingService.hide();
-  //       this.showAlert('error', 'Loading Failed', 'Failed to load events. Please try again later.');
-  //     }
-  //   });
-  // }
-
-  // fetchEvents(page: number) {
-  //   this.isLoading = true;
-
-  // //     const filters = {
-  // //   search: this.searchQuery.trim(),
-  // //   category: this.selectedCategory,
-  // //   city: this.selectedCity,
-  // //   fromDate: this.dateFrom,
-  // //   toDate: this.dateTo,
-  // //   priceRange: this.selectedPriceRange,
-  // //   sortBy: this.sortBy
-  // // };
-
-  //   this.eventService.getPaginatedEvents(page, this.eventsPerPage).subscribe({
-  //     next: (response) => {
-  //       this.events = response.data.events;
-  //       this.paginatedEvents = response.data.events;
-  //       console.log('Fetched events:', this.paginatedEvents);
-  //       this.filteredEvents = [...this.events]
-  //       console.log('Filtered events:', this.filteredEvents);
-  //       const pagination = response.data.pagination;
-  //       this.extractFilterOptions();
-  //   this.applySorting();
-
-  //       this.currentPage = pagination.currentPage;
-  //       this.totalPages = pagination.totalPages;
-  //       this.eventsPerPage = pagination.perPage;
-  //       console.log('Current Page:', this.currentPage);
-  //       console.log('Total Pages:', this.totalPages);
-  //       console.log('Events Per Page:', this.eventsPerPage);
-  //     },
-  //     error: (error) => {
-  //       console.error('Error fetching events:', error);
-  //     },
-  //     complete: () => {
-  //       this.isLoading = false;
-  //     }
-  //   });
-  // }
   loadRegisteredEvents() {
     if (!this.userId) return;
     this.eventService.getRegisteredEvents(this.userId).subscribe({
@@ -423,7 +370,7 @@ tempcity: string ='';
     });
   }
 
-  fetchEvents(page: number = 1): void {
+ fetchEvents(page: number = 1): void {
   this.isLoading = true;
 
   this.eventService
@@ -431,11 +378,53 @@ tempcity: string ='';
     .subscribe({
       next: (response) => {
         if (response && Array.isArray(response.data)) {
-          this.events = response.data;
+          // Map events and extract city from location
+          this.events = (response.data as any[]).map((event) => ({
+            ...event,
+            tempCity: this.extractCityFromLocationObject(event.location) || event.city || 'Unknown'
+          }));
+
+
+          console.log('Fetched events:', this.events);
+
           this.paginatedEvents = [...this.events];
           this.filteredEvents = [...this.events];
 
           this.applySorting();
+
+          this.currentPage = response.currentPage || 1;
+          this.totalPages = response.totalPages || 1;
+          this.eventsPerPage = response.pageSize || this.eventsPerPage;
+
+        } else {
+          this.showAlert('error', 'Invalid Response', 'Unexpected data format');
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error fetching events:', error);
+        this.showAlert('error', 'Load Failed', 'Failed to load events');
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
+}
+
+fetchEventsWithFilters(page: number = 1, filters: any = {}): void {
+  this.isLoading = true;
+
+  this.eventService
+    .getPaginatedEvents(page, this.eventsPerPage, filters)
+    .subscribe({
+      next: (response) => {
+        if (response && Array.isArray(response.data)) {
+          this.events = (response.data as any[]).map((event) => ({
+            ...event,
+            tempCity: this.extractCityFromLocationObject(event.location) || event.city || 'Unknown'
+          }));
+
+          this.paginatedEvents = [...this.events];
+          this.filteredEvents = [...this.events];
 
           this.currentPage = response.currentPage || 1;
           this.totalPages = response.totalPages || 1;
@@ -453,7 +442,6 @@ tempcity: string ='';
       }
     });
 }
-
 
   registerForEvent(eventId: string) {
     // Validate that we have a user ID
@@ -474,7 +462,7 @@ tempcity: string ='';
       return;
     }
 
-    const event = this.events.find((e) => e._id === eventId);
+    const event = this.events.find((e) => e.id === eventId);
     const eventTitle = event ? event.title : 'this event';
 
     if (event) {
@@ -547,7 +535,7 @@ tempcity: string ='';
 
     const emailRequest = {
       userId: this.userId || 'anonymous',
-      eventId: event._id,
+      eventId: event.id,
       userEmail: this.userEmail,
       userName: this.userName || 'Guest',
       sendPDF: true, // Send PDF ticket attachment
@@ -563,47 +551,6 @@ tempcity: string ='';
       },
     });
   }
-
-  // deregister(userId: string, eventId: string) {
-  //   const event = this.registeredEvents.find((e) => e._id === eventId);
-  //   const eventTitle = event ? event.title : 'this event';
-
-  //   this.showConfirmation(
-  //     'Confirm Deregistration',
-  //     `Are you sure you want to deregister from "${eventTitle}"? This action cannot be undone.`,
-  //     () => {
-  //       this.loadingService.show();
-
-  //       this.eventService.deregisterFromEvent(userId, eventId).subscribe({
-  //         next: () => {
-  //           this.loadRegisteredEvents();
-  //           this.loadingService.hide();
-  //           this.showAlert(
-  //             'success',
-  //             'Deregistration Successful',
-  //             `You have been deregistered from "${eventTitle}".`
-  //           );
-  //         },
-  //         error: (err) => {
-  //           console.error('Deregistration failed', err);
-  //           this.loadingService.hide();
-  //           this.showAlert(
-  //             'error',
-  //             'Deregistration Failed',
-  //             'Failed to deregister from the event. Please try again.'
-  //           );
-  //         },
-  //       });
-  //     },
-  //     () => {
-  //       this.showAlert(
-  //         'info',
-  //         'Deregistration Cancelled',
-  //         'You remain registered for the event.'
-  //       );
-  //     }
-  //   );
-  // }
 
   extractFilterOptions() {
     this.availableCategories = [
@@ -630,6 +577,22 @@ tempcity: string ='';
     }
   }
 
+extractCityFromLocationObject(location: any): string {
+  if (!location) return '';
+
+  // If location is an object with city property
+  if (typeof location === 'object' && location.city) {
+    return location.city;
+  }
+
+  // If location is a string, use existing extraction logic
+  if (typeof location === 'string') {
+    return this.extractCityFromLocation(location);
+  }
+
+  return '';
+}
+
   decodeToken() {
     // console.log('=== TOKEN DECODE START ===');
     const token =
@@ -642,11 +605,9 @@ tempcity: string ='';
     }
 
     try {
-      // console.log('Token length:', token.length);
-      // console.log('Token starts with:', token.substring(0, 20) + '...');
+
 
       const parts = token.split('.');
-      // console.log('Token parts count:', parts.length);
 
       if (parts.length !== 3) {
         throw new Error('Invalid token format');
@@ -674,21 +635,19 @@ tempcity: string ='';
   }
 
   isRegistered(eventId: string): boolean {
-    return this.registeredEvents.some((e) => e._id === eventId);
+    return this.registeredEvents.some((e) => e.id === eventId);
   }
 
   // Filter logic
   onSearchChange() {
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
-
-    // Set new timeout for debounced search
-    this.searchTimeout = setTimeout(() => {
-      this.currentPage = 1; // Reset to first page when searching
-      this.fetchEvents(1); // Fetch from server with search filter
-    }, 300); // 300ms delay
+  if (this.searchTimeout) {
+    clearTimeout(this.searchTimeout);
   }
+
+  this.searchTimeout = setTimeout(() => {
+    this.onFilterChange();
+  }, 300);
+}
 
   ngOnDestroy() {
     if (this.searchTimeout) {
@@ -696,55 +655,21 @@ tempcity: string ='';
     }
   }
 
-  //   applyFilters() {
-  //     let filtered = [...this.paginatedEvents];
-
-  //     // Enhanced search with trimming and better matching
-  //     if (this.searchQuery && this.searchQuery.trim()) {
-  //       const query = this.searchQuery.toLowerCase().trim();
-  //       filtered = filtered.filter(e => {
-  //         const searchableText = [
-  //           e.title,
-  //           e.description,
-  //           e.artist || '',
-  //           e.organization || '',
-  //           e.category || '',
-  //           e.city
-  //         ].join(' ').toLowerCase();
-
-  //         return searchableText.includes(query);
-  //       });
-  //     }
-
-  //   if (this.selectedCategory) {
-  //     filtered = filtered.filter(e => e.category === this.selectedCategory);
-  //   }
-
-  //   if (this.selectedCity) {
-  //     filtered = filtered.filter(e => this.extractCityFromLocation(e.city) === this.selectedCity);
-  //   }
-
-  //   if (this.dateFrom) {
-  //     const fromDate = new Date(this.dateFrom);
-  //     filtered = filtered.filter(e => new Date(e.date) >= fromDate);
-  //   }
-
-  //   if (this.dateTo) {
-  //     const toDate = new Date(this.dateTo);
-  //     filtered = filtered.filter(e => new Date(e.date) <= toDate);
-  //   }
-
-  //   if (this.selectedPriceRange) {
-  //     filtered = this.applyPriceFilter(filtered);
-  //   }
-
-  //   this.filteredEvents = filtered;
-  //   this.applySorting();
-
-  //   // Reset to first page when filters change
-  //   this.currentPage = 1;
-  //   // this.calculatePagination();
-  // }
+  onPageChange(page: number): void {
+  if (this.hasActiveFilters()) {
+    const filters = {
+      searchQuery: this.searchQuery,
+      category: this.selectedCategory,
+      city: this.selectedCity,
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo,
+      sortBy: this.sortBy
+    };
+    this.fetchEventsWithFilters(page, filters);
+  } else {
+    this.fetchEvents(page);
+  }
+}
 
   applyPriceFilter(events: Event[]): Event[] {
     switch (this.selectedPriceRange) {
@@ -777,13 +702,19 @@ tempcity: string ='';
       }
     });
 
-    // Recalculate pagination after sorting
-    // this.calculatePagination();
   }
   onFilterChange() {
-    this.currentPage = 1; // Reset to first page
-    this.fetchEvents(1); // Fetch from server with new filters
-  }
+  this.currentPage = 1;
+  const filters = {
+    searchQuery: this.searchQuery,
+    category: this.selectedCategory,
+    city: this.selectedCity,
+    dateFrom: this.dateFrom,
+    dateTo: this.dateTo,
+    sortBy: this.sortBy
+  };
+  this.fetchEventsWithFilters(1, filters);
+}
   clearFilters() {
     this.searchQuery = '';
     this.selectedCategory = '';
@@ -807,16 +738,6 @@ tempcity: string ='';
     this.currentPage = 1; // Reset to first page
     this.fetchEvents(1); // Fetch fresh data from server
   }
-
-  //  debugSearch() {
-  //   console.log('Search Debug Info:');
-  //   console.log('Search Query:', this.searchQuery);
-  //   console.log('All Events Count:', this.events.length);
-  //   console.log('Filtered Events Count:', this.filteredEvents.length);
-  //   console.log('Paginated Events Count:', this.paginatedEvents.length);
-  //   console.log('Current Page:', this.currentPage);
-  //   console.log('Total Pages:', this.totalPages);
-  // }
 
   hasActiveFilters(): boolean {
     return !!(
@@ -874,157 +795,6 @@ tempcity: string ='';
     document.body.style.overflow = 'auto';
   }
 
-  // downloadTicket(event: Event) {
-  //   this.showConfirmation(
-  //     'Download Ticket',
-  //     `Generate and download ticket for "${event.title}"?`,
-  //     () => {
-  //       this.generateTicketPDF(event);
-  //     }
-  //   );
-  // }
-
-  // private generateTicketPDF(event: Event) {
-  //   this.loadingService.show();
-  //   try {
-  //     const doc = new jsPDF();
-  //     const pageWidth = doc.internal.pageSize.width;
-  //     const pageHeight = doc.internal.pageSize.height;
-  //     const margin = 20;
-  //     const contentWidth = pageWidth - margin * 2;
-
-  //     // Header Background
-  //     doc.setFillColor(102, 126, 234);
-  //     doc.rect(0, 0, pageWidth, 60, 'F');
-
-  //     // Header Text
-  //     doc.setTextColor(255, 255, 255);
-  //     doc.setFontSize(24);
-  //     doc.setFont('helvetica', 'bold');
-  //     doc.text('EVENT TICKET', pageWidth / 2, 30, { align: 'center' });
-
-  //     doc.setFontSize(12);
-  //     doc.setFont('helvetica', 'normal');
-  //     doc.text('Official Entry Pass', pageWidth / 2, 45, { align: 'center' });
-
-  //     // Reset text color for content
-  //     doc.setTextColor(0, 0, 0);
-
-  //     // Start content below header with more spacing
-  //     let yPosition = 80;
-  //     const lineHeight = 8;
-  //     const sectionSpacing = 15;
-
-  //     // Event details with better formatting
-  //     const details = [
-  //       { label: 'Event Name', value: event.title },
-  //       { label: 'Description', value: event.description },
-  //       { label: 'Date', value: this.formatDate(event.date) },
-  //       { label: 'Time', value: event.timeSlot },
-  //       { label: 'Duration', value: event.duration },
-  //       { label: 'Location', value: event.location },
-  //       { label: 'Category', value: event.category || 'General' },
-  //       { label: 'Price', value: `${event.price}` },
-  //       { label: 'Ticket Holder', value: this.userName || 'Guest' },
-  //     ];
-
-  //     details.forEach((detail, index) => {
-  //       // Check if we need a new page
-  //       if (yPosition > pageHeight - 40) {
-  //         doc.addPage();
-  //         yPosition = 30;
-  //       }
-
-  //       // Label
-  //       doc.setFont('helvetica', 'bold');
-  //       doc.setFontSize(11);
-  //       doc.text(`${detail.label}:`, margin, yPosition);
-
-  //       // Value with text wrapping
-  //       doc.setFont('helvetica', 'normal');
-  //       doc.setFontSize(10);
-
-  //       const labelWidth = 60;
-  //       const valueX = margin + labelWidth;
-  //       const maxValueWidth = contentWidth - labelWidth;
-
-  //       // Handle long text with proper wrapping
-  //       const splitText = doc.splitTextToSize(detail.value, maxValueWidth);
-  //       doc.text(splitText, valueX, yPosition);
-
-  //       // Calculate next position based on wrapped text
-  //       const textHeight = Array.isArray(splitText)
-  //         ? splitText.length * lineHeight
-  //         : lineHeight;
-  //       yPosition += Math.max(textHeight, lineHeight) + 5;
-  //     });
-
-  //     // Add some spacing before footer
-  //     yPosition += sectionSpacing;
-
-  //     // Separator line
-  //     if (yPosition > pageHeight - 60) {
-  //       doc.addPage();
-  //       yPosition = 30;
-  //     }
-
-  //     doc.setDrawColor(102, 126, 234);
-  //     doc.setLineWidth(0.5);
-  //     doc.line(margin, yPosition, pageWidth - margin, yPosition);
-
-  //     // Footer
-  //     yPosition += 15;
-  //     doc.setFontSize(9);
-  //     doc.setTextColor(100, 100, 100);
-  //     doc.setFont('helvetica', 'normal');
-
-  //     const footerText1 =
-  //       'This is an official ticket. Please present this ticket at the event entrance.';
-  //     doc.text(footerText1, pageWidth / 2, yPosition, { align: 'center' });
-
-  //     yPosition += 10;
-  //     const footerText2 = `Generated on: ${new Date().toLocaleString()}`;
-  //     doc.text(footerText2, pageWidth / 2, yPosition, { align: 'center' });
-
-  //     // Add ticket ID for authenticity
-  //     yPosition += 10;
-  //     const ticketId = `Ticket ID: ${Date.now()}-${event._id.slice(-6)}`;
-  //     doc.text(ticketId, pageWidth / 2, yPosition, { align: 'center' });
-
-  //     // Generate filename
-  //     const fileName = `ticket-${event.title
-  //       .replace(/[^a-z0-9]/gi, '_')
-  //       .toLowerCase()}.pdf`;
-
-  //     // Save the PDF
-  //     doc.save(fileName);
-
-  //     this.loadingService.hide();
-  //     this.showAlert(
-  //       'success',
-  //       'Ticket Downloaded',
-  //       `Your ticket for "${event.title}" has been downloaded successfully!`
-  //     );
-  //   } catch (error) {
-  //     console.error('Error generating ticket PDF:', error);
-  //     this.loadingService.hide();
-  //     this.showAlert(
-  //       'error',
-  //       'Download Failed',
-  //       'Failed to generate the ticket. Please try again.'
-  //     );
-  //   }
-  // }
-
-  // scrollToRegisteredEvents() {
-  //   const registeredSection = document.querySelector('.registered-section');
-  //   if (registeredSection) {
-  //     registeredSection.scrollIntoView({
-  //       behavior: 'smooth',
-  //       block: 'start',
-  //     });
-  //   }
-  // }
   scrollToAvailableEvents() {
     const availableSection = document.querySelector('.events-section');
     if (availableSection) {

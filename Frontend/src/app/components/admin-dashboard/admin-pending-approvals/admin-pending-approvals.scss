@@ -1,6 +1,5 @@
 $admin-primary-purple: #8B5FBF;
 $admin-light-purple: #B794C7;
-// #8b5cf6: #9D7BEA;
 $admin-light-blue: #A8C8EC;
 $admin-blue-accent: #7FB3D3;
 $admin-white: #FFFFFF;
@@ -254,11 +253,6 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
         width: 300px;
         height: 300px;
       }
-
-      // &:hover {
-      //   transform: translateY(-4px) scale(1.02);
-      //   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-      // }
 
       &:active {
         transform: translateY(-2px) scale(0.98);

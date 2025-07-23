@@ -11,7 +11,7 @@ import { CustomAlertComponent } from '../../custom-alert/custom-alert';
 import { environment } from '../../../../environment';
 
 export interface Event {
-  _id: string;
+  id: string;
   title: string;
   description: string;
   date: string;
@@ -31,7 +31,7 @@ export interface RegisteredUser {
   userId: string;
   name: string;
   email: string;
-  _id: string;
+  id: string;
 }
 
 export interface RegisteredUsersResponse {
@@ -102,45 +102,12 @@ export class AdminUpcomingEvents {
     this.loadEvents();
   }
 
-  // ngOnInit(): void {
-  //     // this.setUserFromLocalUser();
-
-  //   this.loadEvents();
-  //   this.viewAvailableEvents();
-  // }
-
-//   setUserFromLocalUser() {
-//   try {
-//     const userString = localStorage.getItem('user');
-//     if (userString) {
-//       const user = JSON.parse(userString);
-//       this.userEmail = user.email || '';
-//       this.userId = user._id || '';
-//       this.isSuperAdmin = this.userEmail === 'superadmin@gmail.com';
-//     } else {
-//       this.userEmail = '';
-//       this.userId = '';
-//       this.isSuperAdmin = false;
-//     }
-//   } catch (error) {
-//     console.error('Failed to parse user from localStorage', error);
-//     this.userEmail = '';
-//     this.userId = '';
-//     this.isSuperAdmin = false;
-//   }
-// }
 
   handleHeaderAction(action: string): void {
     switch (action) {
       case 'backToDashboard':
         this.router.navigate(['/admin-dashboard']);
         break;
-      // case 'viewPendingEvents':
-      //   // Navigate to pending events or implement functionality
-      //   break;
-      // case 'viewExpiredEvents':
-      //   // Navigate to expired events or implement functionality
-      //   break;
       case 'viewAnalytics':
         this.router.navigate(['/admin-analytics']);
         break;
@@ -227,41 +194,24 @@ export class AdminUpcomingEvents {
     }
   }
 
-  // viewAvailableEvents() {
-  //   const availableSection = document.querySelector('.upcoming-events');
-  //   if (availableSection) {
-  //     availableSection.scrollIntoView({
-  //       behavior: 'smooth',
-  //       block: 'start',
-  //     });
-  //   }
-  // }
-
-  // loadRegisteredUsersForEvents(): void {
-  //   this.filteredEvents.forEach((event) => {
-  //     this.http
-  //       .get<RegisteredUsersResponse>(
-  //         `${environment.apiBaseUrl}/events/${event._id}/registrations`
-  //       )
-  //       .subscribe({
-  //         next: (response) => {
-  //           this.usersMap[event._id] = response;
-  //         },
-  //         error: (error) => {
-  //           console.error(
-  //             `Error loading registered users for event ${event._id}:`,
-  //             error
-  //           );
-  //         },
-  //       });
-  //   });
-  // }
   loadRegisteredUsers(eventId: string) {
-    this.eventService.getRegisteredUsers(eventId).subscribe({
-      next: (res) => (this.usersMap[eventId] = res.data),
-      error: (err) => console.error('Error loading users for event', err),
-    });
-  }
+  this.eventService.getRegisteredUsers(eventId).subscribe({
+    next: (res: any) => {
+      // Map the response to ensure compatibility
+      const mappedResponse = {
+        users: res.data?.users?.map((user: any) => ({
+          userId: user.userId,
+          name: user.name,
+          email: user.email,
+          id: user.id || user.userId // Use id if available, otherwise use userId
+        })) || [],
+        currentRegistration: res.data?.currentRegistration || 0
+      };
+      this.usersMap[eventId] = mappedResponse;
+    },
+    error: (err) => console.error('Error loading users for event', err),
+  });
+}
 
   toggleUsersDropdown(eventId: string): void {
     this.showUsersDropdown[eventId] = !this.showUsersDropdown[eventId];
@@ -289,7 +239,7 @@ export class AdminUpcomingEvents {
         // this.extractFilterOptions();
         // this.applySorting();
         this.events.forEach((event) => {
-          this.loadRegisteredUsers(event._id); // keep your existing method call
+          this.loadRegisteredUsers(event.id); // keep your existing method call
         });
         this.loadingService.hide();
         this.showAlert(

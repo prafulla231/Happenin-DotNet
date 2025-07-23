@@ -16,7 +16,7 @@ import { FooterComponent } from '../../../common/footer/footer';
 import { CustomAlertComponent } from '../../custom-alert/custom-alert';
 
 export interface Event {
-  _id: string;
+  id: string;
   title: string;
   description: string;
   date: string;
@@ -209,7 +209,7 @@ export class MyRegisteredEvents implements OnInit, OnDestroy {
   }
 
   deregister(userId: string, eventId: string) {
-    const event = this.registeredEvents.find((e) => e._id === eventId);
+    const event = this.registeredEvents.find((e) => e.id === eventId);
     const eventTitle = event ? event.title : 'this event';
 
     this.showConfirmation(
@@ -362,7 +362,7 @@ export class MyRegisteredEvents implements OnInit, OnDestroy {
 
       // Add ticket ID for authenticity
       yPosition += 10;
-      const ticketId = `Ticket ID: ${Date.now()}-${event._id.slice(-6)}`;
+      const ticketId = `Ticket ID: ${Date.now()}-${event.id.slice(-6)}`;
       doc.text(ticketId, pageWidth / 2, yPosition, { align: 'center' });
 
       // Generate filename

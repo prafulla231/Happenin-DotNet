@@ -1,7 +1,6 @@
 
 $admin-primary-purple: #8B5FBF;
 $admin-light-purple: #B794C7;
-// #8b5cf6: #9D7BEA;
 $admin-light-blue: #A8C8EC;
 $admin-blue-accent: #7FB3D3;
 $admin-white: #FFFFFF;
@@ -2483,95 +2482,6 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
   }
 }
 
-// // ========= ADD NEW ADMIN BUTTON =========
-// .add-admin-btn {
-//   position: relative;
-//   display: inline-flex;
-//   align-items: center;
-//   gap: 0.5rem;
-//   padding: 0.875rem 1.5rem;
-//   margin: 1rem 0 1.5rem 0;
-
-//   // Typography
-//   font-size: 0.95rem;
-//   font-weight: 600;
-//   letter-spacing: 0.025em;
-//   text-transform: none;
-
-//   // Colors & Background
-//   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-//   color: white;
-//   border: none;
-//   border-radius: 12px;
-
-//   // 3D Effect
-//   box-shadow:
-//     0 4px 14px 0 rgba(79, 70, 229, 0.3),
-//     0 2px 4px 0 rgba(0, 0, 0, 0.1),
-//     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-
-//   // Transform & Transition
-//   transform: translateY(0);
-//   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-//   cursor: pointer;
-//   overflow: hidden;
-
-//   // Hover Effects
-//   &:hover {
-//     transform: translateY(-2px);
-//     box-shadow:
-//       0 8px 25px 0 rgba(79, 70, 229, 0.4),
-//       0 4px 8px 0 rgba(0, 0, 0, 0.15),
-//       inset 0 1px 0 rgba(255, 255, 255, 0.3);
-//     background: linear-gradient(135deg, #5b52f0 0%, #8b46f7 100%);
-//   }
-
-//   // Active State
-//   &:active {
-//     transform: translateY(-1px);
-//     transition: all 0.1s ease;
-//     box-shadow:
-//       0 6px 20px 0 rgba(79, 70, 229, 0.35),
-//       0 2px 6px 0 rgba(0, 0, 0, 0.12),
-//       inset 0 1px 0 rgba(255, 255, 255, 0.25);
-//   }
-
-//   // Focus State
-//   &:focus {
-//     outline: none;
-//     box-shadow:
-//       0 4px 14px 0 rgba(79, 70, 229, 0.3),
-//       0 2px 4px 0 rgba(0, 0, 0, 0.1),
-//       inset 0 1px 0 rgba(255, 255, 255, 0.2),
-//       0 0 0 3px rgba(79, 70, 229, 0.2);
-//   }
-
-//   // Ripple Effect
-//   &::before {
-//     content: '';
-//     position: absolute;
-//     top: 50%;
-//     left: 50%;
-//     width: 0;
-//     height: 0;
-//     border-radius: 50%;
-//     background: rgba(255, 255, 255, 0.3);
-//     transform: translate(-50%, -50%);
-//     transition: width 0.6s, height 0.6s;
-//   }
-
-//   &:active::before {
-//     width: 300px;
-//     height: 300px;
-//   }
-
-//   // Icon Styling
-//   .btn-icon {
-//     font-size: 1.1rem;
-//     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-//   }
-// }
-
 // ========= ADMIN REGISTRATION FORM =========
 .admin-register-form {
   background: #ffffff;
@@ -3425,7 +3335,7 @@ $analytics-color: #2196F3;
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  
+
   .dashboard-title {
     text-align: center;
     color: white;
@@ -3453,52 +3363,52 @@ $analytics-color: #2196F3;
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
-  
+
   &:hover {
     @include card-hover-effect;
-    
+
     .card-image {
       transform: scale(1.05);
     }
   }
-  
+
   &:focus {
     outline: 2px solid #667eea;
     outline-offset: 2px;
   }
-  
+
   &:active {
     transform: translateY(-5px) scale(0.98);
   }
-  
+
   // Card variants
   &.upcoming-events {
     @include card-border($upcoming-color);
-    
+
     .card-icon {
       color: $upcoming-color;
     }
   }
-  
+
   &.expired-events {
     @include card-border($expired-color);
-    
+
     .card-icon {
       color: $expired-color;
     }
   }
-  
+
   &.waiting-approval {
     @include card-border($waiting-color);
-    
+
     .card-icon {
       color: $waiting-color;
     }
   }
-  
+
   &.analytics {
     @include card-border($analytics-color);
-    
+
     .card-icon {
       color: $analytics-color;
     }
@@ -3534,14 +3444,14 @@ $analytics-color: #2196F3;
 .card-content {
   padding: 1.5rem;
   text-align: center;
-  
+
   .card-title {
     font-size: 1.4rem;
     font-weight: 600;
     color: #333;
     margin-bottom: 0.5rem;
   }
-  
+
   .card-description {
     color: #666;
     font-size: 0.95rem;
@@ -3562,15 +3472,15 @@ $analytics-color: #2196F3;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: $button-shadow;
-  
+
   &:hover {
     @include button-hover-effect;
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   &:focus {
     outline: 2px solid rgba(255, 255, 255, 0.5);
     outline-offset: 2px;
@@ -3581,26 +3491,26 @@ $analytics-color: #2196F3;
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 1rem;
-    
+
     .dashboard-title {
       font-size: 2rem;
       margin-bottom: 2rem;
     }
   }
-  
+
   .cards-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
     padding: 0.5rem;
   }
-  
+
   .card-content {
     padding: 1rem;
-    
+
     .card-title {
       font-size: 1.2rem;
     }
-    
+
     .card-description {
       font-size: 0.9rem;
     }
@@ -3614,7 +3524,7 @@ $analytics-color: #2196F3;
       margin-bottom: 1.5rem;
     }
   }
-  
+
   .card-button {
     padding: 10px 25px;
     font-size: 0.9rem;

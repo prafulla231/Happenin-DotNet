@@ -61,9 +61,9 @@ export class AnalyticsService {
     );
   }
 
-  refreshAnalytics(type: 'organizer' | 'admin' | 'user', id?: string): Observable<any> {
+  refreshAnalytics(type: 'organizer' | 'admin' | 'user', _id?: string): Observable<any> {
     const headers = this.getHeaders();
-    const endpoint = id ? `${environment.apiBaseUrl}/analytics/${type}/${id}/refresh` : `${environment.apiBaseUrl}/analytics/${type}/refresh`;
+    const endpoint = _id ? `${environment.apiBaseUrl}/analytics/${type}/${_id}/refresh` : `${environment.apiBaseUrl}/analytics/${type}/refresh`;
 
     return this.http.post<ApiResponse<any>>(endpoint, {}, { headers }).pipe(
       map(response => response.data),

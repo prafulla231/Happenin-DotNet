@@ -28,8 +28,10 @@ export const environment = {
     addLocation: '/locations' ,
     bookLocation: '/locations/book', // not defined in environment — consider adding
     cancelBooking: '/locations/cancel', // not defined in environment
-    viewLocation: (locationId: string) => `/locations/${locationId}`,
-    deleteLocation: (locationId: string) => `/locations/${locationId}`,
+    // viewLocation: (locationId: string) => `/locations/${locationId}`,
+    viewLocation: (locationId: string) => `/locations`,
+    // deleteLocation: (locationId: string) => `/locations/${locationId}`,
+    deleteLocation: (locationId: string) => `/locations`,
 
     //Approvals
     approveEvent:  `/approval/approveEvent`,

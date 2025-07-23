@@ -24,16 +24,18 @@ export class LocationService {
     });
   }
 
-  createEvent(data: any) {
-    return this.http.post(`${environment.apiBaseUrl}${environment.apis.createEvent}`, data, {
-      headers: this.getAuthHeaders()
-    });
-  }
+  // createEvent(data: any) {
+  //   return this.http.post(`${environment.apiBaseUrl}${environment.apis.createEvent}`, data, {
+  //     headers: this.getAuthHeaders()
+  //   });
+  // }
 
-  fetchLocations(): Observable<Location[]> {
-  return this.http.get<Location[]>(`${environment.apiBaseUrl}${environment.apis.fetchLocations}`, {
-      headers: this.getAuthHeaders()
-    });
+ fetchLocations(): Observable<Location[]> {
+  return this.http.get<any>(`${environment.apiBaseUrl}${environment.apis.fetchLocations}`, {
+    headers: this.getAuthHeaders()
+  }).pipe(
+    map(response => response.data || response) // Handle both wrapped and direct responses
+  );
 }
 
 
@@ -66,11 +68,10 @@ export class LocationService {
   }
 
   // DELETE: Delete a location using state, city, and placeName
-  deleteLocation(state: string, city: string, placeName: string): Observable<any> {
-    const payload = { state, city, placeName };
-    return this.http.request('delete', `${environment.apiBaseUrl}${environment.apis.deleteLocation}`,  {
-      headers: this.getAuthHeaders() ,
-      body : payload
-    });
-  }
+ deleteLocation(locationData: any): Observable<any> {
+  return this.http.request('delete', `${environment.apiBaseUrl}${environment.apis.deleteLocation}`, {
+    headers: this.getAuthHeaders(),
+    body: locationData
+  });
+}
 }

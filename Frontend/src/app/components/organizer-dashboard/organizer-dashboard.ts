@@ -1,3 +1,4 @@
+// organizer-dashboard.ts
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -24,20 +25,37 @@ import { CustomAlertComponent } from '../custom-alert/custom-alert';
 
 // Interfaces
 export interface Event {
-  _id: string;
+  id: string;
   title: string;
   description: string;
   date: string;
-  city: string;
   timeSlot: string;
-  duration: string;
-  location: string;
+  duration: string; // Changed from string to number (minutes)
+  locationId: string; // Added locationId
+  // location: string;
+  //  // This will be the place name for display
+   location: Location;
   category: string;
   price: number;
   maxRegistrations: number;
-  createdBy: string;
+  currentRegistrations: number; // Added this field
+  createdById: string; // Changed from createdBy
   artist?: string;
   organization?: string;
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Expired'; // Added status
+  createdAt: string; // Added timestamps
+  updatedAt: string;
+}
+
+export interface Location {
+  id: string;
+  state: string;
+  city: string;
+  placeName: string;
+  address: string;
+  maxSeatingCapacity: number;
+  amenities: string[];
+  bookings: any[]; // You can replace `any` with a more specific interface if bookings have a defined structure
 }
 
 export interface RegisteredUser {
@@ -89,6 +107,10 @@ export interface CustomAlert {
   styleUrls: ['./organizer-dashboard.scss'],
 })
 export class OrganizerDashboardComponent implements OnDestroy {
+ngOnInit() {
+    // Move initialization logic here instead of constructor
+    this.initializeData();
+  }
   private destroy$ = new Subject<void>();
   userName: string | null = null;
   showCreateForm = false;
@@ -100,7 +122,7 @@ export class OrganizerDashboardComponent implements OnDestroy {
   currentEditEventId: string | null = null;
   organizerId: string | null = null;
   isLoading = false;
-
+pendingEvents: Event[] = [];
   usersMap: { [eventId: string]: RegisteredUsersResponse } = {};
   eventForm: FormGroup;
 
@@ -358,67 +380,59 @@ export class OrganizerDashboardComponent implements OnDestroy {
     }
   }
 
-  private loadAllData(): void {
-    this.isLoading = true;
-    this.loadingService.show();
+ private loadAllData(): void {
+  this.isLoading = true;
+  this.loadingService.show();
 
-    // Load locations
-    this.locationService
-      .fetchLocations()
+  // Load locations
+  this.locationService.fetchLocations()
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data) => {
+        this.locations = Array.isArray(data) ? data : [];
+        this.places = this.locations;
+        this.filteredStates = [
+          ...new Set(this.locations.map((loc) => loc.state?.trim()).filter(Boolean))
+        ];
+      },
+      error: (error) => {
+        console.error('Error loading locations:', error);
+        this.locations = [];
+        this.places = [];
+      }
+    });
+
+  // Load events with pagination - FILTER BY APPROVAL STATUS
+  if (this.organizerId) {
+    this.eventService.getEventById(this.organizerId, 1, 100)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
-          this.locations = Array.isArray(data) ? data : [];
-          this.places = this.locations;
-          this.filteredStates = [
-            ...new Set(
-              this.locations.map((loc) => loc.state?.trim()).filter(Boolean)
-            ),
-          ];
-        },
+        next: (response) => {
+  const allEvents = response.data || [];
+
+  // Separate events by approval status
+  this.events = allEvents.filter((event: Event) =>
+    event.status === 'Approved'
+  );
+
+  this.pendingEvents = allEvents.filter((event: Event) =>
+    event.status === 'Pending'
+  );
+},
         error: (error) => {
-          console.error('Error loading locations:', error);
-          this.locations = [];
-          this.places = [];
+          console.error('Error loading events:', error);
+          this.events = [];
         },
+        complete: () => {
+          this.isLoading = false;
+          this.loadingService.hide();
+        }
       });
-
-    // Load events
-    if (this.organizerId) {
-      this.eventService
-        .getEventById(this.organizerId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (events) => {
-            this.events = Array.isArray(events) ? events : [];
-          },
-          error: (error) => {
-            console.error('Error loading events:', error);
-            this.events = [];
-          },
-        });
-
-      // Load approval requests
-      this.ApprovalService.viewApprovalRequestById(this.organizerId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (events) => {
-            this.eventsone = Array.isArray(events) ? events : [];
-          },
-          error: (error) => {
-            console.error('Error loading approval requests:', error);
-            this.eventsone = [];
-          },
-          complete: () => {
-            this.isLoading = false;
-            this.loadingService.hide();
-          },
-        });
-    } else {
-      this.isLoading = false;
-      this.loadingService.hide();
-    }
+  } else {
+    this.isLoading = false;
+    this.loadingService.hide();
   }
+}
 
   calculateDuration() {
     const start = this.eventForm.get('startTime')?.value;
@@ -485,125 +499,120 @@ export class OrganizerDashboardComponent implements OnDestroy {
 
   // Event Submit/Create/Update
   async onSubmit() {
-    if (this.eventForm.invalid) {
-      this.showAlert(
-        'error',
-        'Validation Error',
-        'Please fill required fields'
-      );
+  if (this.eventForm.invalid) {
+    this.showAlert('error', 'Validation Error', 'Please fill required fields');
+    return;
+  }
+
+  this.isLoading = true;
+  this.loadingService.show();
+
+  try {
+    const form = this.eventForm.value;
+    const timeSlot = `${form.startTime} - ${form.endTime}`;
+
+    // Find the selected location to get its ID
+    const selectedPlace = this.places.find((place: any) => place.placeName === form.location);
+    if (!selectedPlace) {
+      this.showAlert('error', 'Error', 'Please select a valid location');
+      this.isLoading = false;
+      this.loadingService.hide();
       return;
     }
 
-    // this.isLoading = true;
-    // this.loadingService.show();
+    const eventData = {
+      title: form.title,
+      description: form.description,
+      date: form.date,
+      timeSlot,
+      // duration: this.convertDurationToMinutes(form.duration),
+      duration : form.duration,
+      locationId: selectedPlace.id, // Use location ID from backend
+      category: form.category,
+      price: form.price,
+      maxRegistrations: form.maxRegistrations,
+      createdBy: this.organizerId, // This will be mapped to createdById in service
+      artist: form.artist,
+      organization: form.organization
 
-    try {
-      const form = this.eventForm.value;
-      const timeSlot = `${form.startTime} - ${form.endTime}`;
-      const eventData = {
-        ...form,
-        createdBy: this.organizerId,
-        timeSlot,
-        city: form.city,
-      };
+    };
 
-      const startDateTime = new Date(
-        `${form.date}T${form.startTime}:00`
-      ).toISOString();
-      const endDateTime = new Date(
-        `${form.date}T${form.endTime}:00`
-      ).toISOString();
+    const request = this.isEditMode && this.currentEditEventId
+      ? this.eventService.updateEvent(this.currentEditEventId, eventData)
+      : this.eventService.createEvent(eventData);
 
-      const locationData = {
-        startTime_one: startDateTime,
-        endTime_one: endDateTime,
-        state: form.state,
-        city: form.city,
-        placeName: form.location,
-      };
+    request.pipe(takeUntil(this.destroy$)).subscribe({
+      next: async () => {
+        this.showAlert('success', 'Success', `Event ${this.isEditMode ? 'updated' : 'created'} successfully!`);
+        this.resetForm();
+        this.loadAllData();
+      },
+      error: async (error) => {
+        console.error('Event creation/update error:', error);
+        this.showAlert('error', 'Error', 'Event creation/updation failed');
+      },
+      complete: () => {
+        this.isLoading = false;
+        this.loadingService.hide();
+      }
+    });
 
-      // First book the location
-      this.locationService
-        .bookLocation(locationData)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            const request =
-              this.isEditMode && this.currentEditEventId
-                ? this.eventService.updateEvent(
-                    this.currentEditEventId,
-                    eventData
-                  )
-                : this.eventService.createEvent(eventData);
-
-            request.pipe(takeUntil(this.destroy$)).subscribe({
-              next: async () => {
-                // await alert(`Event ${this.isEditMode ? 'updated' : 'created'} successfully!`);
-                this.showAlert(
-                  'success',
-                  'Success',
-                  `Event ${
-                    this.isEditMode ? 'updated' : 'created'
-                  } successfully!`
-                );
-                // this.resetForm();
-                // this.loadAllData(); // Reload data after successful operation
-              },
-              error: async (error) => {
-                console.error('Event creation/update error:', error);
-                this.showAlert(
-                  'error',
-                  'Error',
-                  'Event creation/updation failed'
-                );
-              },
-              complete: () => {
-                this.isLoading = false;
-                this.loadingService.hide();
-              },
-            });
-          },
-          error: async (error) => {
-            console.error('Location booking error:', error);
-            // await alert('Failed to book location');
-            this.showAlert('error', 'Error', 'Failed to book location');
-            this.isLoading = false;
-            this.loadingService.hide();
-          },
-        });
-    } catch (error) {
-      console.error('Submit error:', error);
-      await alert('An unexpected error occurred');
-      this.isLoading = false;
-      this.loadingService.hide();
-    }
+  } catch (error) {
+    console.error('Submit error:', error);
+    this.showAlert('error', 'Error', 'An unexpected error occurred');
+    this.isLoading = false;
+    this.loadingService.hide();
   }
+}
+
+// Add helper method for duration conversion
+private convertDurationToMinutes(durationStr: string): number {
+  if (!durationStr) return 0;
+
+  const hourMatch = durationStr.match(/(\d+)\s*hour/);
+  const minMatch = durationStr.match(/(\d+)\s*min/);
+
+  const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
+  const minutes = minMatch ? parseInt(minMatch[1]) : 0;
+
+  return hours * 60 + minutes;
+}
 
   onEdit(event: Event) {
-    window.scrollTo(0, 0);
-    const loc = this.locations.find((l) => l.placeName === event.location);
-    this.eventForm.patchValue({
-      ...event,
-      state: loc?.state || '',
-      city: loc?.city || '',
-    });
-    this.currentEditEventId = event._id;
-    this.isEditMode = true;
-    this.showCreateForm = true;
-    if (loc) {
-      this.selectedState = loc.state;
-      this.onStateChange();
-      this.selectedCity = loc.city;
-      this.onCityChange();
-      // Set selected venue after city change
-      setTimeout(() => {
-        this.selectedVenue =
-          this.places.find(
-            (place: any) => place.placeName === event.location
-          ) || null;
-      }, 100);
-    }
+  window.scrollTo(0, 0);
+  const loc = this.locations.find((l) => l.id === event.locationId);
+  console.log('Location:', loc);
+
+  this.eventForm.patchValue({
+    title: event.title,
+    description: event.description,
+    date: event.date,
+    startTime: event.timeSlot.split(' - ')[0],
+    endTime: event.timeSlot.split(' - ')[1],
+    location: loc?.placeName || '',
+    category: event.category,
+    price: event.price,
+    maxRegistrations: event.maxRegistrations,
+    artist: event.artist,
+    organization: event.organization,
+    state: loc?.state || '',
+    city: loc?.city || ''
+  });
+
+  this.currentEditEventId = event.id;
+  this.isEditMode = true;
+  this.showCreateForm = true;
+
+  if (loc) {
+    this.selectedState = loc.state;
+    this.onStateChange();
+    this.selectedCity = loc.city;
+    this.onCityChange();
+    setTimeout(() => {
+      this.selectedVenue = this.places.find((place: any) => place.id === event.locationId) || null;
+    }, 100);
   }
+}
 
   async onDelete(eventId: string) {
     this.showConfirmation(
@@ -653,30 +662,40 @@ export class OrganizerDashboardComponent implements OnDestroy {
   }
 
   // State/City Filters
-  onStateChange() {
-    const state = this.selectedState.trim();
-    const matches = this.locations.filter((loc) => loc.state?.trim() === state);
-    this.filteredCities = [
-      ...new Set(matches.map((loc) => loc.city?.trim()).filter(Boolean)),
-    ];
-    this.filteredPlaceNames = [];
-    this.selectedCity = '';
-    this.selectedVenue = null;
-    this.eventForm.patchValue({ city: '', location: '' });
-  }
+ onStateChange() {
+  this.selectedState = this.eventForm.get('state')?.value?.trim() || '';
+  const state = this.selectedState;
+
+  const matches = this.locations.filter((loc) => loc.state?.trim() === state);
+  this.filteredCities = [
+    ...new Set(matches.map((loc) => loc.city?.trim()).filter(Boolean)),
+  ];
+  this.filteredPlaceNames = [];
+  this.selectedCity = '';
+  this.selectedVenue = null;
+  this.eventForm.patchValue({ city: '', location: '' });
+
+
+}
+
 
   onCityChange() {
-    const state = this.selectedState.trim();
-    const city = this.selectedCity.trim();
-    const matches = this.locations.filter(
-      (loc) => loc.state?.trim() === state && loc.city?.trim() === city
-    );
-    this.filteredPlaceNames = [
-      ...new Set(matches.map((loc) => loc.placeName?.trim()).filter(Boolean)),
-    ];
-    this.selectedVenue = null;
-    this.eventForm.patchValue({ location: '' });
-  }
+  this.selectedCity = this.eventForm.get('city')?.value?.trim() || '';
+  const state = this.selectedState;
+  const city = this.selectedCity;
+
+  const matches = this.locations.filter(
+    (loc) => loc.state?.trim() === state && loc.city?.trim() === city
+  );
+
+  this.filteredPlaceNames = [
+    ...new Set(matches.map((loc) => loc.placeName?.trim()).filter(Boolean)),
+  ];
+  this.selectedVenue = null;
+  this.eventForm.patchValue({ location: '' });
+
+
+}
 
   toggleCreateForm() {
     this.showCreateForm = !this.showCreateForm;

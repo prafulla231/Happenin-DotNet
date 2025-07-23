@@ -9,14 +9,14 @@ export const environment = {
     // Events
     getAllEvents: '/events',
     createEvent: '/events',
-    // getEventsByOrganizer: (organizerId: string) => `/events/${organizerId}`,
-    getEventsByOrganizer: (organizerId: string) => `/events/by-organizer/{organizerId}`,
+    getEventsByOrganizer: (organizerId: string) => `/events/${organizerId}`,
+    // getEventsByOrganizer: (organizerId: string) => `/events/by-organizer/{organizerId}`,
     updateEvent: (eventId: string) => `/events/${eventId}`,
     deleteEvent: (eventId: string) => `/events/${eventId}`,
     registeredEvents : (userId : string) => `/events/registered-events/${userId}`,
     registerForEvent: '/events/register',
     deregisterForEvent: '/events/deregister',
-    getUpcomingEvent : '/events/upcoming',
+    getUpcomingEvent : '/events/Approved',
     getExpiredEvent : '/events/expired',
 
     // Registrations
@@ -28,13 +28,15 @@ export const environment = {
     addLocation: '/locations' ,
     bookLocation: '/locations/book', // not defined in environment — consider adding
     cancelBooking: '/locations/cancel', // not defined in environment
-    viewLocation: (locationId: string) => `/locations/${locationId}`,
-    deleteLocation: (locationId: string) => `/locations/${locationId}`,
+    // viewLocation: (locationId: string) => `/locations/${locationId}`,
+    viewLocation: (locationId: string) => `/locations`,
+    // deleteLocation: (locationId: string) => `/locations/${locationId}`,
+    deleteLocation: (locationId: string) => `/locations`,
 
     //Approvals
     approveEvent:  `/approval/approveEvent`,
     denyEvent: (eventId: string) => `/approval/deny/${eventId}`,
-    viewApprovalRequests: '/approval/viewApproval',
+    viewApprovalRequests: '/events/Pending',
     viewApprovalRequestById: (requestId: string) => `/approval/viewrequests/${requestId}`,
 
     //users

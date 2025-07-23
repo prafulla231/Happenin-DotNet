@@ -215,7 +215,7 @@ export class PendingApprovals implements OnInit {
     this.loadingService.show();
 
     this.ApprovalService.viewApprovalRequests().subscribe({
-      next: (res: { data: Event[] }) => {
+      next: (res :  any) => {
         this.eventsone = res.data;
         this.filteredEventsone = [...this.eventsone];
         // this.extractFilterOptions();

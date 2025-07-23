@@ -13,7 +13,7 @@ import { FooterComponent } from '../../../common/footer/footer';
 import { CustomAlertComponent } from '../../custom-alert/custom-alert';
 
 export interface Event {
-  _id: string;
+  id: string;
   title: string;
   description: string;
   date: string;
@@ -33,7 +33,7 @@ export interface RegisteredUser {
   userId: string;
   name: string;
   email: string;
-  _id: string;
+  id: string;
 }
 
 export interface RegisteredUsersResponse {
@@ -233,7 +233,7 @@ export class AdminExpiredEvents implements OnInit {
     this.eventService.deleteEvent(eventId).subscribe({
       next: () => {
         this.expiredEvents = this.expiredEvents.filter(
-          (event) => event._id !== eventId
+          (event) => event.id !== eventId
         );
         this.showAlert('success', 'Success', 'Event deleted successfully');
         this.loadingService.hide();
@@ -252,12 +252,24 @@ export class AdminExpiredEvents implements OnInit {
     document.body.style.overflow = 'hidden';
   }
 
-  loadRegisteredUsers(eventId: string) {
-    this.eventService.getRegisteredUsers(eventId).subscribe({
-      next: (res) => (this.usersMap[eventId] = res.data),
-      error: (err) => console.error('Error loading users for event', err),
-    });
-  }
+   loadRegisteredUsers(eventId: string) {
+  this.eventService.getRegisteredUsers(eventId).subscribe({
+    next: (res: any) => {
+      // Map the response to ensure compatibility
+      const mappedResponse = {
+        users: res.data?.users?.map((user: any) => ({
+          userId: user.userId,
+          name: user.name,
+          email: user.email,
+          _id: user.id || user.userId // Use id if available, otherwise use userId
+        })) || [],
+        currentRegistration: res.data?.currentRegistration || 0
+      };
+      this.usersMap[eventId] = mappedResponse;
+    },
+    error: (err) => console.error('Error loading users for event', err),
+  });
+}
   closeEventDetails(): void {
     this.showEventDetails = false;
     this.selectedEvent = null;

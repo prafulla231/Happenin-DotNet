@@ -271,7 +271,7 @@ ngOnDestroy(): void {
 verifyOtp(email: string, otp: string) {
   this.http.post(`${environment.apiBaseUrl}${environment.apis.verifyOtp}`, { email, otp }).subscribe({
         next: (response: any) => {
-          const userRole = response.user?.role;
+          const userRole = response.user?.role.toLowerCase();
 
           if (response.token) {
             localStorage.setItem('token', response.token);

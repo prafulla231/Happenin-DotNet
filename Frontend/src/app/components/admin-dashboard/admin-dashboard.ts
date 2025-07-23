@@ -23,7 +23,7 @@ import { FooterComponent } from '../../common/footer/footer';
 import { CustomAlertComponent } from '../custom-alert/custom-alert';
 
 export interface Event {
-  _id: string;
+  id: string;
   title: string;
   description: string;
   date: string;
@@ -43,11 +43,23 @@ export interface RegisteredUser {
   userId: string;
   name: string;
   email: string;
-  _id: string;
+  id: string;
+}
+
+export interface AdminRegisteredUser {
+  userId: string;
+  name: string;
+  email: string;
+  id: string;
+}
+
+export interface AdminRegisteredUsersResponse {
+  users: AdminRegisteredUser[];
+  currentRegistration: number;
 }
 
 export interface Location {
-  _id?: string;
+  id?: string;
   state: string;
   city: string;
   placeName: string;
@@ -108,7 +120,7 @@ export class AdminDashboardComponent {
   filteredEvents: Event[] = [];
   filteredEventsone: Event[] = [];
   filteredExpiredEvents: Event[] = [];
-  usersMap: { [eventId: string]: RegisteredUsersResponse } = {};
+usersMap: { [eventId: string]: AdminRegisteredUsersResponse } = {};
   userName: string | null = null;
 
   // Event details modal properties
@@ -124,28 +136,13 @@ export class AdminDashboardComponent {
   //   }
 
   adminButtons: HeaderButton[] = [
-    // { text: 'Upcoming Events', action: 'viewAvailableEvents' },
-    // { text: 'Pending Approvals', action: 'viewPendingEvents' },
-    // { text: 'Expired Events', action: 'viewExpiredEvents' },
-    // { text: 'Analytics', action: 'viewAnalytics', style: 'primary' },
+
     { text: 'Logout', action: 'logout', style: 'primary' },
   ];
 
   handleHeaderAction(action: string): void {
     switch (action) {
-      // case 'viewPendingEvents':
-      //   this.router.navigate(['/admin-pending-approvals']);
-      //   break;
-      // case 'viewExpiredEvents':
-      //   this.router.navigate(['/admin-expired-events']);
-      //   break;
-      // case 'viewAvailableEvents':
-      //   // Navigate to the new upcoming events component instead of scrolling
-      //   this.router.navigate(['/admin-upcoming-events']);
-      //   break;
-      // case 'viewAnalytics':
-      //   this.viewAnalytics();
-      //   break;
+
       case 'logout':
         this.logout();
         break;
@@ -508,7 +505,8 @@ export class AdminDashboardComponent {
   }
 
   deleteLocation(state: string, city: string, placeName: string): void {
-    this.locationService.deleteLocation(state, city, placeName).subscribe({
+    const locationData = { state, city, placeName };
+  this.locationService.deleteLocation(locationData).subscribe({
       next: () => {
         this.showAlert(
           'success',
@@ -576,7 +574,7 @@ export class AdminDashboardComponent {
       if (userString) {
         const user = JSON.parse(userString);
         this.userEmail = user.email || '';
-        this.isSuperAdmin = this.userEmail === 'superadmin@gmail.com';
+        this.isSuperAdmin = this.userEmail === 'happenin.events.app@gmail.com';
         // console.log('Parsed user:', user);
         // console.log('User email:', this.userEmail);
       } else {
@@ -621,26 +619,6 @@ export class AdminDashboardComponent {
     }
   }
 
-  // loadEvents() {
-  //   this.loadingService.show();
-  //   this.http.get<{ data: Event[] }>(this.baseEventUrl).subscribe({
-  //     next: res => {
-  //       this.events = res.data;
-  //       this.filteredEvents = [...this.events];
-  //       this.extractFilterOptions();
-  //       this.applySorting();
-  //       res.data.forEach(event => this.loadRegisteredUsers(event._id));
-  //       this.loadingService.hide();
-  //       this.showAlert('success', 'Events Loaded', 'Successfully loaded all approved events!');
-  //     },
-  //     error: err => {
-  //       console.error('Error loading events', err);
-  //       this.loadingService.hide();
-  //       this.showAlert('error', 'Loading Failed', 'Failed to load events. Please try again later.');
-  //     }
-  //   });
-  // }
-
   loadEvents(): void {
     this.loadingService.show();
 
@@ -651,7 +629,7 @@ export class AdminDashboardComponent {
         this.extractFilterOptions();
         this.applySorting();
         this.events.forEach((event) => {
-          this.loadRegisteredUsers(event._id); // keep your existing method call
+          this.loadRegisteredUsers(event.id); // keep your existing method call
         });
         this.loadingService.hide();
         this.showAlert(
@@ -703,13 +681,13 @@ export class AdminDashboardComponent {
     this.loadingService.show();
 
     this.ApprovalService.viewApprovalRequests().subscribe({
-      next: (res: { data: Event[] }) => {
+      next: (res: any) => {
         this.eventsone = res.data;
         this.filteredEventsone = [...this.eventsone];
         this.extractFilterOptions();
         this.applySorting();
 
-        res.data.forEach((event: Event) => this.loadRegisteredUsers(event._id));
+        res.data.forEach((event: Event) => this.loadRegisteredUsers(event.id));
 
         this.loadingService.hide();
 
@@ -734,7 +712,7 @@ export class AdminDashboardComponent {
   }
 
   approveEvent(eventId: string) {
-    const eventToApprove = this.eventsone.find((e) => e._id === eventId);
+    const eventToApprove = this.eventsone.find((e) => e.id === eventId);
 
     if (!eventToApprove) {
       this.showAlert(
@@ -773,7 +751,7 @@ export class AdminDashboardComponent {
     eventTimeSlot: string,
     eventLocation: string
   ) {
-    const eventToDeny = this.eventsone.find((e) => e._id === eventId);
+    const eventToDeny = this.eventsone.find((e) => e.id === eventId);
     const eventTitle = eventToDeny ? eventToDeny.title : 'Unknown Event';
 
     const { startTime, endTime } = this.extractStartEndTime(
@@ -856,7 +834,7 @@ export class AdminDashboardComponent {
             event.organization.toLowerCase().includes(query)) ||
           (event.category && event.category.toLowerCase().includes(query));
 
-        const userMatch = this.usersMap[event._id]?.users.some(
+        const userMatch = this.usersMap[event.id]?.users.some(
           (user) =>
             user.name.toLowerCase().includes(query) ||
             user.email.toLowerCase().includes(query)
@@ -924,8 +902,8 @@ export class AdminDashboardComponent {
         case 'category':
           return (a.category || '').localeCompare(b.category || '');
         case 'registrations':
-          const aCount = this.usersMap[a._id]?.currentRegistration || 0;
-          const bCount = this.usersMap[b._id]?.currentRegistration || 0;
+          const aCount = this.usersMap[a.id]?.currentRegistration || 0;
+          const bCount = this.usersMap[b.id]?.currentRegistration || 0;
           return bCount - aCount;
         default:
           return 0;
@@ -994,13 +972,24 @@ export class AdminDashboardComponent {
     }
   }
 
-  loadRegisteredUsers(eventId: string) {
-    this.eventService.getRegisteredUsers(eventId).subscribe({
-      next: (res) => (this.usersMap[eventId] = res.data),
-      error: (err) => console.error('Error loading users for event', err),
-    });
-  }
-
+ loadRegisteredUsers(eventId: string) {
+  this.eventService.getRegisteredUsers(eventId).subscribe({
+    next: (res: any) => {
+      // Map the response to ensure compatibility
+      const mappedResponse = {
+        users: res.data?.users?.map((user: any) => ({
+          userId: user.userId,
+          name: user.name,
+          email: user.email,
+          id: user.id || user.userId // Use id if available, otherwise use userId
+        })) || [],
+        currentRegistration: res.data?.currentRegistration || 0
+      };
+      this.usersMap[eventId] = mappedResponse;
+    },
+    error: (err) => console.error('Error loading users for event', err),
+  });
+}
   deleteEvent(eventId: string) {
     this.eventService.deleteEvent(eventId).subscribe({
       next: () => {
@@ -1101,8 +1090,8 @@ export class AdminDashboardComponent {
   }
 
   addLocation(location: Location): void {
-    this.locationService.addLocation(location).subscribe({
-      next: () => {
+  this.locationService.addLocation(location).subscribe({
+    next: (response) => {
         this.showAlert(
           'success',
           'Location Added',
@@ -1123,19 +1112,8 @@ export class AdminDashboardComponent {
     });
   }
 
-  //   loadLocations(): void {
-  //   this.locationService.viewLocation().subscribe({
-  //     next: (locations) => {
-  //       this.locations = locations;
-  //     },
-  //     error: (err) => {
-  //       console.error('Error loading locations', err);
-  //       this.showAlert('error', 'Loading Failed', 'Failed to load locations.');
-  //     }
-  //   });
-  // }
   loadLocations(): void {
-    this.locationService.viewLocation().subscribe({
+    this.locationService.fetchLocations().subscribe({
       next: (locations) => {
         this.locations = locations;
       },
