@@ -210,7 +210,20 @@ namespace HappeninApi.Controllers
 
             var pagination = new PaginationHelper(paginationRequest);
             var (events, totalCount) = await _repository.GetEventsByOrganizerAsync(organizerId, pagination);
-            
+
+            // 🔁 Populate Location data for each event
+            foreach (var ev in events)
+            {
+                if (ev.LocationId != Guid.Empty)
+                {
+                    Location? location = await _locationRepo.GetByIdAsync(ev.LocationId);
+                    if (location != null)
+                    {
+                        ev.Location = location;
+                    }
+                }
+            }
+
             var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
             
             return Ok(response);

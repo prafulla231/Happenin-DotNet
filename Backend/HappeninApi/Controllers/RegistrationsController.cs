@@ -24,7 +24,10 @@ public class RegistrationsController : ControllerBase
             return BadRequest("UserId and EventId are required.");
 
         var success = await _repository.RegisterAsync(dto.UserId, dto.EventId);
-        return success ? Ok("Successfully registered.") : BadRequest("Registration failed.");
+        return success 
+    ? Ok(new { message = "Successfully registered." }) 
+    : BadRequest(new { message = "Registration failed." });
+
     }
 
     [HttpPost("deregister")]
@@ -34,7 +37,8 @@ public class RegistrationsController : ControllerBase
             return BadRequest("UserId and EventId are required.");
 
         var success = await _repository.DeregisterAsync(dto.UserId, dto.EventId);
-        return success ? Ok("Deregistered successfully.") : NotFound("Registration not found.");
+        return success ? Ok(new { message = "Successfully deregistered." })  : BadRequest(new { message = "Registration failed." });
+
     }
 
   [HttpGet("{eventId}/registered-users")]

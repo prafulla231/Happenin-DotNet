@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace HappeninApi.Models
 
@@ -6,7 +7,9 @@ namespace HappeninApi.Models
 
 public class Event
 {
+    [MongoDB.Bson.Serialization.Attributes.BsonId]
     [MongoDB.Bson.Serialization.Attributes.BsonRepresentation(MongoDB.Bson.BsonType.String)]
+    [MongoDB.Bson.Serialization.Attributes.BsonElement("_id")]
     public Guid Id { get; set; }
 
     public required string Title { get; set; }
@@ -50,11 +53,12 @@ public class Event
     public DateTime UpdatedAt { get; set; }
 }
 
-public enum EventStatus
-{
-    Pending,
-    Approved,
-     Rejected,
-    Expired
-}
+[JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum EventStatus
+    {
+        Pending,
+        Approved,
+        Rejected,
+        Expired
+    }
 }
