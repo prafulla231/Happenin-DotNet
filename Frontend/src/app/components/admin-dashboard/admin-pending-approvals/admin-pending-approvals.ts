@@ -1,3 +1,4 @@
+// admin-pending-approvals.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -14,16 +15,36 @@ import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+export interface Location {
+  id: string; // This should be a GUID string
+  state: string;
+  city: string;
+  placeName: string;
+  address: string;
+  maxSeatingCapacity: number;
+  amenities: string[];
+  bookings?: Booking[]; // This might be optional
+}
+
+export interface Booking {
+  id: string; // This should be a GUID string (BookingId)
+  date: string; // or Date type
+  timeSlot: string;
+  eventId: string; // This should be a GUID string
+}
+
+// Updated Event interface to ensure locationId is properly typed
 export interface Event {
-  _id?: string;
-  id?: string;
+  _id?: string; // MongoDB ObjectId (if using MongoDB)
+  id?: string; // Event GUID
   title: string;
   description: string;
   date: string;
   city: string;
   timeSlot: string;
   duration: string;
-  location: string;
+  location: string; // Display name
+  locationId: string; // GUID of the location - THIS IS CRITICAL
   category: string;
   price: number;
   maxRegistrations: number;
@@ -77,7 +98,9 @@ export class PendingApprovals implements OnInit {
   filteredEventsone: Event[] = [];
   selectedEvent: Event | null = null;
   showEventDetails: boolean = false;
- usersMap: { [eventId: string]: { currentRegistration: number; users: RegisteredUser[] } } = {};
+  usersMap: {
+    [eventId: string]: { currentRegistration: number; users: RegisteredUser[] };
+  } = {};
   userName: string | null = null;
 
   adminButtons: HeaderButton[] = [
@@ -207,27 +230,27 @@ export class PendingApprovals implements OnInit {
     }
   }
 
- loadRegisteredUsers(eventId: string, callback?: () => void) {
-  this.eventService
-    .getRegisteredUsers(eventId)
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (res:any) => {
-        this.usersMap[eventId] = res.data;
-        if (callback) callback();
-      },
-      error: (error) => {
-        console.error('Error loading registered users:', error);
-        this.showAlert('error', 'Error', 'Failed to load registered users');
-      },
-    });
-}
+  loadRegisteredUsers(eventId: string, callback?: () => void) {
+    this.eventService
+      .getRegisteredUsers(eventId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res: any) => {
+          this.usersMap[eventId] = res.data;
+          if (callback) callback();
+        },
+        error: (error) => {
+          console.error('Error loading registered users:', error);
+          this.showAlert('error', 'Error', 'Failed to load registered users');
+        },
+      });
+  }
 
   loadApprovals(): void {
     this.loadingService.show();
 
     this.ApprovalService.viewApprovalRequests().subscribe({
-      next: (res :  any) => {
+      next: (res: any) => {
         this.eventsone = res.data;
         this.filteredEventsone = [...this.eventsone];
         // this.extractFilterOptions();
@@ -258,7 +281,12 @@ export class PendingApprovals implements OnInit {
   }
 
   confirmApproveEvent(eventId: string, eventTitle: string) {
-    console.log('confirmApproveEvent called with eventId:', eventId, 'eventTitle:', eventTitle);
+    console.log(
+      'confirmApproveEvent called with eventId:',
+      eventId,
+      'eventTitle:',
+      eventTitle
+    );
     this.showConfirmation(
       'Approve Event',
       `Are you sure you want to approve "${eventTitle}"?`,
@@ -271,65 +299,89 @@ export class PendingApprovals implements OnInit {
     eventTitle: string,
     eventDate: string,
     eventTimeSlot: string,
-    eventLocation: string
+    eventLocationId: string
   ) {
     this.showConfirmation(
       'Deny Event',
       `Are you sure you want to deny "${eventTitle}"? This action cannot be undone.`,
-      () => this.denyEvent(eventId, eventDate, eventTimeSlot, eventLocation)
+      () => this.denyEvent(eventId, eventDate, eventTimeSlot, eventLocationId)
     );
   }
 
- approveEvent(eventId: string) {
-  console.log('approveEvent called with eventId:', eventId);
-  const eventToApprove = this.eventsone.find((e) => e.id === eventId);
-  console.log('eventToApprove:', eventToApprove);
+  approveEvent(eventId: string) {
+    console.log('approveEvent called with eventId:', eventId);
+    const eventToApprove = this.eventsone.find((e) => e.id === eventId);
+    console.log('eventToApprove:', eventToApprove);
 
-  if (!eventToApprove) {
-    this.showAlert('error', 'Event Not Found', 'The event could not be found.');
-    return;
+    if (!eventToApprove) {
+      this.showAlert(
+        'error',
+        'Event Not Found',
+        'The event could not be found.'
+      );
+      return;
+    }
+
+    // Use id for eventId if available
+    const idToSend = eventToApprove.id || eventId;
+    console.log('Calling ApprovalService.approveEvent with id:', idToSend);
+    this.ApprovalService.approveEvent(idToSend).subscribe({
+      next: () => {
+        this.loadApprovals();
+        this.showAlert(
+          'success',
+          'Event Approved',
+          `Event "${eventToApprove.title}" has been approved successfully!`
+        );
+      },
+      error: (err) => {
+        console.error('Approval failed:', err);
+        this.showAlert(
+          'error',
+          'Approval Failed',
+          'Failed to approve the event. Please try again.'
+        );
+      },
+    });
   }
 
-  // Use id for eventId if available
-  const idToSend = eventToApprove.id || eventId;
-  console.log('Calling ApprovalService.approveEvent with id:', idToSend);
-  this.ApprovalService.approveEvent(idToSend).subscribe({
-    next: () => {
-      this.loadApprovals();
-      this.showAlert('success', 'Event Approved', `Event "${eventToApprove.title}" has been approved successfully!`);
-    },
-    error: (err) => {
-      console.error('Approval failed:', err);
-      this.showAlert('error', 'Approval Failed', 'Failed to approve the event. Please try again.');
-    }
-  });
-}
-
+  private isValidGuid(guid: string): boolean {
+    const guidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return guidRegex.test(guid);
+  }
 
   denyEvent(
     eventId: string,
     eventDate: string,
     eventTimeSlot: string,
-    eventLocation: string
+    eventLocationId: string // Now expecting the locationId instead of location name
   ) {
-    const eventToDeny = this.eventsone.find((e) => e._id === eventId);
+    const eventToDeny = this.eventsone.find(
+      (e) => e._id === eventId || e.id === eventId
+    );
     const eventTitle = eventToDeny ? eventToDeny.title : 'Unknown Event';
 
-    const { startTime, endTime } = this.extractStartEndTime(
-      eventTimeSlot,
-      eventDate
-    );
+    // Validate that we have a proper GUID for locationId
+    if (!eventLocationId || !this.isValidGuid(eventLocationId)) {
+      this.showAlert(
+        'error',
+        'Invalid Location',
+        'Location ID is missing or invalid. Cannot cancel booking.'
+      );
+      return;
+    }
 
-    let cancelData = { eventLocation, startTime, endTime };
+    const cancelData = {
+      locationId: eventLocationId, // Now using the actual GUID
+      bookingId: eventId, // Assuming eventId is the bookingId
+    };
 
     this.locationService.cancelBooking(cancelData).subscribe({
       next: (cancelRes) => {
-        // Proceed only if cancelBooking is successful
         this.ApprovalService.denyEvent(eventId).subscribe({
           next: (res) => {
             this.loadApprovals();
-            // this.loadExpiredEvents();
-            // this.loadEvents();
             this.showAlert(
               'success',
               'Event Denied',

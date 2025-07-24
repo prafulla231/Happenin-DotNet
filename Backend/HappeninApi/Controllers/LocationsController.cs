@@ -85,7 +85,8 @@ namespace HappeninApi.Controllers
             if (!success)
                 return NotFound("Location not found");
 
-            return Ok("Booking cancelled successfully");
+            return Ok(new { message = "Booking cancelled successfully" });
+
         }
 
         // DELETE /locations/{locationId}

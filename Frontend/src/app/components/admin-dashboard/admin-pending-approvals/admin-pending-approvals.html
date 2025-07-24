@@ -41,7 +41,7 @@
         <div class="event-actions">
           <button
             class="delete-btn"
-          (click)="confirmDenyEvent(event.id || event._id || '', event.title, event.date, event.timeSlot, event.location)"
+            (click)="confirmDenyEvent(event.id || event._id || '', event.title, event.date, event.timeSlot, event.locationId ||'')"
           >
             Deny Event
           </button>
@@ -52,7 +52,7 @@
           </button>
           <button
             class="delete-btn"
-          (click)="confirmApproveEvent(event.id || event._id || '', event.title)"
+            (click)="confirmApproveEvent(event.id || event._id || '', event.title)"
           >
             Approve event
           </button>
