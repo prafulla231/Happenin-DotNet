@@ -408,7 +408,7 @@
           <div class="event-price">₹{{ event.price || 0 }}</div>
           <div
             class="event-status"
-            [class]="'status-' + event.status?.toLowerCase()"
+            [class]="'status-' + (event.status ? event.status.toLowerCase() : 'pending')"
           >
             {{ event.status || 'Pending' }}
           </div>
@@ -578,8 +578,8 @@
         <div class="modal-body">
           <div class="registration-summary" *ngIf="usersMap[selectedEventId]">
             <p>
-              <strong>Total Registrations:</strong> {{
-              usersMap[selectedEventId]?.currentRegistration || 0 }}
+              <strong>Total Registrations:</strong>
+              {{ usersMap[selectedEventId].currentRegistration || 0 }}
             </p>
           </div>
 
@@ -642,7 +642,7 @@
                 <span class="detail-label">Status</span>
                 <span
                   class="detail-value"
-                  [class]="'status-' + selectedEvent.status?.toLowerCase?.()"
+                  [class]="'status-' + selectedEvent.status.toLowerCase()"
                 >
                   {{ selectedEvent.status }}
                 </span>

@@ -594,6 +594,7 @@
 
 .share-btn {
   background-color: #0ad3a4;
+  width: 20%;
   color: rgb(0, 0, 0);
   border: none;
   padding: 6px 12px;
@@ -1804,6 +1805,9 @@
 
 .category-badge {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 20%;
+  align-items: center;
+  text-align: center;
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 25px;
