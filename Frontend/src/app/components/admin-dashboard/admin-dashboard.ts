@@ -22,6 +22,24 @@ import { HeaderComponent, HeaderButton } from '../../common/header/header';
 import { FooterComponent } from '../../common/footer/footer';
 import { CustomAlertComponent } from '../custom-alert/custom-alert';
 
+// export interface Location {
+//   id: string; // This should be a GUID string
+//   state: string;
+//   city: string;
+//   placeName: string;
+//   address: string;
+//   maxSeatingCapacity: number;
+//   amenities: string[];
+//   bookings?: Booking[]; // This might be optional
+// }
+
+export interface Booking {
+  id: string; // This should be a GUID string (BookingId)
+  date: string; // or Date type
+  timeSlot: string;
+  eventId: string; // This should be a GUID string
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -30,7 +48,7 @@ export interface Event {
   city: string;
   timeSlot: string;
   duration: string;
-  location: string;
+  location: Location;
   category: string;
   price: number;
   maxRegistrations: number;

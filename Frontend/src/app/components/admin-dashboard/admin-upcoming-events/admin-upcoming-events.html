@@ -39,7 +39,7 @@
       <div class="event-details">
         <p><strong>Date</strong> {{ event.date | date: 'MMM d, y' }}</p>
         <p><strong>Time</strong> {{ event.timeSlot }}</p>
-        <p><strong>Location</strong> {{ event.location }}</p>
+        <p><strong>Location</strong> {{ event.location.city }}</p>
         <p><strong>Price</strong> ₹{{ event.price }}</p>
         <p *ngIf="event.artist"><strong>Artist</strong> {{ event.artist }}</p>
         <p *ngIf="event.organization">
@@ -84,10 +84,7 @@
             class="users-list"
             *ngIf="showUsersDropdown[event.id]"
           >
-            <li
-              *ngFor="let user of usersMap[event.id].users"
-              class="user-item"
-            >
+            <li *ngFor="let user of usersMap[event.id].users" class="user-item">
               <div class="user-info">
                 <span class="user-name">{{ user.name }}</span>
                 <span class="user-email">{{ user.email }}</span>

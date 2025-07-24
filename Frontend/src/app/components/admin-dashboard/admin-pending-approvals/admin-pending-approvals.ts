@@ -43,7 +43,7 @@ export interface Event {
   city: string;
   timeSlot: string;
   duration: string;
-  location: string; // Display name
+  location: Location; // Display name
   locationId: string; // GUID of the location - THIS IS CRITICAL
   category: string;
   price: number;
@@ -253,12 +253,14 @@ export class PendingApprovals implements OnInit {
       next: (res: any) => {
         this.eventsone = res.data;
         this.filteredEventsone = [...this.eventsone];
+        // console.log(this.eventsone);
         // this.extractFilterOptions();
         // this.applySorting();
 
         // res.data.forEach((event: Event) => this.loadRegisteredUsers(event._id));
 
         this.loadingService.hide();
+        // console.log(this.eventsone);
 
         if (res.data.length > 0) {
           this.showAlert(

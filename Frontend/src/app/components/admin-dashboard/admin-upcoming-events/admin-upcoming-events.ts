@@ -18,13 +18,31 @@ export interface Event {
   city: string;
   timeSlot: string;
   duration: string;
-  location: string;
+  location: Location;
   category: string;
   price: number;
   maxRegistrations: number;
   createdBy: string;
   artist?: string;
   organization?: string;
+}
+
+export interface Location {
+  id: string; // This should be a GUID string
+  state: string;
+  city: string;
+  placeName: string;
+  address: string;
+  maxSeatingCapacity: number;
+  amenities: string[];
+  bookings?: Booking[]; // This might be optional
+}
+
+export interface Booking {
+  id: string; // This should be a GUID string (BookingId)
+  date: string; // or Date type
+  timeSlot: string;
+  eventId: string; // This should be a GUID string
 }
 
 export interface RegisteredUser {
@@ -101,7 +119,6 @@ export class AdminUpcomingEvents {
   ) {
     this.loadEvents();
   }
-
 
   handleHeaderAction(action: string): void {
     switch (action) {
@@ -195,23 +212,24 @@ export class AdminUpcomingEvents {
   }
 
   loadRegisteredUsers(eventId: string) {
-  this.eventService.getRegisteredUsers(eventId).subscribe({
-    next: (res: any) => {
-      // Map the response to ensure compatibility
-      const mappedResponse = {
-        users: res.data?.users?.map((user: any) => ({
-          userId: user.userId,
-          name: user.name,
-          email: user.email,
-          id: user.id || user.userId // Use id if available, otherwise use userId
-        })) || [],
-        currentRegistration: res.data?.currentRegistration || 0
-      };
-      this.usersMap[eventId] = mappedResponse;
-    },
-    error: (err) => console.error('Error loading users for event', err),
-  });
-}
+    this.eventService.getRegisteredUsers(eventId).subscribe({
+      next: (res: any) => {
+        // Map the response to ensure compatibility
+        const mappedResponse = {
+          users:
+            res.data?.users?.map((user: any) => ({
+              userId: user.userId,
+              name: user.name,
+              email: user.email,
+              id: user.id || user.userId, // Use id if available, otherwise use userId
+            })) || [],
+          currentRegistration: res.data?.currentRegistration || 0,
+        };
+        this.usersMap[eventId] = mappedResponse;
+      },
+      error: (err) => console.error('Error loading users for event', err),
+    });
+  }
 
   toggleUsersDropdown(eventId: string): void {
     this.showUsersDropdown[eventId] = !this.showUsersDropdown[eventId];
@@ -233,7 +251,7 @@ export class AdminUpcomingEvents {
     this.loadingService.show();
 
     this.eventService.getUpcomingEvents().subscribe({
-      next: (events) => {
+      next: (events: any[]) => {
         this.events = events;
         this.filteredEvents = [...events];
         // this.extractFilterOptions();
@@ -242,6 +260,7 @@ export class AdminUpcomingEvents {
           this.loadRegisteredUsers(event.id); // keep your existing method call
         });
         this.loadingService.hide();
+        console.log('Loaded events:', this.events);
         this.showAlert(
           'success',
           'Events Loaded',

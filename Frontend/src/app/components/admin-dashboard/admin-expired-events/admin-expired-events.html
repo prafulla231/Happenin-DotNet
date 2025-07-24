@@ -18,7 +18,7 @@
       <div class="event-details">
         <p><strong>Date:</strong> {{ event.date | date: 'MMM d, y' }}</p>
         <p><strong>Time:</strong> {{ event.timeSlot }}</p>
-        <p><strong>Location:</strong> {{ event.location }}</p>
+        <p><strong>Location:</strong> {{ event.location.city }}</p>
         <p><strong>Price:</strong> ₹{{ event.price }}</p>
         <p *ngIf="event.artist"><strong>Artist:</strong> {{ event.artist }}</p>
         <p *ngIf="event.organization">

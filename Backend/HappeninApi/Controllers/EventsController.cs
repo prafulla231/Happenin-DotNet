@@ -121,8 +121,6 @@ namespace HappeninApi.Controllers
         [HttpGet("pending")]
         public async Task<IActionResult> GetPendingEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
-            // Console.WriteLine($"📄 Fetching PENDING events, Page: {paginationRequest.Page}");
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -133,16 +131,27 @@ namespace HappeninApi.Controllers
             var pagination = new PaginationHelper(paginationRequest);
             var (events, totalCount) = await _repository.GetEventsByStatusAsync(EventStatus.Pending, pagination);
 
-            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
+            // Assign locations to each event
+            foreach (var ev in events)
+            {
+                if (ev.LocationId != Guid.Empty)
+                {
+                    Location? location = await _locationRepo.GetByIdAsync(ev.LocationId);
+                    if (location != null)
+                    {
+                        ev.Location = location;
+                    }
+                }
+            }
 
+            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
             return Ok(response);
         }
+
 
         [HttpGet("approved")]
         public async Task<IActionResult> GetApprovedEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
-            // Console.WriteLine($"📄 Fetching APPROVED events, Page: {paginationRequest.Page}");
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -153,10 +162,23 @@ namespace HappeninApi.Controllers
             var pagination = new PaginationHelper(paginationRequest);
             var (events, totalCount) = await _repository.GetEventsByStatusAsync(EventStatus.Approved, pagination);
 
-            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
+            // Assign locations to each event
+            foreach (var ev in events)
+            {
+                if (ev.LocationId != Guid.Empty)
+                {
+                    Location? location = await _locationRepo.GetByIdAsync(ev.LocationId);
+                    if (location != null)
+                    {
+                        ev.Location = location;
+                    }
+                }
+            }
 
+            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
             return Ok(response);
         }
+
 
         [HttpGet("rejected")]
         public async Task<IActionResult> GetRejectedEvents([FromQuery] PaginationRequestDto paginationRequest)
@@ -181,8 +203,6 @@ namespace HappeninApi.Controllers
         [HttpGet("expired")]
         public async Task<IActionResult> GetExpiredEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
-            // Console.WriteLine($"📄 Fetching EXPIRED events, Page: {paginationRequest.Page}");
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -193,10 +213,23 @@ namespace HappeninApi.Controllers
             var pagination = new PaginationHelper(paginationRequest);
             var (events, totalCount) = await _repository.GetEventsByStatusAsync(EventStatus.Expired, pagination);
 
-            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
+            // Assign locations to each event
+            foreach (var ev in events)
+            {
+                if (ev.LocationId != Guid.Empty)
+                {
+                    Location? location = await _locationRepo.GetByIdAsync(ev.LocationId);
+                    if (location != null)
+                    {
+                        ev.Location = location;
+                    }
+                }
+            }
 
+            var response = new PaginatedResponseDto<Event>(events, pagination.Page, pagination.PageSize, totalCount);
             return Ok(response);
         }
+
 
         [HttpGet("by-organizer/{organizerId}")]
         public async Task<IActionResult> GetEventsByOrganizer(Guid organizerId, [FromQuery] PaginationRequestDto paginationRequest)
