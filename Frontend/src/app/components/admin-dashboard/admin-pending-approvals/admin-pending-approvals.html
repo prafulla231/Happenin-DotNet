@@ -41,7 +41,7 @@
         <div class="event-actions">
           <button
             class="delete-btn"
-            (click)="confirmDenyEvent(event._id, event.title, event.date, event.timeSlot, event.location)"
+          (click)="confirmDenyEvent(event.id || event._id || '', event.title, event.date, event.timeSlot, event.location)"
           >
             Deny Event
           </button>
@@ -52,7 +52,7 @@
           </button>
           <button
             class="delete-btn"
-            (click)="confirmApproveEvent(event._id, event.title)"
+          (click)="confirmApproveEvent(event.id || event._id || '', event.title)"
           >
             Approve event
           </button>
@@ -162,14 +162,14 @@
       <div class="admin-modal-actions">
         <button
           class="admin-modal-delete-btn"
-          (click)="confirmDenyEvent(selectedEvent._id, selectedEvent.title, selectedEvent.date, selectedEvent.timeSlot, selectedEvent.location); closeEventDetails()"
+          (click)="confirmDenyEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title, selectedEvent.date, selectedEvent.timeSlot, selectedEvent.location); closeEventDetails()"
         >
           <span class="btn-icon">🗑️</span>
           <span class="btn-text">Deny Event</span>
         </button>
         <button
           class="admin-modal-approve-btn"
-          (click)="confirmApproveEvent(selectedEvent._id, selectedEvent.title); closeEventDetails()"
+          (click)="confirmApproveEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title); closeEventDetails()"
         >
           <span class="btn-icon">✅</span>
           <span class="btn-text">Approve Event</span>

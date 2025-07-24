@@ -730,7 +730,7 @@ export class AdminDashboardComponent {
       return;
     }
 
-    return this.ApprovalService.approveEvent(eventToApprove).subscribe({
+    return this.ApprovalService.approveEvent(eventToApprove.id).subscribe({
       next: (res) => {
         this.loadApprovals();
         this.loadEvents();

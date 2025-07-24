@@ -11,9 +11,12 @@ import { LoadingService } from '../../loading';
 import { EventService } from '../../../services/event';
 import { LocationService } from '../../../services/location';
 import { HttpClient } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 export interface Event {
-  _id: string;
+  _id?: string;
+  id?: string;
   title: string;
   description: string;
   date: string;
@@ -30,15 +33,14 @@ export interface Event {
 }
 
 export interface RegisteredUser {
-  userId: string;
+  id: string;
   name: string;
   email: string;
-  _id: string;
 }
 
 export interface RegisteredUsersResponse {
-  users: RegisteredUser[];
   currentRegistration: number;
+  users: RegisteredUser[];
 }
 
 export interface CustomAlert {
@@ -66,6 +68,7 @@ export interface CustomAlert {
   styleUrls: ['./admin-pending-approvals.scss'],
 })
 export class PendingApprovals implements OnInit {
+  private destroy$ = new Subject<void>();
   // private router = inject(Router);
   // private approvalService = inject(ApprovalService);
   // private authService = inject(AuthService);
@@ -74,7 +77,7 @@ export class PendingApprovals implements OnInit {
   filteredEventsone: Event[] = [];
   selectedEvent: Event | null = null;
   showEventDetails: boolean = false;
-  usersMap: { [eventId: string]: RegisteredUsersResponse } = {};
+ usersMap: { [eventId: string]: { currentRegistration: number; users: RegisteredUser[] } } = {};
   userName: string | null = null;
 
   adminButtons: HeaderButton[] = [
@@ -204,18 +207,27 @@ export class PendingApprovals implements OnInit {
     }
   }
 
-  // loadRegisteredUsers(eventId: string) {
-  //   this.eventService.getRegisteredUsers(eventId).subscribe({
-  //     next: (res) => (this.usersMap[eventId] = res.data),
-  //     error: (err) => console.error('Error loading users for event', err),
-  //   });
-  // }
+ loadRegisteredUsers(eventId: string, callback?: () => void) {
+  this.eventService
+    .getRegisteredUsers(eventId)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (res:any) => {
+        this.usersMap[eventId] = res.data;
+        if (callback) callback();
+      },
+      error: (error) => {
+        console.error('Error loading registered users:', error);
+        this.showAlert('error', 'Error', 'Failed to load registered users');
+      },
+    });
+}
 
   loadApprovals(): void {
     this.loadingService.show();
 
     this.ApprovalService.viewApprovalRequests().subscribe({
-      next: (res: any) => {
+      next: (res :  any) => {
         this.eventsone = res.data;
         this.filteredEventsone = [...this.eventsone];
         // this.extractFilterOptions();
@@ -246,6 +258,7 @@ export class PendingApprovals implements OnInit {
   }
 
   confirmApproveEvent(eventId: string, eventTitle: string) {
+    console.log('confirmApproveEvent called with eventId:', eventId, 'eventTitle:', eventTitle);
     this.showConfirmation(
       'Approve Event',
       `Are you sure you want to approve "${eventTitle}"?`,
@@ -267,39 +280,31 @@ export class PendingApprovals implements OnInit {
     );
   }
 
-  approveEvent(eventId: string) {
-    const eventToApprove = this.eventsone.find((e) => e._id === eventId);
+ approveEvent(eventId: string) {
+  console.log('approveEvent called with eventId:', eventId);
+  const eventToApprove = this.eventsone.find((e) => e.id === eventId);
+  console.log('eventToApprove:', eventToApprove);
 
-    if (!eventToApprove) {
-      this.showAlert(
-        'error',
-        'Event Not Found',
-        'The event could not be found.'
-      );
-      return;
-    }
-
-    return this.ApprovalService.approveEvent(eventToApprove).subscribe({
-      next: (res) => {
-        this.loadApprovals();
-        // this.loadEvents();
-        this.showAlert(
-          'success',
-          'Event Approved',
-          `Event "${eventToApprove.title}" has been approved successfully!`
-        );
-        // console.log('Approved:', res);
-      },
-      error: (err) => {
-        console.error('Approval failed:', err);
-        this.showAlert(
-          'error',
-          'Approval Failed',
-          'Failed to approve the event. Please try again.'
-        );
-      },
-    });
+  if (!eventToApprove) {
+    this.showAlert('error', 'Event Not Found', 'The event could not be found.');
+    return;
   }
+
+  // Use id for eventId if available
+  const idToSend = eventToApprove.id || eventId;
+  console.log('Calling ApprovalService.approveEvent with id:', idToSend);
+  this.ApprovalService.approveEvent(idToSend).subscribe({
+    next: () => {
+      this.loadApprovals();
+      this.showAlert('success', 'Event Approved', `Event "${eventToApprove.title}" has been approved successfully!`);
+    },
+    error: (err) => {
+      console.error('Approval failed:', err);
+      this.showAlert('error', 'Approval Failed', 'Failed to approve the event. Please try again.');
+    }
+  });
+}
+
 
   denyEvent(
     eventId: string,

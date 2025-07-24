@@ -36,11 +36,16 @@ export const environment = {
     deleteLocation: (locationId: string) => `/locations`,
 
     //Approvals
-    approveEvent: `/approval/approveEvent`,
-    denyEvent: (eventId: string) => `/approval/deny/${eventId}`,
-    viewApprovalRequests: '/events/Pending',
-    viewApprovalRequestById: (requestId: string) =>
-      `/approval/viewrequests/${requestId}`,
+    // approveEvent: `/approval/approveEvent`,
+    // denyEvent: (eventId: string) => `/approval/deny/${eventId}`,
+    // inside apis: { ... }
+updateEventStatus: (eventId: string) => `/events/${eventId}/status`,
+
+    // viewApprovalRequests: '/events/Pending',
+    // viewApprovalRequestById: (requestId: string) =>
+    //   `/approval/viewrequests/${requestId}`,
+      viewApprovalRequests: '/events/Pending',
+  viewApprovalRequestById: (requestId: string) => `/approval/viewrequests/${requestId}`,
 
     //users
     registerUser: '/users/register',
