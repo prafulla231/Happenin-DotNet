@@ -1,6 +1,14 @@
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../services/auth';
@@ -11,7 +19,7 @@ import { environment } from '../../../../environment.prod';
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './login.html',
-  styleUrls: ['./login.scss']
+  styleUrls: ['./login.scss'],
 })
 export class LoginComponent implements OnDestroy {
   isLogin = true;
@@ -19,11 +27,11 @@ export class LoginComponent implements OnDestroy {
   successMessage = '';
 
   isOtpLogin = false;
-otpSent = false;
-otpForm: FormGroup;
-resendTimer = 0;
-resendDisabled = false;
-private timerInterval: any;
+  otpSent = false;
+  otpForm: FormGroup;
+  resendTimer = 0;
+  resendDisabled = false;
+  private timerInterval: any;
 
   // Alert popup properties
   showAlertPopup = false;
@@ -42,25 +50,33 @@ private timerInterval: any;
     // Login form with enhanced validations
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
 
     // Register form with enhanced validations and confirm password
-    this.registerForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      phone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+    this.registerForm = this.fb.group(
+      {
+        name: ['', [Validators.required, Validators.minLength(2)]],
+        phone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+        email: ['', [Validators.required, Validators.email]],
+        password: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(6),
+            this.passwordValidator,
+          ],
+        ],
+        confirmPassword: ['', [Validators.required]], // Added confirm password field
+        role: ['user'],
+      },
+      { validators: this.passwordMatchValidator }
+    ); // Added form-level validator
+
+    this.otpForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6), this.passwordValidator]],
-      confirmPassword: ['', [Validators.required]], // Added confirm password field
-      role: ['user']
-    }, { validators: this.passwordMatchValidator }); // Added form-level validator
-
-this.otpForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    otp: ['', [Validators.required, Validators.pattern(/^[0-9]{6}$/)]]
-  });
-
-
+      otp: ['', [Validators.required, Validators.pattern(/^[0-9]{6}$/)]],
+    });
   }
 
   // Custom password validator
@@ -109,45 +125,45 @@ this.otpForm = this.fb.group({
     return null;
   }
 
- toggleLoginMethod(isOtp: boolean): void {
-  this.isOtpLogin = isOtp;
-  this.otpSent = false;
-  this.resetResendTimer();
-  // Reset forms when switching
-  this.loginForm.reset();
-  this.otpForm.reset();
-}
-
-onSendOtp(): void {
-  const emailControl = this.otpForm.get('email');
-  if (emailControl?.valid) {
-    this.sendOtp(emailControl.value);
-  } else {
-    emailControl?.markAsTouched();
-    this.showAlert('Please enter a valid email address.', 'warning');
+  toggleLoginMethod(isOtp: boolean): void {
+    this.isOtpLogin = isOtp;
+    this.otpSent = false;
+    this.resetResendTimer();
+    // Reset forms when switching
+    this.loginForm.reset();
+    this.otpForm.reset();
   }
-}
 
-onResendOtp(): void {
-  if (!this.resendDisabled) {
+  onSendOtp(): void {
     const emailControl = this.otpForm.get('email');
     if (emailControl?.valid) {
-      // Clear the OTP field when resending
-      this.otpForm.patchValue({ otp: '' });
       this.sendOtp(emailControl.value);
+    } else {
+      emailControl?.markAsTouched();
+      this.showAlert('Please enter a valid email address.', 'warning');
     }
   }
-}
 
-onVerifyOtp(): void {
-  if (this.otpForm.valid) {
-    const { email, otp } = this.otpForm.value;
-    this.verifyOtp(email, otp);
-  } else {
-    this.markFormGroupTouched(this.otpForm);
-    this.showAlert('Please enter a valid 6-digit OTP.', 'warning');
+  onResendOtp(): void {
+    if (!this.resendDisabled) {
+      const emailControl = this.otpForm.get('email');
+      if (emailControl?.valid) {
+        // Clear the OTP field when resending
+        this.otpForm.patchValue({ otp: '' });
+        this.sendOtp(emailControl.value);
+      }
+    }
   }
-}
+
+  onVerifyOtp(): void {
+    if (this.otpForm.valid) {
+      const { email, otp } = this.otpForm.value;
+      this.verifyOtp(email, otp);
+    } else {
+      this.markFormGroupTouched(this.otpForm);
+      this.showAlert('Please enter a valid 6-digit OTP.', 'warning');
+    }
+  }
 
   toggleForm(isLoginForm: boolean): void {
     this.isLogin = isLoginForm;
@@ -171,7 +187,10 @@ onVerifyOtp(): void {
   }
 
   // New method to show alert popup
-  showAlert(message: string, type: 'error' | 'warning' | 'info' = 'error'): void {
+  showAlert(
+    message: string,
+    type: 'error' | 'warning' | 'info' = 'error'
+  ): void {
     this.alertMessage = message;
     this.alertType = type;
     this.showAlertPopup = true;
@@ -182,94 +201,101 @@ onVerifyOtp(): void {
     }, 4000);
   }
 
- sendOtp(email: string) {
-  this.http.post(`${environment.apiBaseUrl}${environment.apis.sendOtp}`, { email }).subscribe({
-    next: () => {
-      this.otpSent = true;
-      this.startResendTimer();
-      this.showAlert('OTP sent to your email successfully! 📧', 'info');
-    },
-    error: (err) => {
-      console.error('OTP send failed', err);
-      let errorMessage = 'Failed to send OTP. Please try again.';
-      if (err.error?.message) {
-        errorMessage = err.error.message;
+  sendOtp(email: string) {
+    this.http
+      .post(`${environment.apiBaseUrl}${environment.apis.sendOtp}`, { email })
+      .subscribe({
+        next: () => {
+          this.otpSent = true;
+          this.startResendTimer();
+          this.showAlert('OTP sent to your email successfully! 📧', 'info');
+        },
+        error: (err) => {
+          console.error('OTP send failed', err);
+          let errorMessage = 'Failed to send OTP. Please try again.';
+          if (err.error?.message) {
+            errorMessage = err.error.message;
+          }
+          this.showAlert(errorMessage, 'error');
+        },
+      });
+  }
+
+  getOtpEmailError(): string | null {
+    const emailControl = this.otpForm.get('email');
+    if (!emailControl?.errors || !emailControl?.touched) {
+      return null;
+    }
+
+    if (emailControl.errors['required']) {
+      return 'Email is required';
+    }
+    if (emailControl.errors['email']) {
+      return 'Please enter a valid email address';
+    }
+
+    return null;
+  }
+
+  getOtpError(): string | null {
+    const otpControl = this.otpForm.get('otp');
+    if (!otpControl?.errors || !otpControl?.touched) {
+      return null;
+    }
+
+    if (otpControl.errors['required']) {
+      return 'OTP is required';
+    }
+    if (otpControl.errors['pattern']) {
+      return 'Please enter a valid 6-digit OTP';
+    }
+
+    return null;
+  }
+
+  public startResendTimer(): void {
+    this.resendTimer = 180; // 3 minutes = 180 seconds
+    this.resendDisabled = true;
+
+    this.timerInterval = setInterval(() => {
+      this.resendTimer--;
+
+      if (this.resendTimer <= 0) {
+        this.resetResendTimer();
       }
-      this.showAlert(errorMessage, 'error');
+    }, 1000);
+  }
+
+  private resetResendTimer(): void {
+    this.resendTimer = 0;
+    this.resendDisabled = false;
+
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
     }
-  });
-}
-
-
-getOtpEmailError(): string | null {
-  const emailControl = this.otpForm.get('email');
-  if (!emailControl?.errors || !emailControl?.touched) {
-    return null;
   }
 
-  if (emailControl.errors['required']) {
-    return 'Email is required';
-  }
-  if (emailControl.errors['email']) {
-    return 'Please enter a valid email address';
-  }
-
-  return null;
-}
-
-getOtpError(): string | null {
-  const otpControl = this.otpForm.get('otp');
-  if (!otpControl?.errors || !otpControl?.touched) {
-    return null;
+  getFormattedTimer(): string {
+    const minutes = Math.floor(this.resendTimer / 60);
+    const seconds = this.resendTimer % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`;
   }
 
-  if (otpControl.errors['required']) {
-    return 'OTP is required';
-  }
-  if (otpControl.errors['pattern']) {
-    return 'Please enter a valid 6-digit OTP';
+  // Clean up timer on component destroy
+  ngOnDestroy(): void {
+    this.resetResendTimer();
   }
 
-  return null;
-}
-
-public startResendTimer(): void {
-  this.resendTimer = 180; // 3 minutes = 180 seconds
-  this.resendDisabled = true;
-
-  this.timerInterval = setInterval(() => {
-    this.resendTimer--;
-
-    if (this.resendTimer <= 0) {
-      this.resetResendTimer();
-    }
-  }, 1000);
-}
-
-private resetResendTimer(): void {
-  this.resendTimer = 0;
-  this.resendDisabled = false;
-
-  if (this.timerInterval) {
-    clearInterval(this.timerInterval);
-    this.timerInterval = null;
-  }
-}
-
-getFormattedTimer(): string {
-  const minutes = Math.floor(this.resendTimer / 60);
-  const seconds = this.resendTimer % 60;
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-}
-
-// Clean up timer on component destroy
-ngOnDestroy(): void {
-  this.resetResendTimer();
-}
-
-
-verifyOtp(email: string, otp: string) {
-  this.http.post(`${environment.apiBaseUrl}${environment.apis.verifyOtp}`, { email, otp }).subscribe({
+  verifyOtp(email: string, otp: string) {
+    this.http
+      .post(`${environment.apiBaseUrl}${environment.apis.verifyOtp}`, {
+        email,
+        otp,
+      })
+      .subscribe({
         next: (response: any) => {
           const userRole = response.user?.role.toLowerCase();
 
@@ -285,7 +311,7 @@ verifyOtp(email: string, otp: string) {
           // Show success message
           this.showSuccessMessage('Logged in successfully! 🎉');
 
-           setTimeout(() => {
+          setTimeout(() => {
             this.getRoleAndNavigate();
           }, 2000);
         },
@@ -293,7 +319,8 @@ verifyOtp(email: string, otp: string) {
           console.error('Login failed', error);
 
           // Handle specific error messages
-          let errorMessage = 'Login failed. Please check your credentials and try again.';
+          let errorMessage =
+            'Login failed. Please check your credentials and try again.';
           if (error.error?.message) {
             errorMessage = error.error.message;
           } else if (error.status === 401) {
@@ -304,33 +331,34 @@ verifyOtp(email: string, otp: string) {
 
           // Use custom alert instead of default alert
           this.showAlert(errorMessage, 'error');
-        }
+        },
       });
-}
+  }
 
-getRoleAndNavigate() {
-  const token = localStorage.getItem('token');
-  // console.log('Token from localStorage:', token);
+  getRoleAndNavigate() {
+    const token = localStorage.getItem('token');
+    // console.log('Token from localStorage:', token);
 
-  this.http.get(`${environment.apiBaseUrl}/users/dashboard`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).subscribe({
-    next: (res: any) => {
-      const redirectPath = res.data.redirectTo;
-      if (redirectPath) {
-        this.router.navigate([redirectPath]);
-      } else {
-        this.router.navigate(['/fallback']);
-      }
-    },
-    error: () => {
-      this.showAlert('Access denied or session expired', 'error');
-    }
-  });
-}
-
+    this.http
+      .get(`${environment.apiBaseUrl}/users/dashboard`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .subscribe({
+        next: (res: any) => {
+          const redirectPath = res.data.redirectTo;
+          if (redirectPath) {
+            this.router.navigate([redirectPath]);
+          } else {
+            this.router.navigate(['/fallback']);
+          }
+        },
+        error: () => {
+          this.showAlert('Access denied or session expired', 'error');
+        },
+      });
+  }
 
   // Method to manually hide alert popup
   hideAlert(): void {
@@ -344,15 +372,15 @@ getRoleAndNavigate() {
       this.authService.loginUser(data).subscribe({
         next: (response: any) => {
           const userRole = response.user?.role;
-          console.log('User Role:', userRole);
+          // console.log('User Role:', userRole);
 
           if (response.token) {
-            console.log('Token:', response.token);
+            // console.log('Token:', response.token);
             localStorage.setItem('token', response.token);
             sessionStorage.setItem('token', response.token);
           }
           if (response.user) {
-            console.log('User:', response.user);
+            // console.log('User:', respSonse.user);
             localStorage.setItem('user', JSON.stringify(response.user));
             sessionStorage.setItem('user', JSON.stringify(response.user));
           }
@@ -367,7 +395,8 @@ getRoleAndNavigate() {
           console.error('Login failed', error);
 
           // Handle specific error messages
-          let errorMessage = 'Login failed. Please check your credentials and try again.';
+          let errorMessage =
+            'Login failed. Please check your credentials and try again.';
           if (error.error?.message) {
             errorMessage = error.error.message;
           } else if (error.status === 401) {
@@ -378,14 +407,17 @@ getRoleAndNavigate() {
 
           // Use custom alert instead of default alert
           this.showAlert(errorMessage, 'error');
-        }
+        },
       });
     } else {
       // Mark all fields as touched to show validation errors
       this.markFormGroupTouched(this.loginForm);
 
       // Show validation error popup
-      this.showAlert('Please fill in all required fields correctly.', 'warning');
+      this.showAlert(
+        'Please fill in all required fields correctly.',
+        'warning'
+      );
     }
   }
 
@@ -400,7 +432,7 @@ getRoleAndNavigate() {
           // Automatically log the user in with the same credentials
           const loginData = {
             email: registrationData.email,
-            password: registrationData.password
+            password: registrationData.password,
           };
 
           this.authService.loginUser(loginData).subscribe({
@@ -412,16 +444,21 @@ getRoleAndNavigate() {
                 sessionStorage.setItem('token', response.token);
               }
 
-              this.showSuccessMessage('Registered and logged in successfully! 🎉');
-               setTimeout(() => {
-            this.getRoleAndNavigate();
-          }, 2000);
+              this.showSuccessMessage(
+                'Registered and logged in successfully! 🎉'
+              );
+              setTimeout(() => {
+                this.getRoleAndNavigate();
+              }, 2000);
             },
             error: (loginError) => {
               console.error('Auto-login failed after registration', loginError);
-              this.showAlert('Registration succeeded but auto-login failed. Please try logging in.', 'warning');
+              this.showAlert(
+                'Registration succeeded but auto-login failed. Please try logging in.',
+                'warning'
+              );
               this.toggleForm(true); // fallback to login form
-            }
+            },
           });
         },
         error: (error) => {
@@ -431,23 +468,27 @@ getRoleAndNavigate() {
           if (error.error?.message) {
             errorMessage = error.error.message;
           } else if (error.status === 409) {
-            errorMessage = 'Email already exists. Please use a different email.';
+            errorMessage =
+              'Email already exists. Please use a different email.';
           } else if (error.status === 0) {
             errorMessage = 'Network error. Please check your connection.';
           }
 
           this.showAlert(errorMessage, 'error');
-        }
+        },
       });
     } else {
       this.markFormGroupTouched(this.registerForm);
-      this.showAlert('Please fill in all required fields correctly.', 'warning');
+      this.showAlert(
+        'Please fill in all required fields correctly.',
+        'warning'
+      );
     }
   }
 
   // Utility method to mark all form controls as touched
   private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.keys(formGroup.controls).forEach(key => {
+    Object.keys(formGroup.controls).forEach((key) => {
       const control = formGroup.get(key);
       control?.markAsTouched();
     });

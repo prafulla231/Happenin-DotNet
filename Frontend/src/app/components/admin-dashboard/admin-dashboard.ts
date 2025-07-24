@@ -120,7 +120,7 @@ export class AdminDashboardComponent {
   filteredEvents: Event[] = [];
   filteredEventsone: Event[] = [];
   filteredExpiredEvents: Event[] = [];
-usersMap: { [eventId: string]: AdminRegisteredUsersResponse } = {};
+  usersMap: { [eventId: string]: AdminRegisteredUsersResponse } = {};
   userName: string | null = null;
 
   // Event details modal properties
@@ -136,13 +136,11 @@ usersMap: { [eventId: string]: AdminRegisteredUsersResponse } = {};
   //   }
 
   adminButtons: HeaderButton[] = [
-
     { text: 'Logout', action: 'logout', style: 'primary' },
   ];
 
   handleHeaderAction(action: string): void {
     switch (action) {
-
       case 'logout':
         this.logout();
         break;
@@ -274,10 +272,19 @@ usersMap: { [eventId: string]: AdminRegisteredUsersResponse } = {};
     window.scrollTo({ top: 0, behavior: 'smooth' });
     // this.loadExpiredEvents();
     this.loadEvents();
+    console.log('Events have been loaded');
+
     this.loadLocations();
+    console.log('Locations have been loaded');
+
     this.loadApprovals();
+    console.log('Approvals have been loaded');
+
     this.loadExpiredEvents();
+    console.log('Expired events have been loaded');
+
     this.setUserFromLocalUser();
+    console.log('User has been set from local storage');
 
     this.registerForm = this.fb.group({
       name: ['', Validators.required],
@@ -506,7 +513,7 @@ usersMap: { [eventId: string]: AdminRegisteredUsersResponse } = {};
 
   deleteLocation(state: string, city: string, placeName: string): void {
     const locationData = { state, city, placeName };
-  this.locationService.deleteLocation(locationData).subscribe({
+    this.locationService.deleteLocation(locationData).subscribe({
       next: () => {
         this.showAlert(
           'success',
@@ -809,8 +816,12 @@ usersMap: { [eventId: string]: AdminRegisteredUsersResponse } = {};
     ].sort();
   }
 
-  extractCityFromLocation(location: string): string {
-    if (!location) return '';
+  extractCityFromLocation(location: any): string {
+    if (!location || typeof location !== 'string') {
+      console.warn('Invalid location value:', location);
+      return '';
+    }
+
     const parts = location.split(',');
     return parts.length >= 2 ? parts[parts.length - 2].trim() : parts[0].trim();
   }
@@ -972,24 +983,25 @@ usersMap: { [eventId: string]: AdminRegisteredUsersResponse } = {};
     }
   }
 
- loadRegisteredUsers(eventId: string) {
-  this.eventService.getRegisteredUsers(eventId).subscribe({
-    next: (res: any) => {
-      // Map the response to ensure compatibility
-      const mappedResponse = {
-        users: res.data?.users?.map((user: any) => ({
-          userId: user.userId,
-          name: user.name,
-          email: user.email,
-          id: user.id || user.userId // Use id if available, otherwise use userId
-        })) || [],
-        currentRegistration: res.data?.currentRegistration || 0
-      };
-      this.usersMap[eventId] = mappedResponse;
-    },
-    error: (err) => console.error('Error loading users for event', err),
-  });
-}
+  loadRegisteredUsers(eventId: string) {
+    this.eventService.getRegisteredUsers(eventId).subscribe({
+      next: (res: any) => {
+        // Map the response to ensure compatibility
+        const mappedResponse = {
+          users:
+            res.data?.users?.map((user: any) => ({
+              userId: user.userId,
+              name: user.name,
+              email: user.email,
+              id: user.id || user.userId, // Use id if available, otherwise use userId
+            })) || [],
+          currentRegistration: res.data?.currentRegistration || 0,
+        };
+        this.usersMap[eventId] = mappedResponse;
+      },
+      error: (err) => console.error('Error loading users for event', err),
+    });
+  }
   deleteEvent(eventId: string) {
     this.eventService.deleteEvent(eventId).subscribe({
       next: () => {
@@ -1090,8 +1102,8 @@ usersMap: { [eventId: string]: AdminRegisteredUsersResponse } = {};
   }
 
   addLocation(location: Location): void {
-  this.locationService.addLocation(location).subscribe({
-    next: (response) => {
+    this.locationService.addLocation(location).subscribe({
+      next: (response) => {
         this.showAlert(
           'success',
           'Location Added',
