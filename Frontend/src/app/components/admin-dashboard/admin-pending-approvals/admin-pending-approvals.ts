@@ -204,24 +204,24 @@ export class PendingApprovals implements OnInit {
     }
   }
 
-  loadRegisteredUsers(eventId: string) {
-    this.eventService.getRegisteredUsers(eventId).subscribe({
-      next: (res) => (this.usersMap[eventId] = res.data),
-      error: (err) => console.error('Error loading users for event', err),
-    });
-  }
+  // loadRegisteredUsers(eventId: string) {
+  //   this.eventService.getRegisteredUsers(eventId).subscribe({
+  //     next: (res) => (this.usersMap[eventId] = res.data),
+  //     error: (err) => console.error('Error loading users for event', err),
+  //   });
+  // }
 
   loadApprovals(): void {
     this.loadingService.show();
 
     this.ApprovalService.viewApprovalRequests().subscribe({
-      next: (res :  any) => {
+      next: (res: any) => {
         this.eventsone = res.data;
         this.filteredEventsone = [...this.eventsone];
         // this.extractFilterOptions();
         // this.applySorting();
 
-        res.data.forEach((event: Event) => this.loadRegisteredUsers(event._id));
+        // res.data.forEach((event: Event) => this.loadRegisteredUsers(event._id));
 
         this.loadingService.hide();
 
