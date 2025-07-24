@@ -96,7 +96,7 @@ namespace HappeninApi.Controllers
             if (!success)
                 return NotFound("Location not found");
 
-            return Ok("Location deleted successfully");
+            return Ok(new { message = "Location deleted successfully" });
         }
     }
 }

@@ -1,4 +1,4 @@
-import { send } from "@emailjs/browser";
+import { send } from '@emailjs/browser';
 
 export const environment = {
   production: false,
@@ -9,35 +9,43 @@ export const environment = {
     // Events
     getAllEvents: '/events',
     createEvent: '/events',
-    // getEventsByOrganizer: (organizerId: string) => `/events/${organizerId}`,
-    getEventsByOrganizer: (organizerId: string) => `/events/by-organizer/{organizerId}`,
+    getEventsByOrganizer: (organizerId: string) => `/events/${organizerId}`,
+    // getEventsByOrganizer: (organizerId: string) => `/events/by-organizer/{organizerId}`,
     updateEvent: (eventId: string) => `/events/${eventId}`,
     deleteEvent: (eventId: string) => `/events/${eventId}`,
-    registeredEvents : (userId : string) => `/events/registered-events/${userId}`,
+    registeredEvents: (userId: string) => `/events/registered-events/${userId}`,
     registerForEvent: '/events/register',
     deregisterForEvent: '/events/deregister',
-    getUpcomingEvent : '/events/upcoming',
-    getExpiredEvent : '/events/expired',
+    getUpcomingEvent: '/events/Approved',
+    getExpiredEvent: '/events/expired',
 
     // Registrations
-    getRegisteredUsers: (eventId: string) => `/events/${eventId}/registered-users`,
-    removeUserFromEvent: (eventId: string, userId: string) => `/events/${eventId}/users/${userId}`,
+    getRegisteredUsers: (eventId: string) =>
+      `/events/${eventId}/registered-users`,
+    removeUserFromEvent: (eventId: string, userId: string) =>
+      `/events/${eventId}/users/${userId}`,
 
     // Locations
     fetchLocations: '/locations',
-    addLocation: '/locations' ,
+    addLocation: '/locations',
     bookLocation: '/locations/book', // not defined in environment — consider adding
     cancelBooking: '/locations/cancel', // not defined in environment
     // viewLocation: (locationId: string) => `/locations/${locationId}`,
     viewLocation: (locationId: string) => `/locations`,
     // deleteLocation: (locationId: string) => `/locations/${locationId}`,
-    deleteLocation: (locationId: string) => `/locations`,
+   deleteLocation: (locationId: string) => `/locations/${locationId}`,
 
     //Approvals
-    approveEvent:  `/approval/approveEvent`,
-    denyEvent: (eventId: string) => `/approval/deny/${eventId}`,
-    viewApprovalRequests: '/approval/viewApproval',
-    viewApprovalRequestById: (requestId: string) => `/approval/viewrequests/${requestId}`,
+    // approveEvent: `/approval/approveEvent`,
+    // denyEvent: (eventId: string) => `/approval/deny/${eventId}`,
+    // inside apis: { ... }
+updateEventStatus: (eventId: string) => `/events/${eventId}/status`,
+
+    // viewApprovalRequests: '/events/Pending',
+    // viewApprovalRequestById: (requestId: string) =>
+    //   `/approval/viewrequests/${requestId}`,
+      viewApprovalRequests: '/events/Pending',
+  viewApprovalRequestById: (requestId: string) => `/approval/viewrequests/${requestId}`,
 
     //users
     registerUser: '/users/register',
@@ -53,7 +61,9 @@ export const environment = {
     sendOtp: '/users/send-otp',
     verifyOtp: '/users/verify-otp',
 
-    //Analytics
-    analytics : '/analytics'
-  }
+    // Analytics
+    getOrganizerAnalytics: (organizerId: string) =>
+      `/analytics/organizer/${organizerId}`,
+    getAdminAnalytics: '/analytics/admin',
+  },
 };

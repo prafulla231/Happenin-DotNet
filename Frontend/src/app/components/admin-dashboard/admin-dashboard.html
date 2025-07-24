@@ -95,7 +95,7 @@
             <div class="location-actions">
               <button
                 class="delete-location-btn"
-                (click)="confirmDeleteLocation(location.state, location.city, location.placeName)"
+                (click)="confirmDeleteLocation(location.id || '', location.placeName, location.city, location.state)"
                 title="Delete Location"
               >
                 🗑️ Delete

@@ -33,7 +33,7 @@ export const environment = {
     // viewLocation: (locationId: string) => `/locations/${locationId}`,
     viewLocation: (locationId: string) => `/locations`,
     // deleteLocation: (locationId: string) => `/locations/${locationId}`,
-    deleteLocation: (locationId: string) => `/locations`,
+   deleteLocation: (locationId: string) => `/locations/${locationId}`,
 
     //Approvals
     // approveEvent: `/approval/approveEvent`,

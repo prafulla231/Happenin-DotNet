@@ -68,10 +68,9 @@ export class LocationService {
   }
 
   // DELETE: Delete a location using state, city, and placeName
- deleteLocation(locationData: any): Observable<any> {
-  return this.http.request('delete', `${environment.apiBaseUrl}${environment.apis.deleteLocation}`, {
-    headers: this.getAuthHeaders(),
-    body: locationData
+ deleteLocation(locationId: string): Observable<any> {
+  return this.http.delete(`${environment.apiBaseUrl}${environment.apis.deleteLocation(locationId)}`, {
+    headers: this.getAuthHeaders()
   });
 }
 }

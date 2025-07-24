@@ -503,18 +503,20 @@ export class AdminDashboardComponent {
     document.body.style.overflow = 'auto';
   }
 
-  confirmDeleteLocation(state: string, city: string, placeName: string): void {
+  confirmDeleteLocation(locationId: string, placeName: string, city: string, state: string): void {
+    console.log('[DEBUG] confirmDeleteLocation called with:', { locationId, placeName, city, state });
     this.showConfirmation(
       'Delete Location',
       `Are you sure you want to delete "${placeName}" in ${city}, ${state}? This action cannot be undone.`,
-      () => this.deleteLocation(state, city, placeName)
+      () => this.deleteLocation(locationId, placeName)
     );
   }
 
-  deleteLocation(state: string, city: string, placeName: string): void {
-    const locationData = { state, city, placeName };
-    this.locationService.deleteLocation(locationData).subscribe({
-      next: () => {
+  deleteLocation(locationId: string, placeName: string): void {
+    console.log('[DEBUG] deleteLocation called with locationId:', locationId, 'placeName:', placeName);
+    this.locationService.deleteLocation(locationId).subscribe({
+      next: (res) => {
+        console.log('[DEBUG] deleteLocation success response:', res);
         this.showAlert(
           'success',
           'Location Deleted',
@@ -523,13 +525,16 @@ export class AdminDashboardComponent {
         this.loadLocations(); // Refresh the locations list
       },
       error: (err) => {
-        console.error('Failed to delete location', err);
+        console.error('[DEBUG] Failed to delete location', err, 'locationId:', locationId);
         this.showAlert(
           'error',
           'Delete Failed',
           'Failed to delete location. Please try again.'
         );
       },
+      complete: () => {
+        console.log('[DEBUG] deleteLocation observable complete');
+      }
     });
   }
 
