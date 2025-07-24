@@ -1,3 +1,4 @@
+// admin-analytics.ts
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -45,12 +46,10 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
   private resizeObserver: ResizeObserver | null = null;
   private dataLoaded = false;
   private viewInitialized = false;
+  isLoading = false; // Add loading state property
 
   adminButtons: HeaderButton[] = [
     { text: 'Dashboard', action: 'dashboard', style: 'primary' },
-    // { text: 'Upcoming Events', action: 'viewAvailableEvents' },
-    // { text: 'Pending Approvals', action: 'viewPendingEvents' },
-    // { text: 'Expired Events', action: 'viewExpiredEvents' },
     { text: 'Export Data', action: 'exportData', style: 'primary' },
     { text: 'Refresh', action: 'refresh', style: 'primary' },
     { text: 'Logout', action: 'logout', style: 'primary' },
@@ -68,11 +67,13 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit(): void {
+    console.log('Analytics component initialized');
     this.loadAnalyticsData();
     this.setupResizeObserver();
   }
 
   ngAfterViewInit(): void {
+    console.log('View initialized');
     this.viewInitialized = true;
     // Initialize charts if data is already loaded
     if (this.dataLoaded) {
@@ -99,15 +100,6 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
       case 'dashboard':
         this.router.navigate(['/admin-dashboard']);
         break;
-      // case 'viewAvailableEvents':
-      //   this.router.navigate(['/admin-dashboard']); // Navigate to admin dashboard and handle the action there
-      //   break;
-      // case 'viewPendingEvents':
-      //   this.router.navigate(['/admin-dashboard']); // Navigate to admin dashboard and handle the action there
-      //   break;
-      // case 'viewExpiredEvents':
-      //   this.router.navigate(['/admin-dashboard']); // Navigate to admin dashboard and handle the action there
-      //   break;
       case 'exportData':
         this.exportAnalyticsData();
         break;
@@ -130,90 +122,95 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  /*loadAnalyticsData(): void {
+  loadAnalyticsData(): void {
+    console.log('Loading analytics data...');
+    this.isLoading = true;
     this.loadingService.show();
 
-    // Call the admin analytics API endpoint
-    this.http.get<{ success: boolean; data: AnalyticsData }>('http://localhost:5000/api/analytics/admin', {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token') || sessionStorage.getItem('token')}`
-      }
-    }).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.analyticsData = response.data;
-          console.log('Analytics data loaded:', this.analyticsData);
-          this.dataLoaded = true;
-          this.loadingService.hide();
+    // Check authentication first
+    const token =
+      localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) {
+      console.error('No authentication token found');
+      this.loadingService.hide();
+      this.isLoading = false;
+      this.logout();
+      return;
+    }
 
-          // Initialize charts if view is ready
-          if (this.viewInitialized) {
-            this.initializeChartsWhenReady();
-          }
-        } else {
-          console.error('Failed to load analytics data');
-          this.loadingService.hide();
+    this.AnalyticsService.getAdminAnalytics().subscribe({
+      next: (data: AdminAnalytics) => {
+        console.log('Analytics data received:', data);
+
+        // Ensure data structure matches interface
+        this.analyticsData = {
+          totalEvents: data.totalEvents || 0,
+          upcomingEvents: data.upcomingEvents || 0,
+          expiredEvents: data.expiredEvents || 0,
+          totalRegistrations: data.totalRegistrations || 0,
+          eventsByCategory: data.eventsByCategory || {},
+          eventsByMonth: data.eventsByMonth || {},
+          registrationsByEvent: data.registrationsByEvent || [],
+          revenueByEvent: data.revenueByEvent || [],
+        };
+
+        console.log('Processed analytics data:', this.analyticsData);
+
+        this.dataLoaded = true;
+        this.isLoading = false;
+        this.loadingService.hide();
+
+        if (this.viewInitialized) {
+          this.initializeChartsWhenReady();
         }
       },
       error: (err) => {
         console.error('Error loading analytics data:', err);
+        this.isLoading = false;
         this.loadingService.hide();
-        // Handle authentication errors
-        if (err.status === 401 || err.status === 403) {
-          this.logout();
-        }
-      }
-    });
-  }*/
 
-  loadAnalyticsData(): void {
-    this.loadingService.show();
+        // Set default/empty data to prevent undefined errors
+        this.analyticsData = {
+          totalEvents: 0,
+          upcomingEvents: 0,
+          expiredEvents: 0,
+          totalRegistrations: 0,
+          eventsByCategory: {},
+          eventsByMonth: {},
+          registrationsByEvent: [],
+          revenueByEvent: [],
+        };
 
-    this.AnalyticsService.getAdminAnalytics().subscribe({
-      next: (data: AdminAnalytics) => {
-        this.analyticsData = data;
-        this.dataLoaded = true;
-        if (this.viewInitialized) this.initializeChartsWhenReady();
-        this.loadingService.hide();
-      },
-      error: (err) => {
-        console.error('Error loading analytics data:', err.message);
-        this.loadingService.hide();
-        if (err.message.includes('401') || err.message.includes('403')) {
+        // Check for authentication errors
+        if (
+          err.message &&
+          (err.message.includes('401') || err.message.includes('403'))
+        ) {
+          console.log('Authentication error, redirecting to login');
           this.logout();
+        } else {
+          // Show error message but continue with empty data
+          console.warn('Using empty data due to error:', err.message);
         }
       },
     });
   }
 
   private initializeChartsWhenReady(): void {
-    // Wait a bit for DOM to be fully ready
+    console.log('Initializing charts when ready...');
     setTimeout(() => {
       this.initializeAllCharts();
-    }, 300);
+    }, 500); // Increased timeout to ensure DOM is ready
   }
 
   private initializeAllCharts(): void {
-    // Dispose existing charts first to prevent multiple initialization
+    console.log('Initializing all charts...');
     this.disposeAllCharts();
-
-    // Initialize each chart individually with error handling
-    try {
-      this.initializeOverviewChart();
-    } catch (error) {
-      console.error('Error initializing overview chart:', error);
-    }
 
     try {
       this.initializeCategoryChart();
     } catch (error) {
       console.error('Error initializing category chart:', error);
-    }
-
-    try {
-      this.initializeMonthlyTrendsChart();
-    } catch (error) {
-      console.error('Error initializing monthly trends chart:', error);
     }
 
     try {
@@ -244,55 +241,6 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.charts = {};
   }
 
-  private initializeOverviewChart(): void {
-    const chartDom = document.getElementById('overviewChart');
-    if (!chartDom) {
-      console.warn('Overview chart container not found');
-      return;
-    }
-
-    const myChart = echarts.init(chartDom);
-    this.charts['overview'] = myChart;
-
-    const option = {
-      title: {
-        text: 'Key Performance Indicators',
-        left: 'center',
-        textStyle: { color: '#333', fontSize: 18, fontWeight: 'bold' },
-      },
-      tooltip: { trigger: 'item' },
-      series: [
-        {
-          type: 'gauge',
-          center: ['25%', '60%'],
-          radius: '50%',
-          detail: { formatter: '{value}' },
-          data: [
-            { value: this.analyticsData.totalEvents, name: 'Total Events' },
-          ],
-          axisLine: { lineStyle: { color: [[1, '#4CAF50']] } },
-        },
-        {
-          type: 'gauge',
-          center: ['75%', '60%'],
-          radius: '50%',
-          max: Math.max(this.analyticsData.totalRegistrations, 100),
-          detail: { formatter: '{value}' },
-          data: [
-            {
-              value: this.analyticsData.totalRegistrations,
-              name: 'Registrations',
-            },
-          ],
-          axisLine: { lineStyle: { color: [[1, '#2196F3']] } },
-        },
-      ],
-    };
-
-    myChart.setOption(option);
-    this.setupChartResize('overview');
-  }
-
   private initializeCategoryChart(): void {
     const chartDom = document.getElementById('categoryChart');
     if (!chartDom) {
@@ -300,15 +248,37 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    console.log(
+      'Initializing category chart with data:',
+      this.analyticsData.eventsByCategory
+    );
+
     const myChart = echarts.init(chartDom);
     this.charts['category'] = myChart;
 
-    const data = Object.entries(this.analyticsData.eventsByCategory).map(
+    const data = Object.entries(this.analyticsData.eventsByCategory || {}).map(
       ([name, value]) => ({
         name,
         value,
       })
     );
+
+    console.log('Category chart data:', data);
+
+    // Handle empty data case
+    if (data.length === 0) {
+      const option = {
+        title: {
+          text: 'Event Categories Distribution',
+          subtext: 'No category data available',
+          left: 'center',
+          textStyle: { color: '#333', fontSize: 16, fontWeight: 'bold' },
+        },
+      };
+      myChart.setOption(option);
+      this.setupChartResize('category');
+      return;
+    }
 
     const option = {
       title: {
@@ -349,83 +319,6 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.setupChartResize('category');
   }
 
-  private initializeMonthlyTrendsChart(): void {
-    const chartDom = document.getElementById('monthlyTrendsChart');
-    if (!chartDom) {
-      console.warn('Monthly trends chart container not found');
-      return;
-    }
-
-    const myChart = echarts.init(chartDom);
-    this.charts['monthlyTrends'] = myChart;
-
-    // Sort months chronologically
-    const monthOrder = [
-      'Jan 2025',
-      'Feb 2025',
-      'Mar 2025',
-      'Apr 2025',
-      'May 2025',
-      'Jun 2025',
-      'Jul 2024',
-      'Aug 2024',
-      'Sep 2024',
-      'Oct 2024',
-      'Nov 2024',
-      'Dec 2024',
-    ];
-
-    const months = monthOrder.filter((month) =>
-      this.analyticsData.eventsByMonth.hasOwnProperty(month)
-    );
-    const eventCounts = months.map(
-      (month) => this.analyticsData.eventsByMonth[month] || 0
-    );
-
-    const option = {
-      title: {
-        text: 'Monthly Event Trends',
-        left: 'center',
-        textStyle: { color: '#333', fontSize: 16, fontWeight: 'bold' },
-      },
-      tooltip: {
-        trigger: 'axis',
-        formatter: function (params: any) {
-          return `${params[0].name}<br/>Events: ${params[0].value}`;
-        },
-      },
-      xAxis: {
-        type: 'category',
-        data: months,
-        axisPointer: { type: 'shadow' },
-        axisLabel: { rotate: 45 },
-      },
-      yAxis: {
-        type: 'value',
-        name: 'Number of Events',
-      },
-      series: [
-        {
-          name: 'Events',
-          type: 'line',
-          data: eventCounts,
-          itemStyle: { color: '#4CAF50' },
-          lineStyle: { width: 3 },
-          areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-              { offset: 0, color: 'rgba(76, 175, 80, 0.3)' },
-              { offset: 1, color: 'rgba(76, 175, 80, 0.1)' },
-            ]),
-          },
-          smooth: true,
-        },
-      ],
-    };
-
-    myChart.setOption(option);
-    this.setupChartResize('monthlyTrends');
-  }
-
   private initializeRegistrationsChart(): void {
     const chartDom = document.getElementById('registrationsChart');
     if (!chartDom) {
@@ -433,11 +326,18 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    console.log(
+      'Initializing registrations chart with data:',
+      this.analyticsData.registrationsByEvent
+    );
+
     const myChart = echarts.init(chartDom);
     this.charts['registrations'] = myChart;
 
     // Get events with registrations > 0, sorted by registrations
-    const eventsWithRegistrations = this.analyticsData.registrationsByEvent
+    const eventsWithRegistrations = (
+      this.analyticsData.registrationsByEvent || []
+    )
       .filter((item) => item.registrations > 0)
       .sort((a, b) => b.registrations - a.registrations)
       .slice(0, 10);
@@ -522,11 +422,16 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    console.log(
+      'Initializing revenue chart with data:',
+      this.analyticsData.revenueByEvent
+    );
+
     const myChart = echarts.init(chartDom);
     this.charts['revenue'] = myChart;
 
     // Get events with revenue > 0, sorted by revenue
-    const eventsWithRevenue = this.analyticsData.revenueByEvent
+    const eventsWithRevenue = (this.analyticsData.revenueByEvent || [])
       .filter((item) => item.revenue > 0)
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 10);
@@ -617,13 +522,20 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    console.log('Initializing event status chart');
+
     const myChart = echarts.init(chartDom);
     this.charts['eventStatus'] = myChart;
 
     const data = [
-      { name: 'Upcoming Events', value: this.analyticsData.upcomingEvents },
-      { name: 'Expired Events', value: this.analyticsData.expiredEvents },
+      {
+        name: 'Upcoming Events',
+        value: this.analyticsData.upcomingEvents || 0,
+      },
+      { name: 'Expired Events', value: this.analyticsData.expiredEvents || 0 },
     ];
+
+    console.log('Event status data:', data);
 
     const option = {
       title: {
@@ -674,6 +586,7 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   refreshData(): void {
+    console.log('Refreshing data...');
     // Dispose charts before refreshing data
     this.disposeAllCharts();
     this.dataLoaded = false;

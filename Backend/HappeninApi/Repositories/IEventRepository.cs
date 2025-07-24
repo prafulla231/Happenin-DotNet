@@ -11,12 +11,16 @@ namespace HappeninApi.Repositories
     {
         Task<Event> CreateEventAsync(Event evnt);
         Task<Event?> GetByIdAsync(Guid id);
-        
+
         // Updated methods with pagination support
         Task<(IEnumerable<Event> Events, int TotalCount)> GetEventsByStatusAsync(EventStatus status, PaginationHelper pagination);
         Task<(IEnumerable<Event> Events, int TotalCount)> GetAllEventsAsync(PaginationHelper pagination);
         Task<(IEnumerable<Event> Events, int TotalCount)> GetEventsByOrganizerAsync(Guid organizerId, PaginationHelper pagination);
-        
+
+        Task<List<Event>> GetEventsByOrganizerIdAsync(Guid organizerId);
+        Task<List<Event>> GetAllNonDeletedEventsAsync();
+
+
         Task MarkExpiredEventsAsync();
         Task<bool> UpdateEventStatusAsync(Guid id, EventStatus newStatus);
         Task<bool> DeleteEventAsync(Guid id);

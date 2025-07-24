@@ -34,7 +34,7 @@ namespace HappeninApi.Repositories
             );
 
             var totalCount = (int)await _events.CountDocumentsAsync(filter);
-            
+
             var events = await _events
                 .Find(filter)
                 .Skip(pagination.Skip)
@@ -50,7 +50,7 @@ namespace HappeninApi.Repositories
             var filter = Builders<Event>.Filter.Eq(e => e.IsDeleted, false);
 
             var totalCount = (int)await _events.CountDocumentsAsync(filter);
-            
+
             var events = await _events
                 .Find(filter)
                 .Skip(pagination.Skip)
@@ -69,7 +69,7 @@ namespace HappeninApi.Repositories
             );
 
             var totalCount = (int)await _events.CountDocumentsAsync(filter);
-            
+
             var events = await _events
                 .Find(filter)
                 .Skip(pagination.Skip)
@@ -101,7 +101,7 @@ namespace HappeninApi.Repositories
                 Builders<Event>.Filter.Eq(e => e.Id, id),
                 Builders<Event>.Filter.Eq(e => e.IsDeleted, false)
             );
-            
+
             var update = Builders<Event>.Update
                 .Set(e => e.Status, newStatus)
                 .Set(e => e.UpdatedAt, DateTime.UtcNow);
@@ -145,5 +145,22 @@ namespace HappeninApi.Repositories
             var result = await _events.UpdateOneAsync(filter, update);
             return result.MatchedCount > 0;
         }
+
+        public async Task<List<Event>> GetEventsByOrganizerIdAsync(Guid organizerId)
+        {
+            var filter = Builders<Event>.Filter.And(
+                Builders<Event>.Filter.Eq(e => e.CreatedById, organizerId),
+                Builders<Event>.Filter.Eq(e => e.IsDeleted, false)
+            );
+
+            return await _events.Find(filter).ToListAsync();
+        }
+
+        public async Task<List<Event>> GetAllNonDeletedEventsAsync()
+        {
+            var filter = Builders<Event>.Filter.Eq(e => e.IsDeleted, false);
+            return await _events.Find(filter).ToListAsync();
+        }
+
     }
 }

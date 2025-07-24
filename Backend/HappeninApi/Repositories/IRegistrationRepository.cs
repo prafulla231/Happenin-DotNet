@@ -9,4 +9,7 @@ public interface IRegistrationRepository
     Task<IEnumerable<User>> GetUsersForEventAsync(Guid eventId);
     Task<IEnumerable<Event>> GetRegisteredEventsAsync(Guid userId);
     Task<bool> DeleteRegistrationAsync(Guid eventId, Guid userId);
+
+    Task<List<Registration>> GetByEventIdsAsync(List<Guid> eventIds);
+
 }

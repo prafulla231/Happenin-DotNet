@@ -90,4 +90,15 @@ public class RegistrationRepository : IRegistrationRepository
         var result = await _registrations.DeleteOneAsync(r => r.EventId == eventId && r.UserId == userId);
         return result.DeletedCount > 0;
     }
+
+    public async Task<List<Registration>> GetByEventIdsAsync(List<Guid> eventIds)
+    {
+        var filter = Builders<Registration>.Filter.And(
+            Builders<Registration>.Filter.In(r => r.EventId, eventIds),
+            Builders<Registration>.Filter.Eq(r => r.IsDeleted, false)
+        );
+
+        return await _registrations.Find(filter).ToListAsync();
+    }
+
 }
