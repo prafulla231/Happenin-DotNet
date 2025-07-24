@@ -2,10 +2,11 @@
 <div class="analytics-container">
   <!-- Header -->
   <app-header
-  [title]="'Analytics Dashboard'"
-  [buttons]="organizerButtons"
-  (buttonClick)="handleHeaderAction($event)">
-</app-header>
+    [title]="'Analytics Dashboard'"
+    [buttons]="organizerButtons"
+    (buttonClick)="handleHeaderAction($event)"
+  >
+  </app-header>
 
   <!-- Loading State -->
   <div *ngIf="loading" class="loading-container">
@@ -84,7 +85,8 @@
             baseChart
             [data]="categoryChartData"
             [type]="getChartType('pie')"
-            [options]="pieChartOptions">
+            [options]="pieChartOptions"
+          >
           </canvas>
         </div>
       </div>
@@ -102,7 +104,8 @@
             baseChart
             [data]="monthlyChartData"
             [type]="getChartType('bar')"
-            [options]="barChartOptions">
+            [options]="barChartOptions"
+          >
           </canvas>
         </div>
       </div>
@@ -120,7 +123,8 @@
             baseChart
             [data]="registrationsChartData"
             [type]="getChartType('bar')"
-            [options]="barChartOptions">
+            [options]="barChartOptions"
+          >
           </canvas>
         </div>
       </div>
@@ -138,7 +142,8 @@
             baseChart
             [data]="revenueChartData"
             [type]="getChartType('doughnut')"
-            [options]="doughnutChartOptions">
+            [options]="doughnutChartOptions"
+          >
           </canvas>
         </div>
       </div>
@@ -153,8 +158,18 @@
   </div>
 
   <app-footer
-  brandName="Happenin' Organizer"
-  contactEmail="happenin.events.app@gmail.com"
-  [showSocials]="false">
-</app-footer>
+    brandName="Happenin' Organizer"
+    contactEmail="happenin.events.app@gmail.com"
+    [showSocials]="false"
+  >
+  </app-footer>
 </div>
+
+<app-custom-alert
+  [alertData]="customAlert"
+  [autoCloseDuration]="2000"
+  (alertClosed)="closeAlert()"
+  (alertConfirmed)="handleAlertConfirm()"
+  (alertCancelled)="handleAlertCancel()"
+>
+</app-custom-alert>

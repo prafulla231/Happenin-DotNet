@@ -11,6 +11,7 @@ import { HeaderComponent, HeaderButton } from '../../common/header/header';
 import { FooterComponent } from '../../common/footer/footer';
 import { AnalyticsService } from '../../services/analytics.service';
 import { AdminAnalytics } from '../../interfaces/analytics.interface';
+import { CustomAlertComponent } from '../custom-alert/custom-alert';
 
 export interface AnalyticsData {
   totalEvents: number;
@@ -23,10 +24,27 @@ export interface AnalyticsData {
   revenueByEvent: { eventTitle: string; revenue: number }[];
 }
 
+export interface CustomAlert {
+  show: boolean;
+  type: 'success' | 'error' | 'warning' | 'info' | 'confirm';
+  title: string;
+  message: string;
+  confirmAction?: () => void;
+  cancelAction?: () => void;
+  showCancel?: boolean;
+  autoClose?: boolean;
+}
+
 @Component({
   selector: 'app-analytics',
   standalone: true,
-  imports: [CommonModule, RouterModule, HeaderComponent, FooterComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    HeaderComponent,
+    FooterComponent,
+    CustomAlertComponent,
+  ],
   templateUrl: './admin-analytics.html',
   styleUrls: ['./admin-analytics.scss'],
 })
@@ -109,6 +127,84 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
       case 'logout':
         this.logout();
         break;
+    }
+  }
+
+  customAlert: CustomAlert = {
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    showCancel: false,
+    autoClose: false,
+  };
+
+  private alertTimeout: any;
+
+  showAlert(
+    type: 'success' | 'error' | 'warning' | 'info',
+    title: string,
+    message: string,
+    duration: number = 2000
+  ) {
+    this.clearAlertTimeout(); // Clear any previous timeout
+
+    this.customAlert = {
+      show: true,
+      type,
+      title,
+      message,
+      showCancel: false,
+    };
+
+    this.alertTimeout = setTimeout(() => {
+      this.closeAlert();
+    }, duration);
+  }
+
+  showConfirmation(
+    title: string,
+    message: string,
+    confirmAction: () => void,
+    cancelAction?: () => void
+  ) {
+    this.clearAlertTimeout(); // Prevent accidental closure
+    this.customAlert = {
+      show: true,
+      type: 'confirm',
+      title,
+      message,
+      confirmAction,
+      cancelAction,
+      showCancel: true,
+    };
+  }
+
+  handleAlertConfirm() {
+    if (this.customAlert.confirmAction) {
+      this.customAlert.confirmAction();
+    }
+    this.closeAlert();
+  }
+
+  handleAlertCancel() {
+    if (this.customAlert.cancelAction) {
+      this.customAlert.cancelAction();
+    }
+    this.closeAlert();
+  }
+
+  closeAlert() {
+    this.customAlert.show = false;
+    this.customAlert.confirmAction = undefined;
+    this.customAlert.cancelAction = undefined;
+    this.clearAlertTimeout();
+  }
+
+  private clearAlertTimeout() {
+    if (this.alertTimeout) {
+      clearTimeout(this.alertTimeout);
+      this.alertTimeout = null;
     }
   }
 
@@ -606,9 +702,22 @@ export class AnalyticsComponent implements OnInit, OnDestroy, AfterViewInit {
     URL.revokeObjectURL(url);
   }
 
-  logout(): void {
-    localStorage.clear();
-    sessionStorage.clear();
-    this.router.navigate(['/login']);
+  logout() {
+    this.showConfirmation(
+      'Logout Confirmation',
+      'Are you sure you want to logout?',
+      () => {
+        localStorage.clear();
+        sessionStorage.clear();
+        this.showAlert(
+          'success',
+          'Logged Out',
+          'You have been logged out successfully.'
+        );
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1500);
+      }
+    );
   }
 }

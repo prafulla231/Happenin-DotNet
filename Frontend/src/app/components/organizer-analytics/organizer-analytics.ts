@@ -10,6 +10,18 @@ import { RouterModule, Router } from '@angular/router';
 import { HeaderComponent, HeaderButton } from '../../common/header/header';
 import { FooterComponent } from '../../common/footer/footer';
 import { AnalyticsService } from '../../services/analytics.service';
+import { CustomAlertComponent } from '../custom-alert/custom-alert';
+
+export interface CustomAlert {
+  show: boolean;
+  type: 'success' | 'error' | 'warning' | 'info' | 'confirm';
+  title: string;
+  message: string;
+  confirmAction?: () => void;
+  cancelAction?: () => void;
+  showCancel?: boolean;
+  autoClose?: boolean;
+}
 
 @Component({
   selector: 'app-organizer-analytics',
@@ -20,6 +32,7 @@ import { AnalyticsService } from '../../services/analytics.service';
     HeaderComponent,
     FooterComponent,
     RouterModule,
+    CustomAlertComponent,
   ],
   templateUrl: './organizer-analytics.html',
   styleUrls: ['./organizer-analytics.scss'],
@@ -146,6 +159,14 @@ export class OrganizerAnalyticsComponent implements OnInit, OnDestroy {
     ],
   };
 
+  customAlert: CustomAlert = {
+    show: false,
+    type: 'info',
+    title: '',
+    message: '',
+    showCancel: false,
+  };
+
   constructor(
     private analyticsService: AnalyticsService,
     private router: Router // Added missing Router injection
@@ -176,6 +197,66 @@ export class OrganizerAnalyticsComponent implements OnInit, OnDestroy {
         this.logout();
         break;
     }
+  }
+
+  showAlert(
+    type: 'success' | 'error' | 'warning' | 'info',
+    title: string,
+    message: string,
+    autoClose: boolean = true,
+    duration: number = 2000
+  ) {
+    this.customAlert = {
+      show: true,
+      type,
+      title,
+      message,
+      showCancel: false,
+      autoClose: autoClose,
+    };
+
+    // Auto-close after specified duration
+    if (autoClose) {
+      setTimeout(() => {
+        this.closeAlert();
+      }, duration);
+    }
+  }
+
+  showConfirmation(
+    title: string,
+    message: string,
+    confirmAction: () => void,
+    cancelAction?: () => void
+  ) {
+    this.customAlert = {
+      show: true,
+      type: 'confirm',
+      title,
+      message,
+      confirmAction,
+      cancelAction,
+      showCancel: true,
+    };
+  }
+
+  handleAlertConfirm() {
+    if (this.customAlert.confirmAction) {
+      this.customAlert.confirmAction();
+    }
+    this.closeAlert();
+  }
+
+  handleAlertCancel() {
+    if (this.customAlert.cancelAction) {
+      this.customAlert.cancelAction();
+    }
+    this.closeAlert();
+  }
+  closeAlert() {
+    this.customAlert.show = false;
+    this.customAlert.confirmAction = undefined;
+    this.customAlert.cancelAction = undefined;
   }
 
   loadAnalyticsData(): void {
@@ -382,9 +463,12 @@ export class OrganizerAnalyticsComponent implements OnInit, OnDestroy {
     URL.revokeObjectURL(url);
   }
 
-  logout(): void {
-    localStorage.clear();
-    sessionStorage.clear();
-    this.router.navigate(['/login']);
+  async logout() {
+    this.showConfirmation('Confirm', 'Are you sure you want to logout?', () => {
+      localStorage.clear();
+      sessionStorage.clear();
+      this.showAlert('success', 'Success', 'You have been logged out');
+      setTimeout(() => (window.location.href = '/login'), 500);
+    });
   }
 }

@@ -739,7 +739,6 @@ export class OrganizerDashboardComponent implements OnDestroy {
 
   async logout() {
     this.showConfirmation('Confirm', 'Are you sure you want to logout?', () => {
-      // Confirm action - what happens when user clicks confirm
       localStorage.clear();
       sessionStorage.clear();
       this.showAlert('success', 'Success', 'You have been logged out');
