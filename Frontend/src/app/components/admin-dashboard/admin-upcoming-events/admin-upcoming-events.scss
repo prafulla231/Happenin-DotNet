@@ -363,14 +363,7 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
   }
 }
 
-// Stagger animation for multiple cards
-.admin-event-card:nth-child(1) { animation-delay: 0.1s; }
-.admin-event-card:nth-child(2) { animation-delay: 0.2s; }
-.admin-event-card:nth-child(3) { animation-delay: 0.3s; }
-.admin-event-card:nth-child(4) { animation-delay: 0.4s; }
-.admin-event-card:nth-child(5) { animation-delay: 0.5s; }
-.admin-event-card:nth-child(6) { animation-delay: 0.6s; }
-
+// Modal Overlay - Remove inline styles from HTML and use this
 .admin-modal-overlay {
   position: fixed !important;
   top: 0 !important;
@@ -387,22 +380,22 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
   justify-content: center;
   z-index: 9999 !important;
   padding: 20px;
-  animation: admin-modalOverlayFadeIn 0.3s ease-out;
+  animation: modalOverlayFadeIn 0.3s ease-out;
   cursor: pointer;
 }
 
 // Modal Container
 .admin-event-modal {
-  @include admin-glass-effect;
-  @include admin-3d-shadow;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
   border-radius: 24px;
   max-width: 800px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   cursor: default;
-  animation: admin-modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(255, 255, 255, 0.5);
 
   // Custom scrollbar for modal
@@ -420,7 +413,7 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
     border-radius: 4px;
 
     &:hover {
-      background: $admin-primary-purple;
+      background: #7c3aed;
     }
   }
 }
@@ -441,7 +434,7 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
   font-weight: 700;
   margin: 0;
   line-height: 1.3;
-  background: linear-gradient(135deg, $admin-text-dark 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #2c3e50 0%, #8b5cf6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -471,9 +464,8 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
   }
 
   &:hover {
-    // background: rgba(255, 255, 255, 1);
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 00 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
   }
 
   &:active {
@@ -513,10 +505,6 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
     font-size: 20px;
     font-weight: 600;
     margin: 0 0 16px 0;
-    // background: linear-gradient(135deg, $admin-text-dark 0%, $admin-primary-purple 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
 
   p {
@@ -560,20 +548,6 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
   margin-bottom: 1rem;
 
   .admin-detail-icon {
-  font-size: 20px;
-  font-weight: 600;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: rgb(181, 9, 9) !important;
-  border-radius: 8px;
-  filter: grayscale(100%) brightness(1.2);
-}
-
-  .admin-detail-icon {
     font-size: 1.5rem;
     width: 32px;
     height: 32px;
@@ -581,25 +555,17 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    // border-radius: 50%;
-    color: rgb(147, 19, 19);
+    border-radius: 8px;
+    color: white;
   }
 
   .admin-detail-title {
     font-size: 1.1rem;
     font-weight: 700;
     color: #2c3e50;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
-}
-
-
-
-.admin-detail-title {
-  color: #2c3e50;
-  font-size: 16px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .admin-detail-content {
@@ -622,10 +588,10 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
     }
   }
 
-  .price-highlight {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: #f57c00;
+  .admin-price-highlight {
+    font-size: 1.5rem !important;
+    font-weight: 800 !important;
+    color: #f57c00 !important;
     background: linear-gradient(135deg, #ffc107, #ff9800);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -633,6 +599,69 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
   }
 }
 
+// Modal Actions
+.admin-modal-actions {
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.admin-modal-delete-btn {
+  background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 71, 87, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Staggered animations for event cards
+.admin-event-card {
+  &:nth-child(1) { animation-delay: 0.1s; }
+  &:nth-child(2) { animation-delay: 0.2s; }
+  &:nth-child(3) { animation-delay: 0.3s; }
+  &:nth-child(4) { animation-delay: 0.4s; }
+  &:nth-child(5) { animation-delay: 0.5s; }
+  &:nth-child(6) { animation-delay: 0.6s; }
+}
+
+// Animations
+@keyframes modalOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
 
 // Custom Alert Overlay Styles - FIXED VERSION
 .custom-alert-overlay {

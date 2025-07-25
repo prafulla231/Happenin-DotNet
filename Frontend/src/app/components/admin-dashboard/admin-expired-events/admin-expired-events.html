@@ -52,15 +52,6 @@
   class="admin-modal-overlay"
   *ngIf="showEventDetails"
   (click)="closeEventDetails()"
-  style="
-    display: flex !important;
-    z-index: 9999 !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-  "
 >
   <div class="admin-event-modal" (click)="$event.stopPropagation()">
     <div class="admin-modal-header">
@@ -107,8 +98,7 @@
             <span class="admin-detail-title">Location</span>
           </div>
           <div class="admin-detail-content">
-            <p>{{ selectedEvent.location }}</p>
-            <p><strong>City:</strong> {{ selectedEvent.city }}</p>
+            <p><strong>City:</strong> {{ selectedEvent.location.city }}</p>
           </div>
         </div>
 
