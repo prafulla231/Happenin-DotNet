@@ -162,7 +162,7 @@
       <div class="admin-modal-actions">
         <button
           class="admin-modal-delete-btn"
-          (click)="confirmDenyEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title, selectedEvent.date, selectedEvent.timeSlot, selectedEvent.location); closeEventDetails()"
+          (click)="confirmDenyEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title, selectedEvent.date, selectedEvent.timeSlot, selectedEvent.location.city); closeEventDetails()"
         >
           <span class="btn-icon">🗑️</span>
           <span class="btn-text">Deny Event</span>

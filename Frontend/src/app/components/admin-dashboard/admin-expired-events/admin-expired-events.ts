@@ -30,21 +30,21 @@ export interface Event {
 }
 
 export interface Location {
-  id: string; // This should be a GUID string
+  id: string;
   state: string;
   city: string;
   placeName: string;
   address: string;
   maxSeatingCapacity: number;
   amenities: string[];
-  bookings?: Booking[]; // This might be optional
+  bookings?: Booking[];
 }
 
 export interface Booking {
-  id: string; // This should be a GUID string (BookingId)
-  date: string; // or Date type
+  id: string;
+  date: string;
   timeSlot: string;
-  eventId: string; // This should be a GUID string
+  eventId: string;
 }
 
 export interface RegisteredUser {
@@ -120,13 +120,7 @@ export class AdminExpiredEvents implements OnInit {
       case 'dashboard':
         this.router.navigate(['/admin-dashboard']);
         break;
-      // case 'viewPendingEvents':
-      //   // Navigate to pending events if you have a separate component for it
-      //   this.router.navigate(['/admin-dashboard']);
-      //   break;
-      // case 'viewAvailableEvents':
-      //   this.router.navigate(['/admin-upcoming-events']);
-      //   break;
+
       case 'viewAnalytics':
         this.router.navigate(['/admin-analytics']);
         break;
@@ -165,7 +159,7 @@ export class AdminExpiredEvents implements OnInit {
     confirmAction: () => void,
     cancelAction?: () => void
   ) {
-    this.clearAlertTimeout(); // Prevent accidental closure
+    this.clearAlertTimeout();
     this.customAlert = {
       show: true,
       type: 'confirm',
@@ -211,8 +205,7 @@ export class AdminExpiredEvents implements OnInit {
     this.eventService.getExpiredEvents().subscribe({
       next: (events: any[]) => {
         this.expiredEvents = events;
-        // this.filteredExpiredEvents = [...events];
-        // this.extractFilterOptions();
+
         this.loadingService.hide();
         this.showAlert(
           'success',
@@ -279,7 +272,7 @@ export class AdminExpiredEvents implements OnInit {
               userId: user.userId,
               name: user.name,
               email: user.email,
-              _id: user.id || user.userId, // Use id if available, otherwise use userId
+              _id: user.id || user.userId,
             })) || [],
           currentRegistration: res.data?.currentRegistration || 0,
         };
