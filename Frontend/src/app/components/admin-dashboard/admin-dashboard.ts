@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { RouterModule, Router } from '@angular/router';
 // import { FormsModule } from '@angular/forms';
 import { LoadingService } from '../loading';
+import { UserService } from '../../services/user.service';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -130,7 +131,11 @@ interface DashboardCard {
   templateUrl: './admin-dashboard.html',
   styleUrls: ['./admin-dashboard.scss'],
 })
-export class AdminDashboardComponent {
+export class AdminDashboardComponent implements OnInit {
+  ngOnInit(): void {
+    // Add this to your existing ngOnInit or create one if it doesn't exist
+    this.loadUserCounts();
+  }
   private fb = inject(FormBuilder);
 
   userName: string | null = null;
@@ -140,6 +145,18 @@ export class AdminDashboardComponent {
   // get displayUserName(): string {
   //     return this.userName || 'Guest';
   //   }
+
+  userCounts = {
+    users: 0,
+    organizers: 0,
+    admins: 0,
+  };
+
+  downloadingData = {
+    users: false,
+    organizers: false,
+    admins: false,
+  };
 
   adminButtons: HeaderButton[] = [
     { text: 'Logout', action: 'logout', style: 'primary' },
@@ -258,7 +275,8 @@ export class AdminDashboardComponent {
     private loadingService: LoadingService,
     private authService: AuthService,
     private locationService: LocationService,
-    private router: Router
+    private router: Router,
+    private userService: UserService
   ) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -604,5 +622,168 @@ export class AdminDashboardComponent {
       amenities: [],
     };
     this.availablecitys = [];
+  }
+
+  loadUserCounts(): void {
+    // Load users count
+    this.userService.getAllUsers().subscribe({
+      next: (users) => {
+        this.userCounts.users = users.length;
+      },
+      error: (err) => console.error('Error loading users count:', err),
+    });
+
+    // Load organizers count
+    this.userService.getAllOrganizers().subscribe({
+      next: (organizers) => {
+        this.userCounts.organizers = organizers.length;
+      },
+      error: (err) => console.error('Error loading organizers count:', err),
+    });
+
+    // Load admins count
+    this.userService.getAllAdmins().subscribe({
+      next: (admins) => {
+        this.userCounts.admins = admins.length;
+      },
+      error: (err) => console.error('Error loading admins count:', err),
+    });
+  }
+
+  downloadUserData(type: 'users' | 'organizers' | 'admins'): void {
+    this.downloadingData[type] = true;
+
+    let apiCall;
+    let filename;
+
+    switch (type) {
+      case 'users':
+        apiCall = this.userService.getAllUsers();
+        filename = 'all_users.xlsx';
+        break;
+      case 'organizers':
+        apiCall = this.userService.getAllOrganizers();
+        filename = 'all_organizers.xlsx';
+        break;
+      case 'admins':
+        apiCall = this.userService.getAllAdmins();
+        filename = 'all_admins.xlsx';
+        break;
+    }
+
+    apiCall.subscribe({
+      next: (data) => {
+        this.exportToExcel(data, filename, type);
+        this.downloadingData[type] = false;
+        this.showAlert(
+          'success',
+          'Download Complete',
+          `${type} data downloaded successfully!`
+        );
+      },
+      error: (err) => {
+        console.error(`Error downloading ${type} data:`, err);
+        this.downloadingData[type] = false;
+        this.showAlert(
+          'error',
+          'Download Failed',
+          `Failed to download ${type} data. Please try again.`
+        );
+      },
+    });
+  }
+
+  private exportToExcel(data: any[], filename: string, type: string): void {
+    // Create workbook and worksheet
+    const ws: any = {};
+
+    if (data.length === 0) {
+      this.showAlert(
+        'warning',
+        'No Data',
+        `No ${type} data available to download.`
+      );
+      return;
+    }
+
+    // Define headers based on type
+    let headers: string[] = [];
+    let processedData: any[] = [];
+
+    switch (type) {
+      case 'users':
+        headers = ['ID', 'Name', 'Email', 'Phone', 'Created Date'];
+        processedData = data.map((user) => ({
+          ID: user.id || user.userId || '',
+          Name: user.name || '',
+          Email: user.email || '',
+          Phone: user.phone || '',
+          'Created Date': user.createdAt
+            ? new Date(user.createdAt).toLocaleDateString()
+            : '',
+        }));
+        break;
+      case 'organizers':
+        headers = [
+          'ID',
+          'Name',
+          'Email',
+          'Phone',
+          'Organization',
+          'Created Date',
+        ];
+        processedData = data.map((organizer) => ({
+          ID: organizer.id || organizer.userId || '',
+          Name: organizer.name || '',
+          Email: organizer.email || '',
+          Phone: organizer.phone || '',
+          Organization: organizer.organization || '',
+          'Created Date': organizer.createdAt
+            ? new Date(organizer.createdAt).toLocaleDateString()
+            : '',
+        }));
+        break;
+      case 'admins':
+        headers = ['ID', 'Name', 'Email', 'Phone', 'Role', 'Created Date'];
+        processedData = data.map((admin) => ({
+          ID: admin.id || admin.userId || '',
+          Name: admin.name || '',
+          Email: admin.email || '',
+          Phone: admin.phone || '',
+          Role: admin.role || 'Admin',
+          'Created Date': admin.createdAt
+            ? new Date(admin.createdAt).toLocaleDateString()
+            : '',
+        }));
+        break;
+    }
+
+    // Create CSV content
+    const csvContent = [
+      headers.join(','),
+      ...processedData.map((row) =>
+        headers
+          .map((header) => {
+            const value = row[header] || '';
+            // Escape commas and quotes in CSV
+            return typeof value === 'string' &&
+              (value.includes(',') || value.includes('"'))
+              ? `"${value.replace(/"/g, '""')}"`
+              : value;
+          })
+          .join(',')
+      ),
+    ].join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename.replace('.xlsx', '.csv'));
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }

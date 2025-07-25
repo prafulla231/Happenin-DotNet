@@ -354,6 +354,63 @@
     </div>
   </div>
 
+  <!-- User Data Cards Section -->
+  <div class="user-data-section">
+    <h2 class="section-title">User Data Management</h2>
+    <div class="user-data-cards">
+      <!-- All Users Card -->
+      <div class="user-data-card users-card">
+        <div class="user-data-icon">👥</div>
+        <div class="user-data-content">
+          <h4>All Users</h4>
+          <p class="user-count">{{ userCounts.users }} users</p>
+          <button
+            class="download-btn"
+            (click)="downloadUserData('users')"
+            [disabled]="downloadingData.users"
+          >
+            <span *ngIf="!downloadingData.users">📥 Download Excel</span>
+            <span *ngIf="downloadingData.users">⏳ Downloading...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- All Organizers Card -->
+      <div class="user-data-card organizers-card">
+        <div class="user-data-icon">🎭</div>
+        <div class="user-data-content">
+          <h4>All Organizers</h4>
+          <p class="user-count">{{ userCounts.organizers }} organizers</p>
+          <button
+            class="download-btn"
+            (click)="downloadUserData('organizers')"
+            [disabled]="downloadingData.organizers"
+          >
+            <span *ngIf="!downloadingData.organizers">📥 Download Excel</span>
+            <span *ngIf="downloadingData.organizers">⏳ Downloading...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- All Admins Card -->
+      <div class="user-data-card admins-card">
+        <div class="user-data-icon">🛡️</div>
+        <div class="user-data-content">
+          <h4>All Admins</h4>
+          <p class="user-count">{{ userCounts.admins }} admins</p>
+          <button
+            class="download-btn"
+            (click)="downloadUserData('admins')"
+            [disabled]="downloadingData.admins"
+          >
+            <span *ngIf="!downloadingData.admins">📥 Download Excel</span>
+            <span *ngIf="downloadingData.admins">⏳ Downloading...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <app-footer
     brandName="Happenin' Admin"
     contactEmail="happenin.events.app@gmail.com"

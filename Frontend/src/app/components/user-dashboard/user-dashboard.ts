@@ -38,9 +38,6 @@ export interface Event {
   organization?: string;
 }
 
-
-
-
 export interface CustomAlert {
   show: boolean;
   type: 'success' | 'error' | 'warning' | 'info' | 'confirm';
@@ -118,14 +115,13 @@ export class UserDashboardComponent implements OnDestroy {
   private searchTimeout: any;
   // tempCity: string = '';
 
-
   //  userName = 'John Doe';
   //  Math = Math;
 
   get displayUserName(): string {
     return this.userName || 'Guest';
   }
-// tempcity: string ='';
+  // tempcity: string ='';
 
   headerButtons: HeaderButton[] = [
     { text: 'Available Events', action: 'scrollToAvailableEvents' },
@@ -194,27 +190,27 @@ export class UserDashboardComponent implements OnDestroy {
   isLoading = false;
 
   constructor(
-  private http: HttpClient,
-  private router: Router,
-  private loadingService: LoadingService,
-  private authService: AuthService,
-  private eventService: EventService,
-  private locationService: LocationService,
-  private ApprovalService: ApprovalService,
-  private emailService: EmailService
-) {
-  this.showFilters = false;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+    private http: HttpClient,
+    private router: Router,
+    private loadingService: LoadingService,
+    private authService: AuthService,
+    private eventService: EventService,
+    private locationService: LocationService,
+    private ApprovalService: ApprovalService,
+    private emailService: EmailService
+  ) {
+    this.showFilters = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Decode token first, then fetch events
-  this.decodeToken();
+    // Decode token first, then fetch events
+    this.decodeToken();
 
-  // Add a small delay to ensure token decoding completes
-  setTimeout(() => {
-    this.fetchEvents(this.currentPage);
-    this.loadRegisteredEvents();
-  }, 100);
-}
+    // Add a small delay to ensure token decoding completes
+    setTimeout(() => {
+      this.fetchEvents(this.currentPage);
+      this.loadRegisteredEvents();
+    }, 100);
+  }
   showFilters: boolean = false;
   // Custom Alert Methods
   showAlert(
@@ -370,20 +366,20 @@ export class UserDashboardComponent implements OnDestroy {
     });
   }
 
- fetchEvents(page: number = 1): void {
-  this.isLoading = true;
+  fetchEvents(page: number = 1): void {
+    this.isLoading = true;
 
-  this.eventService
-    .getPaginatedEvents(page, this.eventsPerPage)
-    .subscribe({
+    this.eventService.getPaginatedEvents(page, this.eventsPerPage).subscribe({
       next: (response) => {
         if (response && Array.isArray(response.data)) {
           // Map events and extract city from location
           this.events = (response.data as any[]).map((event) => ({
             ...event,
-            tempCity: this.extractCityFromLocationObject(event.location) || event.city || 'Unknown'
+            tempCity:
+              this.extractCityFromLocationObject(event.location) ||
+              event.city ||
+              'Unknown',
           }));
-
 
           console.log('Fetched events:', this.events);
 
@@ -395,7 +391,6 @@ export class UserDashboardComponent implements OnDestroy {
           this.currentPage = response.currentPage || 1;
           this.totalPages = response.totalPages || 1;
           this.eventsPerPage = response.pageSize || this.eventsPerPage;
-
         } else {
           this.showAlert('error', 'Invalid Response', 'Unexpected data format');
         }
@@ -406,42 +401,49 @@ export class UserDashboardComponent implements OnDestroy {
       },
       complete: () => {
         this.isLoading = false;
-      }
-    });
-}
-
-fetchEventsWithFilters(page: number = 1, filters: any = {}): void {
-  this.isLoading = true;
-
-  this.eventService
-    .getPaginatedEvents(page, this.eventsPerPage, filters)
-    .subscribe({
-      next: (response) => {
-        if (response && Array.isArray(response.data)) {
-          this.events = (response.data as any[]).map((event) => ({
-            ...event,
-            tempCity: this.extractCityFromLocationObject(event.location) || event.city || 'Unknown'
-          }));
-
-          this.paginatedEvents = [...this.events];
-          this.filteredEvents = [...this.events];
-
-          this.currentPage = response.currentPage || 1;
-          this.totalPages = response.totalPages || 1;
-          this.eventsPerPage = response.pageSize || this.eventsPerPage;
-        } else {
-          this.showAlert('error', 'Invalid Response', 'Unexpected data format');
-        }
       },
-      error: (error) => {
-        console.error('❌ Error fetching events:', error);
-        this.showAlert('error', 'Load Failed', 'Failed to load events');
-      },
-      complete: () => {
-        this.isLoading = false;
-      }
     });
-}
+  }
+
+  fetchEventsWithFilters(page: number = 1, filters: any = {}): void {
+    this.isLoading = true;
+
+    this.eventService
+      .getPaginatedEvents(page, this.eventsPerPage, filters)
+      .subscribe({
+        next: (response) => {
+          if (response && Array.isArray(response.data)) {
+            this.events = (response.data as any[]).map((event) => ({
+              ...event,
+              tempCity:
+                this.extractCityFromLocationObject(event.location) ||
+                event.city ||
+                'Unknown',
+            }));
+
+            this.paginatedEvents = [...this.events];
+            this.filteredEvents = [...this.events];
+
+            this.currentPage = response.currentPage || 1;
+            this.totalPages = response.totalPages || 1;
+            this.eventsPerPage = response.pageSize || this.eventsPerPage;
+          } else {
+            this.showAlert(
+              'error',
+              'Invalid Response',
+              'Unexpected data format'
+            );
+          }
+        },
+        error: (error) => {
+          console.error('❌ Error fetching events:', error);
+          this.showAlert('error', 'Load Failed', 'Failed to load events');
+        },
+        complete: () => {
+          this.isLoading = false;
+        },
+      });
+  }
 
   registerForEvent(eventId: string) {
     // Validate that we have a user ID
@@ -577,21 +579,21 @@ fetchEventsWithFilters(page: number = 1, filters: any = {}): void {
     }
   }
 
-extractCityFromLocationObject(location: any): string {
-  if (!location) return '';
+  extractCityFromLocationObject(location: any): string {
+    if (!location) return '';
 
-  // If location is an object with city property
-  if (typeof location === 'object' && location.city) {
-    return location.city;
+    // If location is an object with city property
+    if (typeof location === 'object' && location.city) {
+      return location.city;
+    }
+
+    // If location is a string, use existing extraction logic
+    if (typeof location === 'string') {
+      return this.extractCityFromLocation(location);
+    }
+
+    return '';
   }
-
-  // If location is a string, use existing extraction logic
-  if (typeof location === 'string') {
-    return this.extractCityFromLocation(location);
-  }
-
-  return '';
-}
 
   decodeToken() {
     // console.log('=== TOKEN DECODE START ===');
@@ -605,8 +607,6 @@ extractCityFromLocationObject(location: any): string {
     }
 
     try {
-
-
       const parts = token.split('.');
 
       if (parts.length !== 3) {
@@ -640,14 +640,14 @@ extractCityFromLocationObject(location: any): string {
 
   // Filter logic
   onSearchChange() {
-  if (this.searchTimeout) {
-    clearTimeout(this.searchTimeout);
-  }
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
 
-  this.searchTimeout = setTimeout(() => {
-    this.onFilterChange();
-  }, 300);
-}
+    this.searchTimeout = setTimeout(() => {
+      this.onFilterChange();
+    }, 300);
+  }
 
   ngOnDestroy() {
     if (this.searchTimeout) {
@@ -656,20 +656,20 @@ extractCityFromLocationObject(location: any): string {
   }
 
   onPageChange(page: number): void {
-  if (this.hasActiveFilters()) {
-    const filters = {
-      searchQuery: this.searchQuery,
-      category: this.selectedCategory,
-      city: this.selectedCity,
-      dateFrom: this.dateFrom,
-      dateTo: this.dateTo,
-      sortBy: this.sortBy
-    };
-    this.fetchEventsWithFilters(page, filters);
-  } else {
-    this.fetchEvents(page);
+    if (this.hasActiveFilters()) {
+      const filters = {
+        searchQuery: this.searchQuery,
+        category: this.selectedCategory,
+        city: this.selectedCity,
+        dateFrom: this.dateFrom,
+        dateTo: this.dateTo,
+        sortBy: this.sortBy,
+      };
+      this.fetchEventsWithFilters(page, filters);
+    } else {
+      this.fetchEvents(page);
+    }
   }
-}
 
   applyPriceFilter(events: Event[]): Event[] {
     switch (this.selectedPriceRange) {
@@ -701,20 +701,19 @@ extractCityFromLocationObject(location: any): string {
           return 0;
       }
     });
-
   }
   onFilterChange() {
-  this.currentPage = 1;
-  const filters = {
-    searchQuery: this.searchQuery,
-    category: this.selectedCategory,
-    city: this.selectedCity,
-    dateFrom: this.dateFrom,
-    dateTo: this.dateTo,
-    sortBy: this.sortBy
-  };
-  this.fetchEventsWithFilters(1, filters);
-}
+    this.currentPage = 1;
+    const filters = {
+      searchQuery: this.searchQuery,
+      category: this.selectedCategory,
+      city: this.selectedCity,
+      dateFrom: this.dateFrom,
+      dateTo: this.dateTo,
+      sortBy: this.sortBy,
+    };
+    this.fetchEventsWithFilters(1, filters);
+  }
   clearFilters() {
     this.searchQuery = '';
     this.selectedCategory = '';
