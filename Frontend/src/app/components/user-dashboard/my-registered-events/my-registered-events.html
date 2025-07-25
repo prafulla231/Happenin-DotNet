@@ -7,190 +7,145 @@
 </app-header>
 
 <main class="main-content">
-        <div class="container">
-            <section class="events-section registered-section">
-                <div class="section-header">
-                    <h2 class="section-title">
-                        <span class="title-icon">🎫</span>
-                        My Registered Events
-                        <div class="title-underline registered-underline"></div>
-                    </h2>
-                </div>
+  <div class="container">
+    <section class="events-section registered-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-icon">🎫</span>
+          My Registered Events
+          <div class="title-underline registered-underline"></div>
+        </h2>
+      </div>
 
-                <!-- Empty State (uncomment to test) -->
-                <!--
-                <div class="empty-state">
-                    <div class="empty-icon">🎭</div>
-                    <p class="empty-message">You haven't registered for any events yet.</p>
-                    <p class="empty-submessage">Browse available events to get started!</p>
-                    <button class="browse-events-btn">
-                        <span class="btn-icon">🎉</span>
-                        <span class="btn-text">Browse Available Events</span>
-                    </button>
-                </div>
-                -->
+      <!-- Events Grid -->
+      <div class="events-grid">
+        <!-- Sample Event Card 1 -->
+        <div class="event-card registered-event-card">
+          <div class="card-gradient-bg registered-bg"></div>
+          <div class="card-content">
+            <div class="card-header">
+              <h3 class="event-title" title="Tech Conference 2025">
+                Tech Conference 2025
+              </h3>
+              <div class="registered-badge">
+                <span class="badge-icon">✓</span>
+                <span class="badge-text">Registered</span>
+              </div>
+            </div>
 
-                <!-- Events Grid -->
-                <div class="events-grid">
-                    <!-- Sample Event Card 1 -->
-                    <div class="event-card registered-event-card">
-                        <div class="card-gradient-bg registered-bg"></div>
-                        <div class="card-content">
-                            <div class="card-header">
-                                <h3 class="event-title">Tech Conference 2025</h3>
-                                <div class="registered-badge">
-                                    <span class="badge-icon">✓</span>
-                                    <span class="badge-text">Registered</span>
-                                </div>
-                            </div>
+            <div class="event-category">Technology</div>
 
-                            <div class="event-category">Technology</div>
+            <p
+              class="event-description"
+              title="Join us for an exciting tech conference featuring the latest innovations in AI, blockchain, and web development."
+            >
+              Join us for an exciting tech conference featuring the latest
+              innovations in AI, blockchain, and web development.
+            </p>
 
-                            <p class="event-description">Join us for an exciting tech conference featuring the latest innovations in AI, blockchain, and web development.</p>
+            <div class="event-details">
+              <div class="detail-item">
+                <span class="detail-icon">📅</span>
+                <span class="detail-label">Date:</span>
+                <span class="detail-value">Mar 15, 2025</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-icon">⏰</span>
+                <span class="detail-label">Time:</span>
+                <span class="detail-value">09:00 AM - 05:00 PM</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-icon">📍</span>
+                <span class="detail-label">Location:</span>
+                <span class="detail-value" title="Convention Center, Mumbai"
+                  >Convention Center, Mumbai</span
+                >
+              </div>
+              <div class="detail-item price-item">
+                <span class="detail-icon">💰</span>
+                <span class="detail-label">Price:</span>
+                <span class="price-value">₹2500</span>
+              </div>
+            </div>
 
-                            <div class="event-details">
-                                <div class="detail-item">
-                                    <span class="detail-icon">📅</span>
-                                    <span class="detail-label">Date:</span>
-                                    <span class="detail-value">Mar 15, 2025</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon">⏰</span>
-                                    <span class="detail-label">Time:</span>
-                                    <span class="detail-value">09:00 AM - 05:00 PM</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon">📍</span>
-                                    <span class="detail-label">Location:</span>
-                                    <span class="detail-value">Convention Center, Mumbai</span>
-                                </div>
-                                <div class="detail-item price-item">
-                                    <span class="detail-icon">💰</span>
-                                    <span class="detail-label">Price:</span>
-                                    <span class="price-value">₹2500</span>
-                                </div>
-                            </div>
-
-                            <div class="card-actions">
-                                <button class="download-ticket-btn">
-                                    <span class="btn-icon">📥</span>
-                                    <span class="btn-text">Download Ticket</span>
-                                </button>
-                                <button class="deregister-button">
-                                    <span class="btn-text">Cancel Registration</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-shine"></div>
-                    </div>
-
-                    <!-- Sample Event Card 2 -->
-                    <div class="event-card registered-event-card">
-                        <div class="card-gradient-bg registered-bg"></div>
-                        <div class="card-content">
-                            <div class="card-header">
-                                <h3 class="event-title">Music Festival 2025</h3>
-                                <div class="registered-badge">
-                                    <span class="badge-icon">✓</span>
-                                    <span class="badge-text">Registered</span>
-                                </div>
-                            </div>
-
-                            <div class="event-category">Music</div>
-
-                            <p class="event-description">Experience an incredible lineup of artists performing across multiple stages in this amazing music festival.</p>
-
-                            <div class="event-details">
-                                <div class="detail-item">
-                                    <span class="detail-icon">📅</span>
-                                    <span class="detail-label">Date:</span>
-                                    <span class="detail-value">Apr 20, 2025</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon">⏰</span>
-                                    <span class="detail-label">Time:</span>
-                                    <span class="detail-value">06:00 PM - 12:00 AM</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon">📍</span>
-                                    <span class="detail-label">Location:</span>
-                                    <span class="detail-value">Mahalaxmi Racecourse, Mumbai</span>
-                                </div>
-                                <div class="detail-item price-item">
-                                    <span class="detail-icon">💰</span>
-                                    <span class="detail-label">Price:</span>
-                                    <span class="price-value">₹1800</span>
-                                </div>
-                            </div>
-
-                            <div class="card-actions">
-                                <button class="download-ticket-btn">
-                                    <span class="btn-icon">📥</span>
-                                    <span class="btn-text">Download Ticket</span>
-                                </button>
-                                <button class="deregister-button">
-                                    <span class="btn-text">Cancel Registration</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-shine"></div>
-                    </div>
-
-                    <!-- Sample Event Card 3 -->
-                    <div class="event-card registered-event-card">
-                        <div class="card-gradient-bg registered-bg"></div>
-                        <div class="card-content">
-                            <div class="card-header">
-                                <h3 class="event-title">Art Workshop</h3>
-                                <div class="registered-badge">
-                                    <span class="badge-icon">✓</span>
-                                    <span class="badge-text">Registered</span>
-                                </div>
-                            </div>
-
-                            <div class="event-category">Art & Culture</div>
-
-                            <p class="event-description">Learn painting techniques from professional artists in this hands-on workshop suitable for all skill levels.</p>
-
-                            <div class="event-details">
-                                <div class="detail-item">
-                                    <span class="detail-icon">📅</span>
-                                    <span class="detail-label">Date:</span>
-                                    <span class="detail-value">May 5, 2025</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon">⏰</span>
-                                    <span class="detail-label">Time:</span>
-                                    <span class="detail-value">10:00 AM - 04:00 PM</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon">📍</span>
-                                    <span class="detail-label">Location:</span>
-                                    <span class="detail-value">Art Studio, Bandra</span>
-                                </div>
-                                <div class="detail-item price-item">
-                                    <span class="detail-icon">💰</span>
-                                    <span class="detail-label">Price:</span>
-                                    <span class="price-value">₹800</span>
-                                </div>
-                            </div>
-
-                            <div class="card-actions">
-                                <button class="download-ticket-btn">
-                                    <span class="btn-icon">📥</span>
-                                    <span class="btn-text">Download Ticket</span>
-                                </button>
-                                <button class="deregister-button">
-                                    <span class="btn-text">Cancel Registration</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-shine"></div>
-                    </div>
-                </div>
-            </section>
+            <div class="card-actions">
+              <button class="download-ticket-btn">
+                <span class="btn-icon">📥</span>
+                <span class="btn-text">Download Ticket</span>
+              </button>
+              <button class="deregister-button">
+                <span class="btn-text">Cancel Registration</span>
+              </button>
+            </div>
+          </div>
+          <div class="card-shine"></div>
         </div>
-    </main>
+
+        <!-- Sample Event Card 2 -->
+        <div class="event-card registered-event-card">
+          <div class="card-gradient-bg registered-bg"></div>
+          <div class="card-content">
+            <div class="card-header">
+              <h3 class="event-title" title="Music Festival 2025">
+                Music Festival 2025
+              </h3>
+              <div class="registered-badge">
+                <span class="badge-icon">✓</span>
+                <span class="badge-text">Registered</span>
+              </div>
+            </div>
+
+            <div class="event-category">Music</div>
+
+            <p
+              class="event-description"
+              title="Experience an incredible lineup of artists performing across multiple stages in this amazing music festival."
+            >
+              Experience an incredible lineup of artists performing across
+              multiple stages in this amazing music festival.
+            </p>
+
+            <div class="event-details">
+              <div class="detail-item">
+                <span class="detail-icon">📅</span>
+                <span class="detail-label">Date:</span>
+                <span class="detail-value">Apr 20, 2025</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-icon">⏰</span>
+                <span class="detail-label">Time:</span>
+                <span class="detail-value">06:00 PM - 12:00 AM</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-icon">📍</span>
+                <span class="detail-label">Location:</span>
+                <span class="detail-value" title="Mahalaxmi Racecourse, Mumbai"
+                  >Mahalaxmi Racecourse, Mumbai</span
+                >
+              </div>
+              <div class="detail-item price-item">
+                <span class="detail-icon">💰</span>
+                <span class="detail-label">Price:</span>
+                <span class="price-value">₹1800</span>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button class="download-ticket-btn">
+                <span class="btn-icon">📥</span>
+                <span class="btn-text">Download Ticket</span>
+              </button>
+              <button class="deregister-button">
+                <span class="btn-text">Cancel Registration</span>
+              </button>
+            </div>
+          </div>
+          <div class="card-shine"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
 
 <app-footer
   brandName="Happenin'"

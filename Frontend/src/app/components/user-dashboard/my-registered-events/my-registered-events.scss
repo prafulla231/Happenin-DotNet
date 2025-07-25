@@ -33,6 +33,21 @@ $warning: #f59e0b;
   justify-content: center;
 }
 
+// Text truncation mixins
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-truncate-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 // Base Styles
 * {
   margin: 0;
@@ -55,9 +70,9 @@ body {
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2rem;
 }
 
 // Section Header
@@ -152,15 +167,18 @@ body {
   }
 }
 
-// Events Grid
+// Enhanced Events Grid - 3 cards per row with better spacing
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
   padding: 1rem 0;
+  
+  // Ensure equal height cards
+  align-items: stretch;
 }
 
-// Event Cards
+// Enhanced Event Cards with better proportions and alignment
 .event-card {
   position: relative;
   background: $white;
@@ -169,6 +187,9 @@ body {
   @include card-shadow;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  height: 100%; // Ensures equal height
 
   &:hover {
     transform: translateY(-8px) scale(1.02);
@@ -181,6 +202,10 @@ body {
 
     .registered-badge {
       transform: scale(1.1);
+    }
+
+    .event-title {
+      color: $primary-blue;
     }
   }
 
@@ -217,6 +242,9 @@ body {
     padding: 2rem;
     position: relative;
     z-index: 2;
+    display: flex;
+    flex-direction: column;
+    flex: 1; // Takes up remaining space
   }
 
   .card-header {
@@ -227,11 +255,16 @@ body {
     gap: 1rem;
 
     .event-title {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: $gray-dark;
       line-height: 1.3;
       flex: 1;
+      transition: color 0.3s ease;
+      
+      // Truncate title if too long
+      @include text-truncate;
+      max-width: calc(100% - 120px); // Account for badge width
     }
 
     .registered-badge {
@@ -245,6 +278,7 @@ body {
       font-weight: 600;
       flex-shrink: 0;
       transition: transform 0.3s ease;
+      min-width: 100px; // Consistent badge width
 
       .badge-icon {
         font-size: 1rem;
@@ -260,15 +294,23 @@ body {
     border-radius: 50px;
     font-size: 0.875rem;
     font-weight: 600;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
     border: 1px solid rgba($primary-blue, 0.2);
+    align-self: flex-start; // Prevents stretching
+    @include text-truncate;
+    max-width: 200px;
   }
 
   .event-description {
     color: $gray-medium;
     font-size: 1rem;
     line-height: 1.6;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+    flex-grow: 1; // Takes up available space
+    
+    // Truncate description to 3 lines
+    @include text-truncate-multiline(2);
+    min-height: 2.8rem; // Consistent height for 3 lines
   }
 
   .event-details {
@@ -278,8 +320,8 @@ body {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      margin-bottom: 1rem;
-      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      padding: 0.50rem;
       background: rgba($light-blue, 0.3);
       border-radius: 12px;
       transition: all 0.3s ease;
@@ -293,17 +335,21 @@ body {
         font-size: 1.2rem;
         width: 24px;
         text-align: center;
+        flex-shrink: 0;
       }
 
       .detail-label {
         font-weight: 600;
         color: $gray-dark;
         min-width: 60px;
+        flex-shrink: 0;
       }
 
       .detail-value {
         color: $gray-medium;
         font-weight: 500;
+        @include text-truncate;
+        flex: 1;
       }
 
       &.price-item {
@@ -313,7 +359,6 @@ body {
         .price-value {
           font-weight: 700;
           font-size: 1.1rem;
-          // color: darken($warning, 20%);
         }
       }
     }
@@ -322,17 +367,16 @@ body {
   .card-actions {
     display: flex;
     gap: 1rem;
-    flex-wrap: wrap;
+    margin-top: auto; // Pushes to bottom
 
     .download-ticket-btn {
       @include flex-center;
-      gap: 0.75rem;
+      gap: 0.25rem;
       flex: 1;
-      min-width: 180px;
       @include button-gradient($primary-blue, $violet);
       color: $white;
       border: none;
-      padding: 1rem 1.5rem;
+      padding: 0.3rem 0.5rem;
       border-radius: 12px;
       font-size: 1rem;
       font-weight: 600;
@@ -351,11 +395,14 @@ body {
       .btn-icon {
         font-size: 1.1rem;
       }
+
+      .btn-text {
+        @include text-truncate;
+      }
     }
 
     .deregister-button {
       flex: 1;
-      min-width: 140px;
       background: $white;
       color: $danger;
       border: 2px solid $danger;
@@ -374,6 +421,10 @@ body {
 
       &:active {
         transform: translateY(0);
+      }
+
+      .btn-text {
+        @include text-truncate;
       }
     }
   }
@@ -422,7 +473,29 @@ body {
   }
 }
 
-// Responsive Design
+// Enhanced Responsive Design
+@media (max-width: 1200px) {
+  .container {
+    max-width: 1200px;
+    padding: 0 1.5rem;
+  }
+  
+  .events-grid {
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .events-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+  
+  .container {
+    padding: 0 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 0 1rem;
@@ -443,6 +516,12 @@ body {
       align-items: flex-start;
       gap: 1rem;
 
+      .event-title {
+        max-width: 100%;
+        @include text-truncate-multiline(2);
+        white-space: normal;
+      }
+
       .registered-badge {
         align-self: flex-end;
       }
@@ -453,7 +532,7 @@ body {
 
       .download-ticket-btn,
       .deregister-button {
-        min-width: 100%;
+        width: 100%;
       }
     }
   }
