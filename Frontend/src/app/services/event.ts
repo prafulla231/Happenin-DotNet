@@ -131,6 +131,34 @@ export class EventService {
       params,
     });
   }
+
+  getPendingPaginatedEvents(
+    page: number = 1,
+    pageSize: number = 10,
+    filters?: any
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('pageSize', pageSize.toString());
+
+    // Add filter parameters if provided
+    if (filters) {
+      if (filters.searchQuery)
+        params = params.set('search', filters.searchQuery);
+      if (filters.category) params = params.set('category', filters.category);
+      if (filters.city) params = params.set('city', filters.city);
+      if (filters.dateFrom) params = params.set('dateFrom', filters.dateFrom);
+      if (filters.dateTo) params = params.set('dateTo', filters.dateTo);
+      if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
+    }
+
+    const url = `${environment.apiBaseUrl}/events/pending`;
+
+    return this.http.get<any>(url, {
+      headers: this.getAuthHeaders(),
+      params,
+    });
+  }
   getUpcomingEvents(): Observable<Event[]> {
     const url = `${environment.apiBaseUrl}${environment.apis.getUpcomingEvent}`;
     return this.http

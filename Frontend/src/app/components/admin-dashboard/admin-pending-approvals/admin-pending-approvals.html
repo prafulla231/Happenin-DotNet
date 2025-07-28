@@ -1,14 +1,10 @@
-<app-header
-  [title]="'Pending Approvals'"
-  [buttons]="adminButtons"
-  (buttonClick)="handleHeaderAction($event)"
->
+<app-header [title]="'Pending Approvals'" [buttons]="adminButtons" (buttonClick)="handleHeaderAction($event)">
 </app-header>
 
 <div class="main-content">
   <div>
     <!-- No pending events message -->
-    <div *ngIf="filteredEventsone.length === 0" class="no-events-message">
+    <div *ngIf="events.length === 0" class="no-events-message">
       <h3>No pending events for approval</h3>
       <p>All events have been reviewed.</p>
       <button class="btn btn-primary" (click)="handleHeaderAction('dashboard')">
@@ -17,12 +13,10 @@
     </div>
 
     <div class="admin-events-grid">
-      <div *ngFor="let event of filteredEventsone" class="admin-event-card">
+      <div *ngFor="let event of events" class="admin-event-card">
         <div class="event-header">
           <h3>{{ event.title }}</h3>
-          <span class="event-category" *ngIf="event.category"
-            >{{ event.category }}</span
-          >
+          <span class="event-category" *ngIf="event.category">{{ event.category }}</span>
         </div>
 
         <div class="event-details">
@@ -39,21 +33,16 @@
         </div>
 
         <div class="event-actions">
-          <button
-            class="delete-btn"
-            (click)="confirmDenyEvent(event.id || event._id || '', event.title, event.date, event.timeSlot, event.locationId ||'')"
-          >
+          <button class="delete-btn"
+            (click)="confirmDenyEvent(event.id || event._id || '', event.title, event.date, event.timeSlot, event.locationId ||'')">
             Deny Event
           </button>
 
           <button class="view-details-btn" (click)="showEventDetail(event)">
-            <span class="btn-icon">👁️</span>
+            <!-- <span class="btn-icon">👁️</span> -->
             <span class="btn-text">Details</span>
           </button>
-          <button
-            class="delete-btn"
-            (click)="confirmApproveEvent(event.id || event._id || '', event.title)"
-          >
+          <button class="delete-btn" (click)="confirmApproveEvent(event.id || event._id || '', event.title)">
             Approve event
           </button>
         </div>
@@ -62,28 +51,23 @@
   </div>
 </div>
 
+<app-pagination [currentPage]="currentPage" [totalPages]="totalPages" (pageChanged)="onPageChange($event)">
+</app-pagination>
+
+
+
 <!-- Event Details Modal (if you have one) -->
-<div
-  *ngIf="showEventDetails && selectedEvent"
-  class="admin-modal-overlay"
-  (click)="closeEventDetails()"
->
+<div *ngIf="showEventDetails && selectedEvent" class="admin-modal-overlay" (click)="closeEventDetails()">
   <div class="admin-event-modal" (click)="$event.stopPropagation()">
     <div class="admin-modal-header">
       <h2 class="admin-modal-title">{{ selectedEvent.title }}</h2>
-      <button
-        class="admin-modal-close-btn"
-        (click)="closeEventDetails()"
-        aria-label="Close event details"
-      >
+      <button class="admin-modal-close-btn" (click)="closeEventDetails()" aria-label="Close event details">
         <span>✕</span>
       </button>
     </div>
     <div class="admin-modal-content" *ngIf="selectedEvent">
       <div class="admin-modal-category">
-        <span class="admin-category-badge"
-          >{{ selectedEvent.category || 'Event' }}</span
-        >
+        <span class="admin-category-badge">{{ selectedEvent.category || 'Event' }}</span>
       </div>
       <div class="admin-modal-description">
         <h3>About This Event</h3>
@@ -150,17 +134,13 @@
         </div>
       </div>
       <div class="admin-modal-actions">
-        <button
-          class="admin-modal-delete-btn"
-          (click)="confirmDenyEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title, selectedEvent.date, selectedEvent.timeSlot, selectedEvent.location.city); closeEventDetails()"
-        >
+        <button class="admin-modal-delete-btn"
+          (click)="confirmDenyEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title, selectedEvent.date, selectedEvent.timeSlot, selectedEvent.location.city); closeEventDetails()">
           <span class="btn-icon">🗑️</span>
           <span class="btn-text">Deny Event</span>
         </button>
-        <button
-          class="admin-modal-approve-btn"
-          (click)="confirmApproveEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title); closeEventDetails()"
-        >
+        <button class="admin-modal-approve-btn"
+          (click)="confirmApproveEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title); closeEventDetails()">
           <span class="btn-icon">✅</span>
           <span class="btn-text">Approve Event</span>
         </button>
@@ -170,13 +150,8 @@
 </div>
 
 <!-- Custom Alert Component -->
-<app-custom-alert
-  [alertData]="customAlert"
-  [autoCloseDuration]="2000"
-  (alertClosed)="closeAlert()"
-  (alertConfirmed)="handleAlertConfirm()"
-  (alertCancelled)="handleAlertCancel()"
->
+<app-custom-alert [alertData]="customAlert" [autoCloseDuration]="2000" (alertClosed)="closeAlert()"
+  (alertConfirmed)="handleAlertConfirm()" (alertCancelled)="handleAlertCancel()">
 </app-custom-alert>
 
 <app-footer></app-footer>

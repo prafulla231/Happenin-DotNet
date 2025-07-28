@@ -55,7 +55,7 @@
           Delete Event
         </button>
         <button class="view-details-btn" (click)="showEventDetail(event)">
-          <span class="btn-icon">👁️</span>
+          <!-- <span class="btn-icon">👁️</span> -->
           <span class="btn-text">Details</span>
         </button>
       </div>
@@ -162,7 +162,7 @@
               <span class="admin-detail-title">Location</span>
             </div>
             <div class="admin-detail-content">
-              <p>{{ selectedEvent.location.city }}</p>
+             <p>{{ getFullAddress(selectedEvent.location) }}</p>
             </div>
           </div>
 

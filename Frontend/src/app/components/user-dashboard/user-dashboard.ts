@@ -600,6 +600,21 @@ export class UserDashboardComponent implements OnDestroy {
     return '';
   }
 
+  getFullAddress(location: any): string {
+  if (!location) return '';
+
+  if (typeof location === 'string') {
+    return location;
+  }
+
+  if (typeof location === 'object') {
+    // Customize this based on your location object structure
+    return `${location.address || ''}, ${location.city || ''}, ${location.state || ''}, ${location.country || ''}`.replace(/,\s*,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '');
+  }
+
+  return JSON.stringify(location);
+}
+
   decodeToken() {
     // console.log('=== TOKEN DECODE START ===');
     const token =

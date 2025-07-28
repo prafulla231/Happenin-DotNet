@@ -235,7 +235,6 @@ extractCityFromLocation(location: string): string {
   }
 
   loadExpiredEvents(page: number = 1): void {
-    console.log("expired events : ",this.events)
     this.isLoading=true;
 
     this.eventService.getExpiredPaginatedEvents(page,this.eventsPerPage).subscribe({

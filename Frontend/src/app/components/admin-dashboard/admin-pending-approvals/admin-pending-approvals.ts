@@ -14,6 +14,7 @@ import { LocationService } from '../../../services/location';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { PaginationComponent } from '../../../common/pagination/pagination';
 
 export interface Location {
   id: string; // This should be a GUID string
@@ -58,10 +59,9 @@ export interface RegisteredUser {
   name: string;
   email: string;
 }
-
 export interface RegisteredUsersResponse {
-  currentRegistration: number;
   users: RegisteredUser[];
+  currentRegistration: number;
 }
 
 export interface CustomAlert {
@@ -83,7 +83,7 @@ export interface CustomAlert {
     RouterModule,
     HeaderComponent,
     FooterComponent,
-    CustomAlertComponent,
+    CustomAlertComponent,PaginationComponent
   ],
   templateUrl: './admin-pending-approvals.html',
   styleUrls: ['./admin-pending-approvals.scss'],
@@ -94,14 +94,19 @@ export class PendingApprovals implements OnInit {
   // private approvalService = inject(ApprovalService);
   // private authService = inject(AuthService);
   // private loadingService = inject(LoadingService);
-  eventsone: Event[] = [];
-  filteredEventsone: Event[] = [];
+  events: Event[] = [];
+  filteredEvents: Event[] = [];
   selectedEvent: Event | null = null;
   showEventDetails: boolean = false;
-  usersMap: {
-    [eventId: string]: { currentRegistration: number; users: RegisteredUser[] };
-  } = {};
+  usersMap: { [eventId: string]: RegisteredUsersResponse } = {};
   userName: string | null = null;
+
+   paginatedEvents: Event[] = [];
+    currentPage = 1;
+    totalPages = 0;
+    eventsPerPage = 6; // Can be passed as `limit`
+    isLoading = false;
+
 
   adminButtons: HeaderButton[] = [
     { text: 'Dashboard', action: 'dashboard' },
@@ -245,42 +250,78 @@ export class PendingApprovals implements OnInit {
         },
       });
   }
+ extractCityFromLocationObject(location: any): string {
+    if (!location) return '';
 
-  loadApprovals(): void {
-    this.loadingService.show();
+    // If location is an object with city property
+    if (typeof location === 'object' && location.city) {
+      return location.city;
+    }
 
-    this.ApprovalService.viewApprovalRequests().subscribe({
-      next: (res: any) => {
-        this.eventsone = res.data;
-        this.filteredEventsone = [...this.eventsone];
-        // console.log(this.eventsone);
-        // this.extractFilterOptions();
-        // this.applySorting();
+    // If location is a string, use existing extraction logic
+    if (typeof location === 'string') {
+      return this.extractCityFromLocation(location);
+    }
 
-        // res.data.forEach((event: Event) => this.loadRegisteredUsers(event._id));
-
-        this.loadingService.hide();
-        // console.log(this.eventsone);
-
-        if (res.data.length > 0) {
-          this.showAlert(
-            'info',
-            'Pending Approvals',
-            `${res.data.length} events are waiting for approval.`
-          );
-        }
-      },
-      error: (err: any) => {
-        console.error('Error loading events', err);
-        this.loadingService.hide();
-        this.showAlert(
-          'error',
-          'Loading Failed',
-          'Failed to load pending events. Please try again later.'
-        );
-      },
-    });
+    return '';
   }
+
+extractCityFromLocation(location: string): string {
+    // console.log('Extracting city from location:', location);
+    if (!location) return '';
+    const parts = location.split(',').map((part) => part.trim());
+    if (parts.length >= 2) {
+      return parts[parts.length - 1];
+    } else {
+      return parts[0];
+    }
+  }
+
+  loadApprovals(page: number = 1): void {
+    this.isLoading = true;
+
+    // Pass the page parameter to the service method
+    this.eventService.getPendingPaginatedEvents(page, this.eventsPerPage).subscribe({
+        next: (response) => {
+            if (response && Array.isArray(response.data)) {
+                this.events = (response.data as any[]).map((event) => ({
+                    ...event,
+                    tempCity:
+                        this.extractCityFromLocationObject(event.location) ||
+                        event.city ||
+                        'Unknown',
+                }));
+
+                this.paginatedEvents = [...this.events];
+                this.filteredEvents = [...this.events];
+
+                this.events.forEach((event) => {
+                    // Your event processing logic here
+                });
+
+                this.currentPage = response.currentPage || 1;
+                this.totalPages = response.totalPages || 1;
+                this.eventsPerPage = response.pageSize || this.eventsPerPage;
+                this.isLoading = false;
+            } else {
+                this.showAlert('error', 'Invalid Response', 'Unexpected data format');
+            }
+        },
+        error: (error) => {
+            console.error('❌ Error fetching events:', error);
+            this.showAlert('error', 'Load Failed', 'Failed to load events');
+            this.isLoading = false;
+        },
+        complete: () => {
+            this.isLoading = false;
+        },
+    });
+}
+
+   onPageChange(page: number): void {
+
+      this.loadApprovals(page);
+    }
 
   confirmApproveEvent(eventId: string, eventTitle: string) {
     console.log(
@@ -312,7 +353,7 @@ export class PendingApprovals implements OnInit {
 
   approveEvent(eventId: string) {
     console.log('approveEvent called with eventId:', eventId);
-    const eventToApprove = this.eventsone.find((e) => e.id === eventId);
+    const eventToApprove = this.events.find((e) => e.id === eventId);
     console.log('eventToApprove:', eventToApprove);
 
     if (!eventToApprove) {
@@ -359,7 +400,7 @@ export class PendingApprovals implements OnInit {
     eventTimeSlot: string,
     eventLocationId: string // Now expecting the locationId instead of location name
   ) {
-    const eventToDeny = this.eventsone.find(
+    const eventToDeny = this.events.find(
       (e) => e._id === eventId || e.id === eventId
     );
     const eventTitle = eventToDeny ? eventToDeny.title : 'Unknown Event';
