@@ -297,7 +297,9 @@ export class LoginComponent implements OnDestroy {
       })
       .subscribe({
         next: (response: any) => {
-          const userRole = response.user?.role.toLowerCase();
+          console.log('OTP Verify Response:', response); // Add this line
+
+          const userRole = response.user?.role;
 
           if (response.token) {
             localStorage.setItem('token', response.token);
