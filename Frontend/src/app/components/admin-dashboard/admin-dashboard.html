@@ -31,12 +31,6 @@
     <button class="view-locations-btn" (click)="toggleViewLocations()">
       👁️ View All Locations
     </button>
-    <!-- <span
-        class="active-filters-count"
-        *ngIf="!showFilters && getActiveFiltersCount() > 0"
-      >
-        ({{ getActiveFiltersCount() }} active)
-      </span> -->
   </div>
 
   <div
@@ -232,9 +226,6 @@
         >
           ✅ Submit Location
         </button>
-        <!-- <button type="button" (click)="toggleLocationForm()" class="close-btn">
-          ✖ Close Form
-        </button> -->
       </div>
     </form>
   </div>
@@ -260,507 +251,6 @@
       </form>
     </div>
   </div>
-  <!-- ========= SEARCH AND FILTERS SECTION ========= -->
-  <!-- <div class="filters-container" *ngIf="showFilters">
-      <div class="filters-header">
-        <h3>Event Filters & Search</h3>
-        <div class="filter-actions">
-          <button
-            class="clear-filters-btn"
-            (click)="clearFilters()"
-            [disabled]="!hasActiveFilters()"
-            [class.disabled]="!hasActiveFilters()"
-          >
-            Clear All Filters
-          </button>
-        </div>
-      </div>
-
-
-      <div class="search-section">
-        <div class="search-bar">
-          <input
-            type="text"
-            [(ngModel)]="searchQuery"
-            (input)="onSearchChange()"
-            placeholder="Search events by title, location, user, category, artist, organization..."
-            class="search-input"
-            aria-label="Search events"
-          />
-          <button
-            class="clear-search-btn"
-            (click)="clearSearch()"
-            *ngIf="searchQuery"
-            title="Clear search"
-            aria-label="Clear search"
-          >
-            ×
-          </button>
-        </div>
-      </div>
-
-
-      <div class="filter-controls">
-        <div class="filter-row">
-
-          <div class="filter-group">
-            <label for="categorySelect">Category</label>
-            <select
-              id="categorySelect"
-              [(ngModel)]="selectedCategory"
-              (change)="applyFilters()"
-              class="filter-select"
-            >
-              <option value="">All Categories</option>
-              <option
-                *ngFor="let category of availableCategories"
-                [value]="category"
-              >
-                {{ category }}
-              </option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label for="cityFilterSelect">Location</label>
-            <select
-              id="cityFilterSelect"
-              [(ngModel)]="selectedCity"
-              (change)="applyFilters()"
-              class="filter-select"
-            >
-              <option value="">All Locations</option>
-              <option *ngFor="let city of availableCities" [value]="city">
-                {{ city }}
-              </option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label for="priceRangeSelect">Price Range</label>
-            <select
-              id="priceRangeSelect"
-              [(ngModel)]="selectedPriceRange"
-              (change)="applyFilters()"
-              class="filter-select"
-            >
-              <option value="">All Prices</option>
-              <option value="0-500">Free - ₹500</option>
-              <option value="500-1000">₹500 - ₹1000</option>
-              <option value="1000-2000">₹1000 - ₹2000</option>
-              <option value="2000+">₹2000+</option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label for="sortBySelect">Sort By</label>
-            <select
-              id="sortBySelect"
-              [(ngModel)]="sortBy"
-              (change)="applySorting()"
-              class="filter-select"
-            >
-              <option value="date">Date</option>
-              <option value="title">Title</option>
-              <option value="price">Price</option>
-              <option value="category">Category</option>
-              <option value="registrations">Registrations</option>
-            </select>
-          </div>
-        </div>
-
-
-        <div class="date-filter-row">
-          <div class="filter-group">
-            <label for="dateFromInput">From Date</label>
-            <input
-              id="dateFromInput"
-              type="date"
-              [(ngModel)]="dateFrom"
-              (change)="applyFilters()"
-              class="date-input"
-            />
-          </div>
-          <div class="filter-group">
-            <label for="dateToInput">To Date</label>
-            <input
-              id="dateToInput"
-              type="date"
-              [(ngModel)]="dateTo"
-              (change)="applyFilters()"
-              class="date-input"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div class="active-filters" *ngIf="hasActiveFilters()">
-        <span class="active-filters-label">Active Filters:</span>
-
-        <span class="filter-tag" *ngIf="searchQuery">
-          Search: "{{ searchQuery }}"
-          <button (click)="searchQuery = ''; applyFilters()">×</button>
-        </span>
-
-        <span class="filter-tag" *ngIf="selectedCategory">
-          Category: {{ selectedCategory }}
-          <button (click)="selectedCategory = ''; applyFilters()">×</button>
-        </span>
-
-        <span class="filter-tag" *ngIf="selectedCity">
-          City: {{ selectedCity }}
-          <button (click)="selectedCity = ''; applyFilters()">×</button>
-        </span>
-
-        <span class="filter-tag" *ngIf="formatDateRange()">
-          Date: {{ formatDateRange() }}
-          <button (click)="dateFrom = ''; dateTo = ''; applyFilters()">×</button>
-        </span>
-
-        <span class="filter-tag" *ngIf="selectedPriceRange">
-          Price: {{ formatPriceRange() }}
-          <button (click)="selectedPriceRange = ''; applyFilters()">×</button>
-        </span>
-      </div>
-
-      <div class="results-summary">
-        <span class="results-count">
-          Showing {{ filteredEvents.length }} of {{ events.length }} events
-        </span>
-      </div>
-    </div> -->
-
-  <!-- <div>
-      <h2
-        class="waiting-approval"
-        *ngIf="filteredEventsone.length > 0"
-        style="
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          text-align: center;
-          color: #4a90e2;
-          font-weight: 600;
-          font-size: 28px;
-          text-shadow: 1px 1px 2px #ccc;
-        "
-      >
-        Waiting for Approval
-      </h2>
-
-      <div class="admin-events-grid">
-        <div *ngFor="let event of filteredEventsone" class="admin-event-card">
-          <div class="event-header">
-            <h3>{{ event.title }}</h3>
-            <span class="event-category" *ngIf="event.category"
-              >{{ event.category }}</span
-            >
-          </div>
-
-          <div class="event-details">
-            <p><strong>Date:</strong> {{ event.date | date: 'MMM d, y' }}</p>
-            <p><strong>Time:</strong> {{ event.timeSlot }}</p>
-            <p><strong>Location:</strong> {{ event.city }}</p>
-            <p><strong>Price:</strong> ₹{{ event.price }}</p>
-            <p *ngIf="event.artist">
-              <strong>Artist:</strong> {{ event.artist }}
-            </p>
-            <p *ngIf="event.organization">
-              <strong>Organization:</strong> {{ event.organization }}
-            </p>
-          </div>
-
-          <div class="event-actions">
-            <button
-              class="delete-btn"
-              (click)="confirmDenyEvent(event.id, event.title, event.date, event.timeSlot, event.location)"
-            >
-              Deny Event
-            </button>
-
-            <button class="view-details-btn" (click)="showEventDetail(event)">
-              <span class="btn-icon">👁️</span>
-              <span class="btn-text">Details</span>
-            </button>
-            <button
-              class="delete-btn"
-              (click)="confirmApproveEvent(event.id, event.title)"
-            >
-              Approve event
-            </button>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-  <!-- ========= EVENT MANAGEMENT ========= -->
-  <!-- <h2
-      class="upcoming-events"
-      *ngIf="filteredEvents.length > 0"
-      style="
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        text-align: center;
-        color: #4a90e2;
-        font-weight: 600;
-        font-size: 28px;
-        text-shadow: 1px 1px 2px #ccc;
-      "
-    >
-      Upcoming Events
-    </h2>
-    <div class="admin-events-grid">
-      <div *ngFor="let event of filteredEvents" class="admin-event-card">
-        <div class="event-header">
-          <h3>{{ event.title }}</h3>
-          <span class="event-category" *ngIf="event.category"
-            >{{ event.category }}</span
-          >
-        </div>
-
-        <div class="event-details">
-          <p><strong>Date</strong> {{ event.date | date: 'MMM d, y' }}</p>
-          <p><strong>Time</strong> {{ event.timeSlot }}</p>
-          <p><strong>Location</strong> {{ event.location }}</p>
-          <p><strong>Price</strong> ₹{{ event.price }}</p>
-          <p *ngIf="event.artist"><strong>Artist</strong> {{ event.artist }}</p>
-          <p *ngIf="event.organization">
-            <strong>Organization</strong> {{ event.organization }}
-          </p>
-        </div>
-
-        <div class="event-actions">
-          <button
-            class="delete-btn"
-            (click)="confirmDeleteEvent(event.id, event.title)"
-          >
-            Delete Event
-          </button>
-          <button class="view-details-btn" (click)="showEventDetail(event)">
-            <span class="btn-icon">👁️</span>
-            <span class="btn-text">Details</span>
-          </button>
-        </div>
-
-        <div class="registered-users-section">
-          <h4>Registered Users</h4>
-
-          <div *ngIf="usersMap[event.id]" class="users-dropdown">
-            <button
-              class="users-toggle-btn"
-              (click)="toggleUsersDropdown(event.id)"
-              [attr.aria-expanded]="showUsersDropdown[event.id]"
-              [attr.aria-controls]="'usersList-' + event.id"
-            >
-              Registered users: {{ usersMap[event.id].currentRegistration }}
-              <span
-                class="dropdown-icon"
-                [class.rotated]="showUsersDropdown[event.id]"
-              >
-                ▼
-              </span>
-            </button>
-
-            <ul
-              id="usersList-{{ event.id }}"
-              class="users-list"
-              *ngIf="showUsersDropdown[event.id]"
-            >
-              <li
-                *ngFor="let user of usersMap[event.id].users"
-                class="user-item"
-              >
-                <div class="user-info">
-                  <span class="user-name">{{ user.name }}</span>
-                  <span class="user-email">{{ user.email }}</span>
-                </div>
-                <button
-                  class="remove-user-btn"
-                  (click)="confirmRemoveUser(event.id, user.id, user.name)"
-                  title="Remove user"
-                >
-                  Remove
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-  <!-- Event Details Modal -->
-  <div
-    class="admin-modal-overlay"
-    *ngIf="showEventDetails"
-    (click)="closeEventDetails()"
-    style="
-      display: flex !important;
-      z-index: 9999 !important;
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-    "
-  >
-    <div class="admin-event-modal" (click)="$event.stopPropagation()">
-      <div class="admin-modal-header">
-        <h2 class="admin-modal-title">{{ selectedEvent?.title }}</h2>
-        <button
-          class="admin-modal-close-btn"
-          (click)="closeEventDetails()"
-          aria-label="Close event details"
-        >
-          <span>✕</span>
-        </button>
-      </div>
-
-      <div class="admin-modal-content" *ngIf="selectedEvent">
-        <div class="admin-modal-category">
-          <span class="admin-category-badge"
-            >{{ selectedEvent.category || 'Event' }}</span
-          >
-        </div>
-
-        <div class="admin-modal-description">
-          <h3>About This Event</h3>
-          <p>{{ selectedEvent.description }}</p>
-        </div>
-
-        <div class="admin-modal-details-grid">
-          <div class="admin-modal-detail-card">
-            <div class="admin-detail-header">
-              <span class="admin-detail-icon">📅</span>
-              <span class="admin-detail-title">Date & Time</span>
-            </div>
-            <div class="admin-detail-content">
-              <p>
-                <strong>Date:</strong> {{ selectedEvent.date | date: 'MMM d, y'
-                }}
-              </p>
-              <p><strong>Time:</strong> {{ selectedEvent.timeSlot }}</p>
-              <p><strong>Duration:</strong> {{ selectedEvent.duration }}</p>
-            </div>
-          </div>
-
-          <div class="admin-modal-detail-card">
-            <div class="admin-detail-header">
-              <span class="admin-detail-icon">📍</span>
-              <span class="admin-detail-title">Location</span>
-            </div>
-            <div class="admin-detail-content">
-              <p>{{ selectedEvent.location }}</p>
-            </div>
-          </div>
-
-          <div class="admin-modal-detail-card">
-            <div class="admin-detail-header">
-              <span class="admin-detail-icon">💰</span>
-              <span class="admin-detail-title">Pricing</span>
-            </div>
-            <div class="admin-detail-content">
-              <p class="admin-price-highlight">₹{{ selectedEvent.price }}</p>
-            </div>
-          </div>
-
-          <div class="admin-modal-detail-card">
-            <div class="admin-detail-header">
-              <span class="admin-detail-icon">👥</span>
-              <span class="admin-detail-title">Capacity</span>
-            </div>
-            <div class="admin-detail-content">
-              <p>Max {{ selectedEvent.maxRegistrations }} attendees</p>
-              <p *ngIf="usersMap[selectedEvent.id]">
-                Current: {{ usersMap[selectedEvent.id].currentRegistration }}
-                registered
-              </p>
-            </div>
-          </div>
-
-          <div class="admin-modal-detail-card" *ngIf="selectedEvent.artist">
-            <div class="admin-detail-header">
-              <span class="admin-detail-icon">🎭</span>
-              <span class="admin-detail-title">Artist</span>
-            </div>
-            <div class="admin-detail-content">
-              <p>{{ selectedEvent.artist }}</p>
-            </div>
-          </div>
-
-          <div
-            class="admin-modal-detail-card"
-            *ngIf="selectedEvent.organization"
-          >
-            <div class="admin-detail-header">
-              <span class="admin-detail-icon">🏢</span>
-              <span class="admin-detail-title">Organization</span>
-            </div>
-            <div class="admin-detail-content">
-              <p>{{ selectedEvent.organization }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Admin-specific actions in modal -->
-        <div class="admin-modal-actions">
-          <button
-            class="admin-modal-delete-btn"
-            (click)="confirmDeleteEvent(selectedEvent.id, selectedEvent.title); closeEventDetails()"
-          >
-            <span class="btn-icon">🗑️</span>
-            <span class="btn-text">Delete Event</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- <h2
-      class="expired-events"
-      *ngIf="expiredEvents.length > 0"
-      style="
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        text-align: center;
-        color: #4a90e2;
-        font-weight: 600;
-        font-size: 28px;
-        text-shadow: 1px 1px 2px #ccc;
-      "
-    >
-      Expired Events
-    </h2>
-
-    <div class="admin-events-grid" *ngIf="expiredEvents.length > 0">
-      <div *ngFor="let event of expiredEvents" class="admin-event-card">
-        <div class="event-header">
-          <h3>{{ event.title }}</h3>
-          <span class="event-category" *ngIf="event.category"
-            >{{ event.category }}</span
-          >
-        </div>
-
-        <div class="event-details">
-          <p><strong>Date:</strong> {{ event.date | date: 'MMM d, y' }}</p>
-          <p><strong>Time:</strong> {{ event.timeSlot }}</p>
-          <p><strong>Location:</strong> {{ event.location }}</p>
-          <p><strong>Price:</strong> ₹{{ event.price }}</p>
-          <p *ngIf="event.artist"><strong>Artist:</strong> {{ event.artist }}</p>
-          <p *ngIf="event.organization">
-            <strong>Organization:</strong> {{ event.organization }}
-          </p>
-        </div>
-
-        <div class="event-actions">
-          <button
-            class="delete-btn"
-            (click)="confirmDeleteEvent(event.id, event.title)"
-          >
-            Delete Event
-          </button>
-          <button class="view-details-btn" (click)="showEventDetail(event)">
-            <span class="btn-icon">👁️</span>
-            <span class="btn-text">Details</span>
-          </button>
-        </div>
-      </div>
-    </div> -->
 
   <div class="cards-grid">
     <!-- Upcoming Events Card -->
@@ -864,6 +354,63 @@
     </div>
   </div>
 
+  <!-- User Data Cards Section -->
+  <div class="user-data-section">
+    <h2 class="section-title">User Data Management</h2>
+    <div class="user-data-cards">
+      <!-- All Users Card -->
+      <div class="user-data-card users-card">
+        <div class="user-data-icon">👥</div>
+        <div class="user-data-content">
+          <h4>All Users</h4>
+          <p class="user-count">{{ userCounts.users }} users</p>
+          <button
+            class="download-btn"
+            (click)="downloadUserData('users')"
+            [disabled]="downloadingData.users"
+          >
+            <span *ngIf="!downloadingData.users">📥 Download Excel</span>
+            <span *ngIf="downloadingData.users">⏳ Downloading...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- All Organizers Card -->
+      <div class="user-data-card organizers-card">
+        <div class="user-data-icon">🎭</div>
+        <div class="user-data-content">
+          <h4>All Organizers</h4>
+          <p class="user-count">{{ userCounts.organizers }} organizers</p>
+          <button
+            class="download-btn"
+            (click)="downloadUserData('organizers')"
+            [disabled]="downloadingData.organizers"
+          >
+            <span *ngIf="!downloadingData.organizers">📥 Download Excel</span>
+            <span *ngIf="downloadingData.organizers">⏳ Downloading...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- All Admins Card -->
+      <div class="user-data-card admins-card">
+        <div class="user-data-icon">🛡️</div>
+        <div class="user-data-content">
+          <h4>All Admins</h4>
+          <p class="user-count">{{ userCounts.admins }} admins</p>
+          <button
+            class="download-btn"
+            (click)="downloadUserData('admins')"
+            [disabled]="downloadingData.admins"
+          >
+            <span *ngIf="!downloadingData.admins">📥 Download Excel</span>
+            <span *ngIf="downloadingData.admins">⏳ Downloading...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <app-footer
     brandName="Happenin' Admin"
     contactEmail="happenin.events.app@gmail.com"
@@ -872,63 +419,6 @@
   </app-footer>
 </div>
 
-<!-- <div class="custom-alert-overlay" *ngIf="customAlert.show" (click)="closeAlert()">
-    <div class="custom-alert-modal" (click)="$event.stopPropagation()"
-        [class.alert-success]="customAlert.type === 'success'"
-        [class.alert-error]="customAlert.type === 'error'"
-        [class.alert-warning]="customAlert.type === 'warning'"
-        [class.alert-info]="customAlert.type === 'info'"
-        [class.alert-confirm]="customAlert.type === 'confirm'">
-
-      <div class="custom-alert-header">
-        <div class="alert-icon-container">
-          <div class="alert-icon">
-            <span *ngIf="customAlert.type === 'success'">✅</span>
-            <span *ngIf="customAlert.type === 'error'">❌</span>
-            <span *ngIf="customAlert.type === 'warning'">⚠️</span>
-            <span *ngIf="customAlert.type === 'info'">ℹ️</span>
-            <span *ngIf="customAlert.type === 'confirm'">❓</span>
-          </div>
-        </div>
-        <div class="alert-title-container">
-          <h3 class="alert-title">{{ customAlert.title }}</h3>
-          <button class="alert-close-btn" (click)="closeAlert()">
-            <span>✕</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="custom-alert-content">
-        <p class="alert-message">{{ customAlert.message }}</p>
-      </div>
-
-      <div class="custom-alert-actions">
-        <button
-    *ngIf="customAlert.type !== 'confirm' && !customAlert.autoClose"
-    class="alert-btn alert-ok-btn"
-    (click)="closeAlert()">
-    <span class="btn-text">OK</span>
-    <div class="btn-ripple"></div>
-  </button>
-
-        <div *ngIf="customAlert.type === 'confirm'" class="confirmation-buttons">
-          <button
-            class="alert-btn alert-cancel-btn"
-            (click)="handleAlertCancel()">
-            <span class="btn-text">Cancel</span>
-            <div class="btn-ripple"></div>
-          </button>
-          <button
-            class="alert-btn alert-confirm-btn"
-            (click)="handleAlertConfirm()">
-            <span class="btn-text">Confirm</span>
-            <div class="btn-ripple"></div>
-          </button>
-        </div>
-      </div>
-
-      <div class="alert-border-animation"></div>
-    </div> -->
 <app-custom-alert
   [alertData]="customAlert"
   [autoCloseDuration]="2000"

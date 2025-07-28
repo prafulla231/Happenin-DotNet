@@ -795,16 +795,6 @@
     </div>
   </div>
 
-  <!-- Custom Alert Component -->
-  <app-custom-alert
-    [alertData]="customAlert"
-    [autoCloseDuration]="2000"
-    (alertClosed)="closeAlert()"
-    (alertConfirmed)="handleAlertConfirm()"
-    (alertCancelled)="handleAlertCancel()"
-  >
-  </app-custom-alert>
-
   <!-- Footer -->
   <app-footer
     brandName="Happenin' Organizer"
@@ -814,3 +804,12 @@
   >
   </app-footer>
 </div>
+
+<app-custom-alert
+  [alertData]="customAlert"
+  [autoCloseDuration]="2000"
+  (alertClosed)="closeAlert()"
+  (alertConfirmed)="handleAlertConfirm()"
+  (alertCancelled)="handleAlertCancel()"
+>
+</app-custom-alert>

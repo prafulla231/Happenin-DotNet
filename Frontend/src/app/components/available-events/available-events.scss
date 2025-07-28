@@ -172,14 +172,6 @@
   backdrop-filter: blur(10px);
 }
 
-// .filter-dropdown-content {
-//   padding: 1.5rem;
-//   border: 1px solid rgba(255, 255, 255, 0.1);
-//   border-radius: 16px;
-//   background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-//   backdrop-filter: blur(10px);
-// }
-
   .clear-filters-btn {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
@@ -447,58 +439,6 @@
   }
 }
 
-.clear-filters-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.2rem;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  .btn-icon {
-    font-size: 1rem;
-  }
-
-  @media (max-width: 768px) {
-    flex: 1;
-    justify-content: center;
-  }
-}
-
-// UPDATE 8: Enhance mobile responsiveness for filters
-
-@media (max-width: 768px) {
-  .filter-controls {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .date-range-group .date-inputs {
-    flex-direction: column;
-    gap: 0.5rem;
-
-    .date-separator {
-      align-self: center;
-      margin: 0;
-    }
-  }
-}
 
 /* Results Info */
 .results-info {
@@ -580,64 +520,6 @@
     margin-bottom: 2rem;
   }
 
-  .clear-filters-btn {
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow:
-      0 4px 12px rgba(99, 102, 241, 0.3),
-      0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow:
-        0 8px 20px rgba(99, 102, 241, 0.4),
-        0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-  }
-}
-
-/* Animations */
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Enhanced 3D Effects for Existing Components */
-.event-card {
-  transform: translateZ(0);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    transform: translateY(-8px) translateZ(0);
-    box-shadow:
-      0 20px 40px rgba(0, 0, 0, 0.12),
-      0 8px 16px rgba(0, 0, 0, 0.08),
-      0 0 0 1px rgba(255, 255, 255, 0.05);
-  }
 }
 
 .register-btn,

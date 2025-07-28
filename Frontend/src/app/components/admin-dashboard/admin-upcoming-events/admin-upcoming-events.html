@@ -39,7 +39,7 @@
       <div class="event-details">
         <p><strong>Date</strong> {{ event.date | date: 'MMM d, y' }}</p>
         <p><strong>Time</strong> {{ event.timeSlot }}</p>
-        <p><strong>Location</strong> {{ event.location }}</p>
+        <p><strong>Location</strong> {{ event.location.city }}</p>
         <p><strong>Price</strong> ₹{{ event.price }}</p>
         <p *ngIf="event.artist"><strong>Artist</strong> {{ event.artist }}</p>
         <p *ngIf="event.organization">
@@ -84,10 +84,7 @@
             class="users-list"
             *ngIf="showUsersDropdown[event.id]"
           >
-            <li
-              *ngFor="let user of usersMap[event.id].users"
-              class="user-item"
-            >
+            <li *ngFor="let user of usersMap[event.id].users" class="user-item">
               <div class="user-info">
                 <span class="user-name">{{ user.name }}</span>
                 <span class="user-email">{{ user.email }}</span>
@@ -111,15 +108,6 @@
     class="admin-modal-overlay"
     *ngIf="showEventDetails"
     (click)="closeEventDetails()"
-    style="
-      display: flex !important;
-      z-index: 9999 !important;
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-    "
   >
     <div class="admin-event-modal" (click)="$event.stopPropagation()">
       <div class="admin-modal-header">
@@ -167,7 +155,7 @@
               <span class="admin-detail-title">Location</span>
             </div>
             <div class="admin-detail-content">
-              <p>{{ selectedEvent.location }}</p>
+              <p>{{ selectedEvent.location.city }}</p>
             </div>
           </div>
 

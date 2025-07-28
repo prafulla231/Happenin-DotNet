@@ -12,11 +12,15 @@ namespace HappeninApi.Controllers
     public class RegistrationsController : ControllerBase
     {
         private readonly IRegistrationRepository _repository;
+        private readonly ILocationRepository _locationRepo;
 
-        public RegistrationsController(IRegistrationRepository repository)
+
+        public RegistrationsController(IRegistrationRepository repository, ILocationRepository locationRepo)
         {
             _repository = repository;
+            _locationRepo = locationRepo;
         }
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistrationDto dto)
@@ -69,7 +73,22 @@ namespace HappeninApi.Controllers
         public async Task<IActionResult> GetRegisteredEvents(Guid userId)
         {
             var events = await _repository.GetRegisteredEventsAsync(userId);
+
+            // 🔁 Populate Location data for each event
+            foreach (var ev in events)
+            {
+                if (ev.LocationId != Guid.Empty)
+                {
+                    Location? location = await _locationRepo.GetByIdAsync(ev.LocationId);
+                    if (location != null)
+                    {
+                        ev.Location = location;
+                    }
+                }
+            }
+
             return Ok(new { events });
         }
+
     }
 }

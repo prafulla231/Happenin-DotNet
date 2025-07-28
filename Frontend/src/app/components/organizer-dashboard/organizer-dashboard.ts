@@ -109,6 +109,7 @@ export interface CustomAlert {
 export class OrganizerDashboardComponent implements OnDestroy {
 ngOnInit() {
     // Move initialization logic here instead of constructor
+    this.decodeToken();
     this.initializeData();
   }
   private destroy$ = new Subject<void>();
@@ -728,7 +729,6 @@ private convertDurationToMinutes(durationStr: string): number {
 
   async logout() {
     this.showConfirmation('Confirm', 'Are you sure you want to logout?', () => {
-      // Confirm action - what happens when user clicks confirm
       localStorage.clear();
       sessionStorage.clear();
       this.showAlert('success', 'Success', 'You have been logged out');

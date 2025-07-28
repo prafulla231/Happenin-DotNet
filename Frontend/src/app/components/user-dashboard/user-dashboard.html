@@ -262,9 +262,8 @@
         <div class="card-content">
           <div class="card-header">
             <h3 class="event-title">{{ event.title }}</h3>
+            <div class="event-category">{{ event.category || 'Event' }}</div>
           </div>
-          <div class="event-category">{{ event.category || 'Event' }}</div>
-
           <p class="event-description">{{ event.description }}</p>
 
           <div class="event-details">

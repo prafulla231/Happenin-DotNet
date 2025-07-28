@@ -83,9 +83,9 @@ export class LoginComponent implements OnDestroy {
   passwordValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.value || '';
 
-    if (!password) return null; // Let required validator handle empty case
+    if (!password) return null;
 
-    if (password.length < 6) return null; // Let minLength validator handle this
+    if (password.length < 6) return null;
 
     if (!/(?=.*[a-z])/.test(password)) {
       return { lowercase: true };

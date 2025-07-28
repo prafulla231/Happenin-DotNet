@@ -23,13 +23,32 @@ export interface Event {
   timeSlot: string;
   duration: string;
   city: string;
-  location: string;
+  // location: string;
+  location: Location;
   category: string;
   price: number;
   maxRegistrations: number;
   createdBy: string;
   artist?: string;
   organization?: string;
+}
+
+export interface Location {
+  id?: string;
+  state: string;
+  city: string;
+  placeName: string;
+  address: string;
+  maxSeatingCapacity: number;
+  amenities: string[];
+  createdBy?: string;
+}
+
+export interface Booking {
+  id: string; // This should be a GUID string (BookingId)
+  date: string; // or Date type
+  timeSlot: string;
+  eventId: string; // This should be a GUID string
 }
 
 export interface CustomAlert {
@@ -192,7 +211,7 @@ export class MyRegisteredEvents implements OnInit, OnDestroy {
     }
 
     this.eventService.getRegisteredEvents(this.userId).subscribe({
-      next: (res) => {
+      next: (res: any[]) => {
         this.registeredEvents = res;
         this.loadingService.hide(); // Hide loading on success
       },
@@ -296,12 +315,12 @@ export class MyRegisteredEvents implements OnInit, OnDestroy {
         { label: 'Date', value: this.formatDate(event.date) },
         { label: 'Time', value: event.timeSlot },
         { label: 'Duration', value: event.duration },
-        { label: 'Location', value: event.location },
+        { label: 'Location', value: event.location.city },
         { label: 'Category', value: event.category || 'General' },
-        { label: 'Price', value: `${event.price}` },
+        { label: 'Price', value: `$${event.price}` }, // Convert to string with currency formatting
         { label: 'Ticket Holder', value: this.userName || 'Guest' },
       ];
-
+      console.log('Ticket Details:', details);
       details.forEach((detail, index) => {
         // Check if we need a new page
         if (yPosition > pageHeight - 40) {
@@ -322,8 +341,9 @@ export class MyRegisteredEvents implements OnInit, OnDestroy {
         const valueX = margin + labelWidth;
         const maxValueWidth = contentWidth - labelWidth;
 
-        // Handle long text with proper wrapping
-        const splitText = doc.splitTextToSize(detail.value, maxValueWidth);
+        // Handle long text with proper wrapping - ensure value is string
+        const valueString = String(detail.value); // Convert to string to be safe
+        const splitText = doc.splitTextToSize(valueString, maxValueWidth);
         doc.text(splitText, valueX, yPosition);
 
         // Calculate next position based on wrapped text

@@ -20,13 +20,31 @@ export interface Event {
   city: string;
   timeSlot: string;
   duration: string;
-  location: string;
+  location: Location;
   category: string;
   price: number;
   maxRegistrations: number;
   createdBy: string;
   artist?: string;
   organization?: string;
+}
+
+export interface Location {
+  id: string;
+  state: string;
+  city: string;
+  placeName: string;
+  address: string;
+  maxSeatingCapacity: number;
+  amenities: string[];
+  bookings?: Booking[];
+}
+
+export interface Booking {
+  id: string;
+  date: string;
+  timeSlot: string;
+  eventId: string;
 }
 
 export interface RegisteredUser {
@@ -102,13 +120,7 @@ export class AdminExpiredEvents implements OnInit {
       case 'dashboard':
         this.router.navigate(['/admin-dashboard']);
         break;
-      // case 'viewPendingEvents':
-      //   // Navigate to pending events if you have a separate component for it
-      //   this.router.navigate(['/admin-dashboard']);
-      //   break;
-      // case 'viewAvailableEvents':
-      //   this.router.navigate(['/admin-upcoming-events']);
-      //   break;
+
       case 'viewAnalytics':
         this.router.navigate(['/admin-analytics']);
         break;
@@ -147,7 +159,7 @@ export class AdminExpiredEvents implements OnInit {
     confirmAction: () => void,
     cancelAction?: () => void
   ) {
-    this.clearAlertTimeout(); // Prevent accidental closure
+    this.clearAlertTimeout();
     this.customAlert = {
       show: true,
       type: 'confirm',
@@ -191,10 +203,9 @@ export class AdminExpiredEvents implements OnInit {
     this.loadingService.show();
 
     this.eventService.getExpiredEvents().subscribe({
-      next: (events) => {
+      next: (events: any[]) => {
         this.expiredEvents = events;
-        // this.filteredExpiredEvents = [...events];
-        // this.extractFilterOptions();
+
         this.loadingService.hide();
         this.showAlert(
           'success',
@@ -213,7 +224,6 @@ export class AdminExpiredEvents implements OnInit {
       },
     });
   }
-
 
   confirmDeleteEvent(eventId: string, eventTitle: string): void {
     this.customAlert = {
@@ -252,24 +262,25 @@ export class AdminExpiredEvents implements OnInit {
     document.body.style.overflow = 'hidden';
   }
 
-   loadRegisteredUsers(eventId: string) {
-  this.eventService.getRegisteredUsers(eventId).subscribe({
-    next: (res: any) => {
-      // Map the response to ensure compatibility
-      const mappedResponse = {
-        users: res.data?.users?.map((user: any) => ({
-          userId: user.userId,
-          name: user.name,
-          email: user.email,
-          _id: user.id || user.userId // Use id if available, otherwise use userId
-        })) || [],
-        currentRegistration: res.data?.currentRegistration || 0
-      };
-      this.usersMap[eventId] = mappedResponse;
-    },
-    error: (err) => console.error('Error loading users for event', err),
-  });
-}
+  loadRegisteredUsers(eventId: string) {
+    this.eventService.getRegisteredUsers(eventId).subscribe({
+      next: (res: any) => {
+        // Map the response to ensure compatibility
+        const mappedResponse = {
+          users:
+            res.data?.users?.map((user: any) => ({
+              userId: user.userId,
+              name: user.name,
+              email: user.email,
+              _id: user.id || user.userId,
+            })) || [],
+          currentRegistration: res.data?.currentRegistration || 0,
+        };
+        this.usersMap[eventId] = mappedResponse;
+      },
+      error: (err) => console.error('Error loading users for event', err),
+    });
+  }
   closeEventDetails(): void {
     this.showEventDetails = false;
     this.selectedEvent = null;

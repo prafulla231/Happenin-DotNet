@@ -18,13 +18,31 @@ export interface Event {
   city: string;
   timeSlot: string;
   duration: string;
-  location: string;
+  location: Location;
   category: string;
   price: number;
   maxRegistrations: number;
   createdBy: string;
   artist?: string;
   organization?: string;
+}
+
+export interface Location {
+  id: string;
+  state: string;
+  city: string;
+  placeName: string;
+  address: string;
+  maxSeatingCapacity: number;
+  amenities: string[];
+  bookings?: Booking[];
+}
+
+export interface Booking {
+  id: string;
+  date: string;
+  timeSlot: string;
+  eventId: string;
 }
 
 export interface RegisteredUser {
@@ -86,8 +104,7 @@ export class AdminUpcomingEvents {
 
   adminButtons: HeaderButton[] = [
     { text: 'Back to Dashboard', action: 'backToDashboard' },
-    // { text: 'Pending Approvals', action: 'viewPendingEvents' },
-    // { text: 'Expired Events', action: 'viewExpiredEvents' },
+
     { text: 'Analytics', action: 'viewAnalytics', style: 'primary' },
     { text: 'Logout', action: 'logout', style: 'primary' },
   ];
@@ -101,7 +118,6 @@ export class AdminUpcomingEvents {
   ) {
     this.loadEvents();
   }
-
 
   handleHeaderAction(action: string): void {
     switch (action) {
@@ -133,7 +149,7 @@ export class AdminUpcomingEvents {
     message: string,
     duration: number = 2000
   ) {
-    this.clearAlertTimeout(); // Clear any previous timeout
+    this.clearAlertTimeout();
 
     this.customAlert = {
       show: true,
@@ -154,7 +170,7 @@ export class AdminUpcomingEvents {
     confirmAction: () => void,
     cancelAction?: () => void
   ) {
-    this.clearAlertTimeout(); // Prevent accidental closure
+    this.clearAlertTimeout();
     this.customAlert = {
       show: true,
       type: 'confirm',
@@ -195,23 +211,23 @@ export class AdminUpcomingEvents {
   }
 
   loadRegisteredUsers(eventId: string) {
-  this.eventService.getRegisteredUsers(eventId).subscribe({
-    next: (res: any) => {
-      // Map the response to ensure compatibility
-      const mappedResponse = {
-        users: res.data?.users?.map((user: any) => ({
-          userId: user.userId,
-          name: user.name,
-          email: user.email,
-          id: user.id || user.userId // Use id if available, otherwise use userId
-        })) || [],
-        currentRegistration: res.data?.currentRegistration || 0
-      };
-      this.usersMap[eventId] = mappedResponse;
-    },
-    error: (err) => console.error('Error loading users for event', err),
-  });
-}
+    this.eventService.getRegisteredUsers(eventId).subscribe({
+      next: (res: any) => {
+        const mappedResponse = {
+          users:
+            res.data?.users?.map((user: any) => ({
+              userId: user.userId,
+              name: user.name,
+              email: user.email,
+              id: user.id || user.userId,
+            })) || [],
+          currentRegistration: res.data?.currentRegistration || 0,
+        };
+        this.usersMap[eventId] = mappedResponse;
+      },
+      error: (err) => console.error('Error loading users for event', err),
+    });
+  }
 
   toggleUsersDropdown(eventId: string): void {
     this.showUsersDropdown[eventId] = !this.showUsersDropdown[eventId];
@@ -233,15 +249,15 @@ export class AdminUpcomingEvents {
     this.loadingService.show();
 
     this.eventService.getUpcomingEvents().subscribe({
-      next: (events) => {
+      next: (events: any[]) => {
         this.events = events;
         this.filteredEvents = [...events];
-        // this.extractFilterOptions();
-        // this.applySorting();
+
         this.events.forEach((event) => {
-          this.loadRegisteredUsers(event.id); // keep your existing method call
+          this.loadRegisteredUsers(event.id);
         });
         this.loadingService.hide();
+        console.log('Loaded events:', this.events);
         this.showAlert(
           'success',
           'Events Loaded',
@@ -317,21 +333,6 @@ export class AdminUpcomingEvents {
       },
     });
   }
-
-  // showAlert(
-  //   type: 'success' | 'error' | 'warning' | 'info' | 'confirm',
-  //   title: string,
-  //   message: string
-  // ): void {
-  //   this.alert = {
-  //     show: true,
-  //     type,
-  //     title,
-  //     message,
-  //     showCancel: false,
-  //     autoClose: type === 'success',
-  //   };
-  // }
 
   hideAlert(): void {
     this.alert.show = false;
