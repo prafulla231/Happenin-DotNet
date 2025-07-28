@@ -34,7 +34,7 @@ export interface Event {
   locationId: string; // Added locationId
   // location: string;
   //  // This will be the place name for display
-   location: Location;
+  location: Location;
   category: string;
   price: number;
   maxRegistrations: number;
@@ -62,12 +62,11 @@ export interface RegisteredUser {
   id: string;
   name: string;
   email: string;
-  _id: string;
 }
 
 export interface RegisteredUsersResponse {
-  users: RegisteredUser[];
   currentRegistration: number;
+  users: RegisteredUser[];
 }
 
 export interface PopupConfig {
@@ -107,7 +106,7 @@ export interface CustomAlert {
   styleUrls: ['./organizer-dashboard.scss'],
 })
 export class OrganizerDashboardComponent implements OnDestroy {
-ngOnInit() {
+  ngOnInit() {
     // Move initialization logic here instead of constructor
     this.decodeToken();
     this.initializeData();
@@ -123,8 +122,10 @@ ngOnInit() {
   currentEditEventId: string | null = null;
   organizerId: string | null = null;
   isLoading = false;
-pendingEvents: Event[] = [];
-  usersMap: { [eventId: string]: RegisteredUsersResponse } = {};
+  pendingEvents: Event[] = [];
+  usersMap: {
+    [eventId: string]: { currentRegistration: number; users: RegisteredUser[] };
+  } = {};
   eventForm: FormGroup;
 
   locations: any[] = [];
@@ -381,59 +382,63 @@ pendingEvents: Event[] = [];
     }
   }
 
- private loadAllData(): void {
-  this.isLoading = true;
-  this.loadingService.show();
+  private loadAllData(): void {
+    this.isLoading = true;
+    this.loadingService.show();
 
-  // Load locations
-  this.locationService.fetchLocations()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (data) => {
-        this.locations = Array.isArray(data) ? data : [];
-        this.places = this.locations;
-        this.filteredStates = [
-          ...new Set(this.locations.map((loc) => loc.state?.trim()).filter(Boolean))
-        ];
-      },
-      error: (error) => {
-        console.error('Error loading locations:', error);
-        this.locations = [];
-        this.places = [];
-      }
-    });
-
-  // Load events with pagination - FILTER BY APPROVAL STATUS
-  if (this.organizerId) {
-    this.eventService.getEventById(this.organizerId, 1, 100)
+    // Load locations
+    this.locationService
+      .fetchLocations()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
-  const allEvents = response.data || [];
-
-  // Separate events by approval status
-  this.events = allEvents.filter((event: Event) =>
-    event.status === 'Approved'
-  );
-
-  this.pendingEvents = allEvents.filter((event: Event) =>
-    event.status === 'Pending'
-  );
-},
-        error: (error) => {
-          console.error('Error loading events:', error);
-          this.events = [];
+        next: (data) => {
+          this.locations = Array.isArray(data) ? data : [];
+          this.places = this.locations;
+          this.filteredStates = [
+            ...new Set(
+              this.locations.map((loc) => loc.state?.trim()).filter(Boolean)
+            ),
+          ];
         },
-        complete: () => {
-          this.isLoading = false;
-          this.loadingService.hide();
-        }
+        error: (error) => {
+          console.error('Error loading locations:', error);
+          this.locations = [];
+          this.places = [];
+        },
       });
-  } else {
-    this.isLoading = false;
-    this.loadingService.hide();
+
+    // Load events with pagination - FILTER BY APPROVAL STATUS
+    if (this.organizerId) {
+      this.eventService
+        .getEventById(this.organizerId, 1, 100)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (response) => {
+            const allEvents = response.data || [];
+
+            // Separate events by approval status
+            this.events = allEvents.filter(
+              (event: Event) => event.status === 'Approved'
+            );
+
+            this.pendingEvents = allEvents.filter(
+              (event: Event) => event.status === 'Pending'
+            );
+          },
+          error: (error) => {
+            console.error('Error loading events:', error);
+            this.events = [];
+          },
+          complete: () => {
+            this.isLoading = false;
+            this.loadingService.hide();
+          },
+        });
+    } else {
+      this.isLoading = false;
+      this.loadingService.hide();
+    }
   }
-}
 
   calculateDuration() {
     const start = this.eventForm.get('startTime')?.value;
@@ -500,120 +505,132 @@ pendingEvents: Event[] = [];
 
   // Event Submit/Create/Update
   async onSubmit() {
-  if (this.eventForm.invalid) {
-    this.showAlert('error', 'Validation Error', 'Please fill required fields');
-    return;
-  }
-
-  this.isLoading = true;
-  this.loadingService.show();
-
-  try {
-    const form = this.eventForm.value;
-    const timeSlot = `${form.startTime} - ${form.endTime}`;
-
-    // Find the selected location to get its ID
-    const selectedPlace = this.places.find((place: any) => place.placeName === form.location);
-    if (!selectedPlace) {
-      this.showAlert('error', 'Error', 'Please select a valid location');
-      this.isLoading = false;
-      this.loadingService.hide();
+    if (this.eventForm.invalid) {
+      this.showAlert(
+        'error',
+        'Validation Error',
+        'Please fill required fields'
+      );
       return;
     }
 
-    const eventData = {
-      title: form.title,
-      description: form.description,
-      date: form.date,
-      timeSlot,
-      // duration: this.convertDurationToMinutes(form.duration),
-      duration : form.duration,
-      locationId: selectedPlace.id, // Use location ID from backend
-      category: form.category,
-      price: form.price,
-      maxRegistrations: form.maxRegistrations,
-      createdBy: this.organizerId, // This will be mapped to createdById in service
-      artist: form.artist,
-      organization: form.organization
+    this.isLoading = true;
+    this.loadingService.show();
 
-    };
+    try {
+      const form = this.eventForm.value;
+      const timeSlot = `${form.startTime} - ${form.endTime}`;
 
-    const request = this.isEditMode && this.currentEditEventId
-      ? this.eventService.updateEvent(this.currentEditEventId, eventData)
-      : this.eventService.createEvent(eventData);
-
-    request.pipe(takeUntil(this.destroy$)).subscribe({
-      next: async () => {
-        this.showAlert('success', 'Success', `Event ${this.isEditMode ? 'updated' : 'created'} successfully!`);
-        this.resetForm();
-        this.loadAllData();
-      },
-      error: async (error) => {
-        console.error('Event creation/update error:', error);
-        this.showAlert('error', 'Error', 'Event creation/updation failed');
-      },
-      complete: () => {
+      // Find the selected location to get its ID
+      const selectedPlace = this.places.find(
+        (place: any) => place.placeName === form.location
+      );
+      if (!selectedPlace) {
+        this.showAlert('error', 'Error', 'Please select a valid location');
         this.isLoading = false;
         this.loadingService.hide();
+        return;
       }
-    });
 
-  } catch (error) {
-    console.error('Submit error:', error);
-    this.showAlert('error', 'Error', 'An unexpected error occurred');
-    this.isLoading = false;
-    this.loadingService.hide();
+      const eventData = {
+        title: form.title,
+        description: form.description,
+        date: new Date(form.date).toISOString(), // ✅ Make sure it's ISO (or omit if it's already ISO)
+        timeSlot,
+        duration: this.eventService.convertDurationToMinutes(form.duration), // ✅ Must be integer
+        locationId: selectedPlace.id,
+        category: form.category,
+        price: form.price,
+        maxRegistrations: form.maxRegistrations,
+        artist: form.artist,
+        organization: form.organization,
+        createdBy: this.organizerId,
+      };
+
+      const request =
+        this.isEditMode && this.currentEditEventId
+          ? this.eventService.updateEvent(this.currentEditEventId, eventData)
+          : this.eventService.createEvent(eventData);
+
+      request.pipe(takeUntil(this.destroy$)).subscribe({
+        next: async () => {
+          this.showAlert(
+            'success',
+            'Success',
+            `Event ${this.isEditMode ? 'updated' : 'created'} successfully!`
+          );
+          console.log('Creating event with organizer ID:', this.organizerId);
+
+          this.resetForm();
+          this.loadAllData();
+        },
+        error: async (error) => {
+          console.error('Event creation/update error:', error);
+          this.showAlert('error', 'Error', 'Event creation/updation failed');
+        },
+        complete: () => {
+          this.isLoading = false;
+          this.loadingService.hide();
+        },
+      });
+    } catch (error) {
+      console.error('Submit error:', error);
+      this.showAlert('error', 'Error', 'An unexpected error occurred');
+      this.isLoading = false;
+      this.loadingService.hide();
+    }
   }
-}
 
-// Add helper method for duration conversion
-private convertDurationToMinutes(durationStr: string): number {
-  if (!durationStr) return 0;
+  // Add helper method for duration conversion
+  private convertDurationToMinutes(durationStr: string): number {
+    if (!durationStr) return 0;
 
-  const hourMatch = durationStr.match(/(\d+)\s*hour/);
-  const minMatch = durationStr.match(/(\d+)\s*min/);
+    const hourMatch = durationStr.match(/(\d+)\s*hour/);
+    const minMatch = durationStr.match(/(\d+)\s*min/);
 
-  const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
-  const minutes = minMatch ? parseInt(minMatch[1]) : 0;
+    const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
+    const minutes = minMatch ? parseInt(minMatch[1]) : 0;
 
-  return hours * 60 + minutes;
-}
+    return hours * 60 + minutes;
+  }
 
   onEdit(event: Event) {
-  window.scrollTo(0, 0);
-  const loc = this.locations.find((l) => l.id === event.locationId);
-  console.log('Location:', loc);
+    window.scrollTo(0, 0);
+    const loc = this.locations.find((l) => l.id === event.locationId);
+    // console.log('Location:', loc);
 
-  this.eventForm.patchValue({
-    title: event.title,
-    description: event.description,
-    date: event.date,
-    startTime: event.timeSlot.split(' - ')[0],
-    endTime: event.timeSlot.split(' - ')[1],
-    location: loc?.placeName || '',
-    category: event.category,
-    price: event.price,
-    maxRegistrations: event.maxRegistrations,
-    artist: event.artist,
-    organization: event.organization,
-    state: loc?.state || '',
-    city: loc?.city || ''
-  });
+    this.eventForm.patchValue({
+      title: event.title,
+      description: event.description,
+      date: event.date,
+      startTime: event.timeSlot.split(' - ')[0],
+      endTime: event.timeSlot.split(' - ')[1],
+      location: loc?.placeName || '',
+      category: event.category,
+      price: event.price,
+      maxRegistrations: event.maxRegistrations,
+      artist: event.artist,
+      organization: event.organization,
+      state: loc?.state || '',
+      city: loc?.city || '',
+    });
 
-  this.currentEditEventId = event.id;
-  this.isEditMode = true;
-  this.showCreateForm = true;
+    this.currentEditEventId = event.id;
+    this.isEditMode = true;
+    this.showCreateForm = true;
 
-  if (loc) {
-    this.selectedState = loc.state;
-    this.onStateChange();
-    this.selectedCity = loc.city;
-    this.onCityChange();
-    setTimeout(() => {
-      this.selectedVenue = this.places.find((place: any) => place.id === event.locationId) || null;
-    }, 100);
+    if (loc) {
+      this.selectedState = loc.state;
+      this.onStateChange();
+      this.selectedCity = loc.city;
+      this.onCityChange();
+      setTimeout(() => {
+        this.selectedVenue =
+          this.places.find((place: any) => place.id === event.locationId) ||
+          null;
+      }, 100);
+    }
   }
-}
 
   async onDelete(eventId: string) {
     this.showConfirmation(
@@ -663,40 +680,35 @@ private convertDurationToMinutes(durationStr: string): number {
   }
 
   // State/City Filters
- onStateChange() {
-  this.selectedState = this.eventForm.get('state')?.value?.trim() || '';
-  const state = this.selectedState;
+  onStateChange() {
+    this.selectedState = this.eventForm.get('state')?.value?.trim() || '';
+    const state = this.selectedState;
 
-  const matches = this.locations.filter((loc) => loc.state?.trim() === state);
-  this.filteredCities = [
-    ...new Set(matches.map((loc) => loc.city?.trim()).filter(Boolean)),
-  ];
-  this.filteredPlaceNames = [];
-  this.selectedCity = '';
-  this.selectedVenue = null;
-  this.eventForm.patchValue({ city: '', location: '' });
-
-
-}
-
+    const matches = this.locations.filter((loc) => loc.state?.trim() === state);
+    this.filteredCities = [
+      ...new Set(matches.map((loc) => loc.city?.trim()).filter(Boolean)),
+    ];
+    this.filteredPlaceNames = [];
+    this.selectedCity = '';
+    this.selectedVenue = null;
+    this.eventForm.patchValue({ city: '', location: '' });
+  }
 
   onCityChange() {
-  this.selectedCity = this.eventForm.get('city')?.value?.trim() || '';
-  const state = this.selectedState;
-  const city = this.selectedCity;
+    this.selectedCity = this.eventForm.get('city')?.value?.trim() || '';
+    const state = this.selectedState;
+    const city = this.selectedCity;
 
-  const matches = this.locations.filter(
-    (loc) => loc.state?.trim() === state && loc.city?.trim() === city
-  );
+    const matches = this.locations.filter(
+      (loc) => loc.state?.trim() === state && loc.city?.trim() === city
+    );
 
-  this.filteredPlaceNames = [
-    ...new Set(matches.map((loc) => loc.placeName?.trim()).filter(Boolean)),
-  ];
-  this.selectedVenue = null;
-  this.eventForm.patchValue({ location: '' });
-
-
-}
+    this.filteredPlaceNames = [
+      ...new Set(matches.map((loc) => loc.placeName?.trim()).filter(Boolean)),
+    ];
+    this.selectedVenue = null;
+    this.eventForm.patchValue({ location: '' });
+  }
 
   toggleCreateForm() {
     this.showCreateForm = !this.showCreateForm;
