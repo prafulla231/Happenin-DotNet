@@ -22,7 +22,7 @@ namespace HappeninApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto)
         {
-            Console.WriteLine($"📥 Creating Event: {dto.Title} by {dto.CreatedById}");
+            // Console.WriteLine($"📥 Creating Event: {dto.Title} by {dto.CreatedById}");
 
             var evnt = new Event
             {
@@ -64,7 +64,7 @@ namespace HappeninApi.Controllers
 
             var created = await _repository.CreateEventAsync(evnt);
 
-            Console.WriteLine("✅ Event created with ID: " + created.Id);
+            // Console.WriteLine("✅ Event created with ID: " + created.Id);
 
             return CreatedAtAction(nameof(GetEvent), new { id = created.Id }, created);
         }
@@ -290,7 +290,7 @@ namespace HappeninApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEvent(Guid id, [FromBody] UpdateEventDto dto)
         {
-            Console.WriteLine("✏️ Updating Event with ID: " + id);
+            // Console.WriteLine("✏️ Updating Event with ID: " + id);
 
             var updated = await _repository.UpdateEventAsync(id, dto);
             if (!updated)

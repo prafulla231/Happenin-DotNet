@@ -31,7 +31,8 @@ export class EventService {
       description: data.description,
       date: data.date,
       timeSlot: data.timeSlot,
-      duration: this.convertDurationToMinutes(data.duration), // Convert to minutes
+      // duration: this.convertDurationToMinutes(data.duration), // Convert to minutes
+      duration: data.duration,
       locationId: data.locationId, // This should come from selected venue
       category: data.category,
       price: data.price,
@@ -51,7 +52,9 @@ export class EventService {
   }
 
   // Add helper method to convert duration
-  private convertDurationToMinutes(durationStr: string): number {
+  convertDurationToMinutes(durationStr: string): number {
+    if (!durationStr || typeof durationStr !== 'string') return 0;
+
     if (!durationStr) return 0;
 
     const hourMatch = durationStr.match(/(\d+)\s*hour/);

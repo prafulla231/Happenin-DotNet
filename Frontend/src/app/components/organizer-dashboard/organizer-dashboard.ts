@@ -108,6 +108,7 @@ export interface CustomAlert {
 export class OrganizerDashboardComponent implements OnDestroy {
   ngOnInit() {
     // Move initialization logic here instead of constructor
+    this.decodeToken();
     this.initializeData();
   }
   private destroy$ = new Subject<void>();
@@ -534,17 +535,16 @@ export class OrganizerDashboardComponent implements OnDestroy {
       const eventData = {
         title: form.title,
         description: form.description,
-        date: form.date,
+        date: new Date(form.date).toISOString(), // ✅ Make sure it's ISO (or omit if it's already ISO)
         timeSlot,
-        // duration: this.convertDurationToMinutes(form.duration),
-        duration: form.duration,
-        locationId: selectedPlace.id, // Use location ID from backend
+        duration: this.eventService.convertDurationToMinutes(form.duration), // ✅ Must be integer
+        locationId: selectedPlace.id,
         category: form.category,
         price: form.price,
         maxRegistrations: form.maxRegistrations,
-        createdBy: this.organizerId, // This will be mapped to createdById in service
         artist: form.artist,
         organization: form.organization,
+        createdBy: this.organizerId,
       };
 
       const request =
@@ -559,6 +559,8 @@ export class OrganizerDashboardComponent implements OnDestroy {
             'Success',
             `Event ${this.isEditMode ? 'updated' : 'created'} successfully!`
           );
+          console.log('Creating event with organizer ID:', this.organizerId);
+
           this.resetForm();
           this.loadAllData();
         },
@@ -595,7 +597,7 @@ export class OrganizerDashboardComponent implements OnDestroy {
   onEdit(event: Event) {
     window.scrollTo(0, 0);
     const loc = this.locations.find((l) => l.id === event.locationId);
-    console.log('Location:', loc);
+    // console.log('Location:', loc);
 
     this.eventForm.patchValue({
       title: event.title,
