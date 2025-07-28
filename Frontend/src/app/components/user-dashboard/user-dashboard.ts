@@ -530,6 +530,7 @@ export class UserDashboardComponent implements OnDestroy {
 
   private sendRegistrationEmail(event: Event) {
     // Check if we have user email
+
     if (!this.userEmail) {
       console.warn('No user email available for sending confirmation');
       return;
@@ -616,7 +617,7 @@ export class UserDashboardComponent implements OnDestroy {
       const payloadBase64 = parts[1];
 
       const decoded = JSON.parse(atob(payloadBase64));
-      // console.log('Decoded token payload:', decoded);
+      console.log('Decoded token payload:', decoded);
 
       this.userId = decoded.userId || decoded.id || null;
       this.userName = decoded.userName || decoded.name || null;

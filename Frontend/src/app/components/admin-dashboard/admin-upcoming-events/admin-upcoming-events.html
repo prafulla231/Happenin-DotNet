@@ -103,6 +103,13 @@
     </div>
   </div>
 
+  <app-pagination
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      (pageChanged)="onPageChange($event)"
+    >
+    </app-pagination>
+
   <!-- Event Details Modal -->
   <div
     class="admin-modal-overlay"

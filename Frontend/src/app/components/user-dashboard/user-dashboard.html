@@ -254,7 +254,7 @@
     <!-- Events Grid - Updated to use paginatedEvents -->
     <div class="events-grid" *ngIf="events.length > 0">
       <div
-        *ngFor="let event of events"
+        *ngFor="let event of paginatedEvents"
         class="event-card"
         [class.registered-card]="isRegistered(event.id)"
       >

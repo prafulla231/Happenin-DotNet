@@ -9,6 +9,7 @@ import { HeaderComponent, HeaderButton } from '../../../common/header/header';
 import { FooterComponent } from '../../../common/footer/footer';
 import { CustomAlertComponent } from '../../custom-alert/custom-alert';
 import { environment } from '../../../../environment';
+import { PaginationComponent } from '../../../common/pagination/pagination';
 
 export interface Event {
   id: string;
@@ -77,6 +78,7 @@ export interface CustomAlert {
     HeaderComponent,
     FooterComponent,
     CustomAlertComponent,
+    PaginationComponent
   ],
   templateUrl: './admin-upcoming-events.html',
   styleUrls: ['./admin-upcoming-events.scss'],
@@ -108,6 +110,11 @@ export class AdminUpcomingEvents {
     { text: 'Analytics', action: 'viewAnalytics', style: 'primary' },
     { text: 'Logout', action: 'logout', style: 'primary' },
   ];
+   paginatedEvents: Event[] = [];
+    currentPage = 1;
+    totalPages = 0;
+    eventsPerPage = 6; // Can be passed as `limit`
+    isLoading = false;
 
   constructor(
     private eventService: EventService,
@@ -245,36 +252,107 @@ export class AdminUpcomingEvents {
     document.body.style.overflow = 'auto';
   }
 
-  loadEvents(): void {
-    this.loadingService.show();
+   extractCityFromLocationObject(location: any): string {
+    if (!location) return '';
 
-    this.eventService.getUpcomingEvents().subscribe({
-      next: (events: any[]) => {
-        this.events = events;
-        this.filteredEvents = [...events];
+    // If location is an object with city property
+    if (typeof location === 'object' && location.city) {
+      return location.city;
+    }
 
-        this.events.forEach((event) => {
-          this.loadRegisteredUsers(event.id);
-        });
-        this.loadingService.hide();
-        console.log('Loaded events:', this.events);
-        this.showAlert(
-          'success',
-          'Events Loaded',
-          'Successfully loaded all available events!'
-        );
+    // If location is a string, use existing extraction logic
+    if (typeof location === 'string') {
+      return this.extractCityFromLocation(location);
+    }
+
+    return '';
+  }
+
+extractCityFromLocation(location: string): string {
+    // console.log('Extracting city from location:', location);
+    if (!location) return '';
+    const parts = location.split(',').map((part) => part.trim());
+    if (parts.length >= 2) {
+      return parts[parts.length - 1];
+    } else {
+      return parts[0];
+    }
+  }
+  loadEvents(page: number = 1): void {
+    // this.loadingService.show();
+
+    this.eventService.getPaginatedEvents(page, this.eventsPerPage).subscribe({
+  //     next: (events: any[]) => {
+  //       this.events = events;
+  //       this.filteredEvents = [...events];
+
+  //       this.events.forEach((event) => {
+  //         this.loadRegisteredUsers(event.id);
+  //       });
+  //       this.loadingService.hide();
+  //       this.isLoading = false;
+  //       console.log('Loaded events:', this.events);
+  //       this.showAlert(
+  //         'success',
+  //         'Events Loaded',
+  //         'Successfully loaded all available events!'
+  //       );
+  //     },
+  //     error: (err) => {
+  //       console.error('Error loading events', err);
+  //       this.loadingService.hide();
+  //       this.isLoading  = false;
+  //       this.showAlert(
+  //         'error',
+  //         'Loading Failed',
+  //         'Failed to load events. Please try again later.'
+  //       );
+  //     },
+  //   });
+  // }
+
+  next: (response) => {
+        if (response && Array.isArray(response.data)) {
+          // Map events and extract city from location
+          this.events = (response.data as any[]).map((event) => ({
+            ...event,
+            tempCity:
+              this.extractCityFromLocationObject(event.location) ||
+              event.city ||
+              'Unknown',
+          }));
+
+          // console.log('Fetched events:', this.events);
+
+          this.paginatedEvents = [...this.events];
+          this.filteredEvents = [...this.events];
+           this.events.forEach((event) => {
+        this.loadRegisteredUsers(event.id);
+     });
+          // this.applySorting();
+
+          this.currentPage = response.currentPage || 1;
+          this.totalPages = response.totalPages || 1;
+          this.eventsPerPage = response.pageSize || this.eventsPerPage;
+        } else {
+          this.showAlert('error', 'Invalid Response', 'Unexpected data format');
+        }
       },
-      error: (err) => {
-        console.error('Error loading events', err);
-        this.loadingService.hide();
-        this.showAlert(
-          'error',
-          'Loading Failed',
-          'Failed to load events. Please try again later.'
-        );
+      error: (error) => {
+        console.error('❌ Error fetching events:', error);
+        this.showAlert('error', 'Load Failed', 'Failed to load events');
+      },
+      complete: () => {
+        this.isLoading = false;
       },
     });
   }
+
+   onPageChange(page: number): void {
+
+      this.loadEvents(page);
+    }
+
 
   confirmDeleteEvent(eventId: string, eventTitle: string) {
     this.showConfirmation(

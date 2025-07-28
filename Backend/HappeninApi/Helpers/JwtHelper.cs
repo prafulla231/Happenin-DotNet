@@ -17,13 +17,12 @@ namespace HappeninApi.Helpers
             var jwtAudience = config["Jwt:Audience"];
 
             var claims = new[]
-            {
-                new Claim("userId", user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
-
-            };
+{
+    new Claim("userId", user.Id.ToString()),
+    new Claim("email", user.Email),
+    new Claim("name", user.Name),
+    new Claim("role", user.Role.ToString())
+};
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
