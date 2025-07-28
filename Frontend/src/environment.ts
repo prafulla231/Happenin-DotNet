@@ -16,7 +16,7 @@ export const environment = {
     registeredEvents: (userId: string) => `/events/registered-events/${userId}`,
     registerForEvent: '/events/register',
     deregisterForEvent: '/events/deregister',
-    getUpcomingEvent: '/events/Approved',
+    getUpcomingEvent: '/events/approved',
     getExpiredEvent: '/events/expired',
 
     // Registrations
@@ -33,19 +33,20 @@ export const environment = {
     // viewLocation: (locationId: string) => `/locations/${locationId}`,
     viewLocation: (locationId: string) => `/locations`,
     // deleteLocation: (locationId: string) => `/locations/${locationId}`,
-   deleteLocation: (locationId: string) => `/locations/${locationId}`,
+    deleteLocation: (locationId: string) => `/locations/${locationId}`,
 
     //Approvals
     // approveEvent: `/approval/approveEvent`,
     // denyEvent: (eventId: string) => `/approval/deny/${eventId}`,
     // inside apis: { ... }
-updateEventStatus: (eventId: string) => `/events/${eventId}/status`,
+    updateEventStatus: (eventId: string) => `/events/${eventId}/status`,
 
     // viewApprovalRequests: '/events/Pending',
     // viewApprovalRequestById: (requestId: string) =>
     //   `/approval/viewrequests/${requestId}`,
-      viewApprovalRequests: '/events/Pending',
-  viewApprovalRequestById: (requestId: string) => `/approval/viewrequests/${requestId}`,
+    viewApprovalRequests: '/events/Pending',
+    viewApprovalRequestById: (requestId: string) =>
+      `/approval/viewrequests/${requestId}`,
 
     //users
     registerUser: '/users/register',

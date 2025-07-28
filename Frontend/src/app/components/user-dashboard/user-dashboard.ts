@@ -381,7 +381,7 @@ export class UserDashboardComponent implements OnDestroy {
               'Unknown',
           }));
 
-          console.log('Fetched events:', this.events);
+          // console.log('Fetched events:', this.events);
 
           this.paginatedEvents = [...this.events];
           this.filteredEvents = [...this.events];

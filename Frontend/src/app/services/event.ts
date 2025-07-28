@@ -96,7 +96,7 @@ export class EventService {
       if (filters.sortBy) params = params.set('sortBy', filters.sortBy);
     }
 
-    const url = `${environment.apiBaseUrl}/events`;
+    const url = `${environment.apiBaseUrl}/events/approved`;
 
     return this.http.get<any>(url, {
       headers: this.getAuthHeaders(),
