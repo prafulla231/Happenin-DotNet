@@ -11,6 +11,7 @@ import { environment } from '../../../../environment';
 import { HeaderComponent, HeaderButton } from '../../../common/header/header';
 import { FooterComponent } from '../../../common/footer/footer';
 import { CustomAlertComponent } from '../../custom-alert/custom-alert';
+import { PaginationComponent } from '../../../common/pagination/pagination';
 
 export interface Event {
   id: string;
@@ -70,6 +71,8 @@ export interface CustomAlert {
   autoClose?: boolean;
 }
 
+
+
 @Component({
   selector: 'app-admin-expired-events',
   standalone: true,
@@ -79,6 +82,7 @@ export interface CustomAlert {
     HeaderComponent,
     FooterComponent,
     CustomAlertComponent,
+    PaginationComponent
   ],
   templateUrl: './admin-expired-events.html',
   styleUrls: ['./admin-expired-events.scss'],
@@ -90,11 +94,11 @@ export class AdminExpiredEvents implements OnInit {
   private eventService = inject(EventService);
   private authService = inject(AuthService);
 
-  expiredEvents: Event[] = [];
+  events: Event[] = [];
+  filteredEvents : Event[] = [];
   selectedEvent: Event | null = null;
   showEventDetails: boolean = false;
   usersMap: { [eventId: string]: RegisteredUsersResponse } = {};
-
   customAlert: CustomAlert = {
     show: false,
     type: 'info',
@@ -114,7 +118,11 @@ export class AdminExpiredEvents implements OnInit {
   ngOnInit(): void {
     this.loadExpiredEvents();
   }
-
+ paginatedEvents: Event[] = [];
+    currentPage = 1;
+    totalPages = 0;
+    eventsPerPage = 6; // Can be passed as `limit`
+    isLoading = false;
   handleHeaderAction(action: string): void {
     switch (action) {
       case 'dashboard':
@@ -199,31 +207,103 @@ export class AdminExpiredEvents implements OnInit {
     }
   }
 
-  loadExpiredEvents(): void {
-    this.loadingService.show();
+  extractCityFromLocationObject(location: any): string {
+    if (!location) return '';
 
-    this.eventService.getExpiredEvents().subscribe({
-      next: (events: any[]) => {
-        this.expiredEvents = events;
+    // If location is an object with city property
+    if (typeof location === 'object' && location.city) {
+      return location.city;
+    }
 
-        this.loadingService.hide();
-        this.showAlert(
-          'success',
-          'Events Loaded',
-          'Successfully loaded all available events!'
-        );
+    // If location is a string, use existing extraction logic
+    if (typeof location === 'string') {
+      return this.extractCityFromLocation(location);
+    }
+
+    return '';
+  }
+
+extractCityFromLocation(location: string): string {
+    // console.log('Extracting city from location:', location);
+    if (!location) return '';
+    const parts = location.split(',').map((part) => part.trim());
+    if (parts.length >= 2) {
+      return parts[parts.length - 1];
+    } else {
+      return parts[0];
+    }
+  }
+
+  loadExpiredEvents(page: number = 1): void {
+    console.log("expired events : ",this.events)
+    this.isLoading=true;
+
+    this.eventService.getExpiredPaginatedEvents(page,this.eventsPerPage).subscribe({
+  //     next: (events: any[]) => {
+  //       this.events = events;
+
+  //       this.loadingService.hide();
+  //       this.showAlert(
+  //         'success',
+  //         'Events Loaded',
+  //         'Successfully loaded all available events!'
+  //       );
+  //     },
+  //     error: (err) => {
+  //       console.error('Error loading events', err);
+  //       this.loadingService.hide();
+  //       this.showAlert(
+  //         'error',
+  //         'Loading Failed',
+  //         'Failed to load events. Please try again later.'
+  //       );
+  //     },
+  //   });
+  // }
+
+   next: (response) => {
+        if (response && Array.isArray(response.data)) {
+          // Map events and extract city from location
+          this.events = (response.data as any[]).map((event) => ({
+            ...event,
+            tempCity:
+              this.extractCityFromLocationObject(event.location) ||
+              event.city ||
+              'Unknown',
+          }));
+
+          // console.log('Fetched events:', this.events);
+
+          this.paginatedEvents = [...this.events];
+          this.filteredEvents = [...this.events];
+           this.events.forEach((event) => {
+
+     });
+          // this.applySorting();
+
+          this.currentPage = response.currentPage || 1;
+          this.totalPages = response.totalPages || 1;
+          this.eventsPerPage = response.pageSize || this.eventsPerPage;
+          this.isLoading=false;
+        } else {
+          this.showAlert('error', 'Invalid Response', 'Unexpected data format');
+        }
       },
-      error: (err) => {
-        console.error('Error loading events', err);
-        this.loadingService.hide();
-        this.showAlert(
-          'error',
-          'Loading Failed',
-          'Failed to load events. Please try again later.'
-        );
+      error: (error) => {
+        console.error('❌ Error fetching events:', error);
+        this.showAlert('error', 'Load Failed', 'Failed to load events');
+      },
+      complete: () => {
+        this.isLoading = false;
       },
     });
   }
+
+   onPageChange(page: number): void {
+
+      this.loadExpiredEvents(page);
+    }
+
 
   confirmDeleteEvent(eventId: string, eventTitle: string): void {
     this.customAlert = {
@@ -242,7 +322,7 @@ export class AdminExpiredEvents implements OnInit {
     this.loadingService.show();
     this.eventService.deleteEvent(eventId).subscribe({
       next: () => {
-        this.expiredEvents = this.expiredEvents.filter(
+        this.events = this.events.filter(
           (event) => event.id !== eventId
         );
         this.showAlert('success', 'Success', 'Event deleted successfully');

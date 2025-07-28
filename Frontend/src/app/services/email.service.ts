@@ -24,6 +24,7 @@ export interface TicketEmailRequest {
   userName: string;
   sendPDF?: boolean;
   sendDetails?: boolean;
+  pdfBase64?: string;
 }
 
 @Injectable({
@@ -100,28 +101,30 @@ export class EmailService {
 
       let yPosition = 80;
       const details = [
-        { label: 'Event Name', value: event.title },
-        { label: 'Description', value: event.description },
-        { label: 'Date', value: new Date(event.date).toLocaleDateString() },
-        { label: 'Time', value: event.timeSlot },
-        { label: 'Duration', value: event.duration },
-        { label: 'Location', value: event.location },
-        { label: 'Category', value: event.category || 'General' },
-        { label: 'Price', value: `₹${event.price}` },
-        { label: 'Ticket Holder', value: userName }
-      ];
+  { label: 'Event Name', value: String(event.title) },
+  { label: 'Description', value: String(event.description) },
+  { label: 'Date', value: new Date(event.date).toLocaleDateString() },
+  { label: 'Time', value: String(event.timeSlot) },
+  { label: 'Duration', value: String(event.duration ?? '') },
+  { label: 'Location', value: String(event.location) },
+  { label: 'Category', value: String(event.category || 'General') },
+  { label: 'Price', value: `₹${event.price}` },
+  { label: 'Ticket Holder', value: userName }
+];
 
-      details.forEach((detail) => {
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.text(`${detail.label}:`, margin, yPosition);
 
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
-        doc.text(detail.value, margin + 70, yPosition);
+     details.forEach((detail) => {
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text(`${detail.label}:`, margin, yPosition);
 
-        yPosition += 12;
-      });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(String(detail.value ?? ''), margin + 70, yPosition);
+
+  yPosition += 12;
+});
+
 
       // Footer
       yPosition += 20;

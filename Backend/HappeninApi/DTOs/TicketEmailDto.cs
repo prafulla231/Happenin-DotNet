@@ -8,5 +8,6 @@ namespace HappeninApi.DTOs
         public string UserName { get; set; } = "Guest";
         public bool SendPDF { get; set; } = true;
         public bool SendDetails { get; set; } = true;
+        public string? PdfBase64 { get; set; }
     }
 }

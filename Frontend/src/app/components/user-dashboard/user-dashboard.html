@@ -176,27 +176,7 @@
         </div>
       </div>
 
-      <!-- Results Count -->
-      <!-- <div class="results-info">
-  <span class="results-count">
-    <span *ngIf="searchQuery && searchQuery.trim()" class="search-indicator">
-      🔍 Search results for "{{ searchQuery }}":
-    </span>
-    {{ paginatedEvents.length }} {{ paginatedEvents.length === 1 ? 'event' : 'events' }} found
-    <span *ngIf="totalPages > 1" class="page-info">
-      (Page {{ currentPage }} of {{ totalPages }})
-    </span>
-  </span>
-  <div class="sort-controls">
-    <label class="sort-label">Sort by:</label>
-    <select class="sort-select" [(ngModel)]="sortBy" (change)="applySorting()">
-      <option value="date">Date</option>
-      <option value="title">Title</option>
-      <option value="price">Price</option>
-      <option value="category">Category</option>
-    </select>
-  </div>
-</div> -->
+
       <div class="results-info">
         <span class="results-count">
           <span
@@ -311,7 +291,7 @@
 
             <!-- View Details Button -->
             <button class="view-details-btn" (click)="showEventDetail(event)">
-              <span class="btn-icon">👁️</span>
+              <!-- <span class="btn-icon">👁️</span> -->
               <span class="btn-text">Details</span>
             </button>
           </div>
@@ -334,78 +314,6 @@
     <!-- Next Button -->
   </section>
 
-  <!-- <section class="events-section registered-section">
-    <div class="section-header">
-      <h2 class="section-title">
-        <span class="title-icon">🎫</span>
-        My Registered Events
-        <div class="title-underline registered-underline"></div>
-      </h2>
-    </div>
-
-    <div *ngIf="registeredEvents.length === 0" class="empty-state">
-      <div class="empty-icon">🎭</div>
-      <p class="empty-message">You haven't registered for any events yet.</p>
-      <p class="empty-submessage">
-        Browse available events above to get started!
-      </p>
-    </div>
-
-    <div class="events-grid" *ngIf="registeredEvents.length > 0">
-      <div
-        *ngFor="let event of registeredEvents"
-        class="event-card registered-event-card"
-      >
-        <div class="card-gradient-bg registered-bg"></div>
-        <div class="card-content">
-          <div class="card-header">
-            <h3 class="event-title">{{ event.title }}</h3>
-            <div class="registered-badge">
-              <span class="badge-icon">✓</span>
-              <span class="badge-text">Registered</span>
-            </div>
-          </div>
-
-          <p class="event-description">{{ event.description }}</p>
-
-          <div class="event-details">
-            <div class="detail-item">
-              <span class="detail-icon">📅</span>
-              <span class="detail-label">Date:</span>
-              <span class="detail-value"
-                >{{ event.date | date: 'MMM d, y'}}</span
-              >
-            </div>
-            <div class="detail-item">
-              <span class="detail-icon">⏰</span>
-              <span class="detail-label">Time:</span>
-              <span class="detail-value">{{ event.timeSlot }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="detail-icon">📍</span>
-              <span class="detail-label">Location:</span>
-              <span class="detail-value">{{ event.location }}</span>
-            </div>
-          </div>
-
-          <div class="card-actions">
-            <button class="download-ticket-btn" (click)="downloadTicket(event)">
-              <span class="btn-icon">📥</span>
-              <span class="btn-text">Download Ticket</span>
-            </button>
-
-            <button
-              class="deregister-button"
-              (click)="deregister(userId!, event.id)"
-            >
-              <span class="btn-text">Cancel</span>
-            </button>
-          </div>
-        </div>
-        <div class="card-shine"></div>
-      </div>
-    </div>
-  </section> -->
   <!-- Event Details Modal -->
   <div
     class="modal-overlay"

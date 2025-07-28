@@ -536,6 +536,9 @@ export class UserDashboardComponent implements OnDestroy {
       return;
     }
 
+    const pdfBase64 = this.emailService.generateTicketPDFBase64(event, this.userName || 'Guest');
+
+
     const emailRequest = {
       userId: this.userId || 'anonymous',
       eventId: event.id,
@@ -543,6 +546,7 @@ export class UserDashboardComponent implements OnDestroy {
       userName: this.userName || 'Guest',
       sendPDF: true, // Send PDF ticket attachment
       sendDetails: true, // Send event details in email body
+       pdfBase64,
     };
 
     this.emailService.sendTicketEmail(emailRequest).subscribe({

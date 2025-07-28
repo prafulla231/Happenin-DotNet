@@ -6,8 +6,8 @@
 </app-header>
 
 <div class="expired-events-container">
-  <div class="admin-events-grid" *ngIf="expiredEvents.length > 0">
-    <div *ngFor="let event of expiredEvents" class="admin-event-card">
+  <div class="admin-events-grid" *ngIf="events.length > 0">
+    <div *ngFor="let event of events" class="admin-event-card">
       <div class="event-header">
         <h3>{{ event.title }}</h3>
         <span class="event-category" *ngIf="event.category"
@@ -26,6 +26,8 @@
         </p>
       </div>
 
+
+
       <div class="event-actions">
         <button
           class="delete-btn"
@@ -41,11 +43,18 @@
     </div>
   </div>
 
-  <div *ngIf="expiredEvents.length === 0" class="no-events-message">
+  <div *ngIf="events.length === 0" class="no-events-message">
     <h3>No expired events found</h3>
     <p>There are currently no expired events to display.</p>
   </div>
 </div>
+
+ <app-pagination
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      (pageChanged)="onPageChange($event)"
+    >
+    </app-pagination>
 
 <!-- Event Details Modal -->
 <div

@@ -32,19 +32,29 @@ import { Subscription } from 'rxjs';
   `,
   styles: [`
     .spinner-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 23, 42, 0.9);
-      backdrop-filter: blur(8px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      animation: fadeIn 0.3s ease-in-out;
-    }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.9);
+  background-color: rgba(15, 23, 42, 0.95); /* fallback */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px); /* Safari */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@supports ((-webkit-backdrop-filter: blur(8px)) or (backdrop-filter: blur(8px))) {
+  .spinner-overlay {
+    background-color: rgba(15, 23, 42, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
 
     .spinner-container {
       display: flex;
@@ -108,14 +118,16 @@ import { Subscription } from 'rxjs';
       letter-spacing: 0.1em;
     }
 
-    .loading-text {
-      background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
-      background-size: 400% 400%;
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: gradient 3s ease infinite;
-    }
+   .loading-text {
+  background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 400% 400%;
+  background-clip: text;
+  -webkit-background-clip: text; /* Safari, Chrome */
+  color: transparent;
+  color: #ffffff;
+  -webkit-text-fill-color: transparent; /* Safari */
+  animation: gradient 3s ease infinite;
+}
 
     .dots {
       display: flex;

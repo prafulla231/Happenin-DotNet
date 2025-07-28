@@ -13,29 +13,54 @@ namespace HappeninApi.Repositories
             _emailHelper = emailHelper;
         }
 
-        public async Task SendTicketEmailAsync(TicketEmailDto request)
+        // public async Task SendTicketEmailAsync(TicketEmailDto request)
+        // {
+        //     byte[]? pdf = null;
+
+        //     if (request.SendPDF)
+        //     {
+        //         // TODO: Generate actual PDF. Placeholder:
+        //         pdf = GeneratePdfTicket(request);
+        //     }
+
+        //     await _emailHelper.SendRegistrationTicketAsync(
+        //         request.UserEmail,
+        //         request.UserName,
+        //         $"Event #{request.EventId}",
+        //         pdf
+        //     );
+        // }
+
+        // private byte[] GeneratePdfTicket(TicketEmailDto request)
+        // {
+        //     // Placeholder PDF generation
+        //     var content = $"Ticket for {request.UserName} - Event ID: {request.EventId}";
+        //     return System.Text.Encoding.UTF8.GetBytes(content); // use real PDF lib like iTextSharp/PDFsharp
+        // }
+
+        public async Task SendTicketEmailAsync(TicketEmailDto dto)
+{
+    byte[]? pdfBytes = null;
+
+    if (dto.SendPDF && !string.IsNullOrWhiteSpace(dto.PdfBase64))
+    {
+        try
         {
-            byte[]? pdf = null;
-
-            if (request.SendPDF)
-            {
-                // TODO: Generate actual PDF. Placeholder:
-                pdf = GeneratePdfTicket(request);
-            }
-
-            await _emailHelper.SendRegistrationTicketAsync(
-                request.UserEmail,
-                request.UserName,
-                $"Event #{request.EventId}",
-                pdf
-            );
+            pdfBytes = Convert.FromBase64String(dto.PdfBase64);
         }
-
-        private byte[] GeneratePdfTicket(TicketEmailDto request)
+        catch
         {
-            // Placeholder PDF generation
-            var content = $"Ticket for {request.UserName} - Event ID: {request.EventId}";
-            return System.Text.Encoding.UTF8.GetBytes(content); // use real PDF lib like iTextSharp/PDFsharp
+            throw new Exception("Invalid base64 PDF string.");
         }
+    }
+
+    await _emailHelper.SendRegistrationTicketAsync(
+        dto.UserEmail,
+        dto.UserName,
+        $"Event #{dto.EventId}", // Replace with actual event name if needed
+        pdfBytes
+    );
+}
+
     }
 }
