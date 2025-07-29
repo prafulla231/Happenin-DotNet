@@ -17,7 +17,7 @@ namespace HappeninApi.Helpers
             Take = PageSize;
         }
 
-        public PaginationHelper(PaginationRequestDto request) 
+        public PaginationHelper(PaginationRequestDto request)
             : this(request.Page, request.PageSize)
         {
         }

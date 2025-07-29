@@ -127,8 +127,6 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
     { text: 'Dashboard', action: 'dashboard' },
     { text: 'My Events', action: 'viewMyEvents' },
     { text: 'Create Event', action: 'createEvent', style: 'primary' },
-    { text: 'Analytics', action: 'openAnalytics', style: 'primary' },
-    { text: 'Contact', action: 'openContact' },
     { text: 'Logout', action: 'logout' },
   ];
 
@@ -350,12 +348,7 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
       case 'createEvent':
         this.createNewEvent();
         break;
-      case 'openAnalytics':
-        this.router.navigate(['/analytics']);
-        break;
-      case 'openContact':
-        this.router.navigate(['/contact']);
-        break;
+
       case 'logout':
         this.logout();
         break;

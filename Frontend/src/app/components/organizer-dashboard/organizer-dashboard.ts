@@ -165,13 +165,27 @@ export class OrganizerDashboardComponent implements OnDestroy {
   }
 
   organizerButtons: HeaderButton[] = [
+    { text: 'My Events', action: 'viewMyEvents' },
+    // { text: 'Pending Events', action: 'viewPendingEvents' },
+    { text: 'Create Event', action: 'createEvent', style: 'primary' },
     { text: 'Analytics', action: 'openAnalytics', style: 'primary' },
+    // { text: 'Analytics', action: 'viewAnalytics' },
+    // { text: 'Settings', action: 'openSettings' },
     { text: 'Contact', action: 'openContact' },
     { text: 'Logout', action: 'logout' },
   ];
 
   handleHeaderAction(action: string): void {
     switch (action) {
+      case 'viewMyEvents':
+        this.viewMyEvents();
+        break;
+      // case 'viewPendingEvents':
+      //   this.viewPendingEvents();
+      //   break;
+      case 'createEvent':
+        this.createEvent();
+        break;
       case 'openAnalytics':
         this.openAnalytics();
         break;
@@ -352,12 +366,36 @@ export class OrganizerDashboardComponent implements OnDestroy {
     this.customAlert.cancelAction = undefined;
   }
 
-  navigateToMyEvents() {
-    this.router.navigate(['/my-created-events']);
+  viewMyEvents() {
+    const availableSection = document.querySelector('.events-section');
+    if (availableSection) {
+      availableSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+    // this.router.navigate(['/my-created-events']);
   }
 
-  navigateToPendingApprovals() {
-    this.router.navigate(['/my-pending-approvals']);
+  viewPendingEvents() {
+    const availableSection = document.querySelector('.events-section');
+    if (availableSection) {
+      availableSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+    // this.router.navigate(['/my-pending-approvals']);
+  }
+
+  createEvent() {
+    const availableSection = document.querySelector('.create-event-btn');
+    if (availableSection) {
+      availableSection.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
   }
 
   private loadAllData(): void {
@@ -481,29 +519,6 @@ export class OrganizerDashboardComponent implements OnDestroy {
     this.validateMaxRegistrations();
   }
 
-  // In OrganizerDashboardComponent
-  private showConflictAlert(conflictingEvent: any) {
-    const conflictMessage = `
-    Another event "${
-      conflictingEvent.title
-    }" is already scheduled at this venue during the same time.
-    
-    Conflicting Event Details:
-    • Date: ${new Date(conflictingEvent.date).toLocaleDateString()}
-    • Time: ${conflictingEvent.timeSlot}
-    • Venue: ${conflictingEvent.location?.placeName}
-    
-    Please choose a different time slot or venue.
-  `;
-
-    this.showAlert(
-      'warning',
-      'Schedule Conflict Detected',
-      conflictMessage,
-      false // Don't auto-close
-    );
-  }
-
   // Event Submit/Create/Update
   async onSubmit() {
     if (this.eventForm.invalid) {
@@ -513,34 +528,6 @@ export class OrganizerDashboardComponent implements OnDestroy {
         'Please fill required fields'
       );
       return;
-    }
-
-    // NEW: Check for conflicts first
-    const form = this.eventForm.value;
-    const timeSlot = `${form.startTime} - ${form.endTime}`;
-    const selectedPlace = this.places.find(
-      (place) => place.placeName === form.location
-    );
-
-    if (selectedPlace) {
-      try {
-        const conflictResponse = await this.eventService
-          .checkEventConflict(
-            selectedPlace.id,
-            new Date(form.date).toISOString(),
-            timeSlot,
-            this.currentEditEventId || undefined // Convert null to undefined
-          )
-          .toPromise();
-
-        if (conflictResponse?.hasConflict) {
-          this.showConflictAlert(conflictResponse.conflictingEvent);
-          return; // Stop execution
-        }
-      } catch (error) {
-        console.error('Error checking conflict:', error);
-        // Continue with creation if conflict check fails
-      }
     }
 
     this.isLoading = true;
@@ -691,6 +678,23 @@ export class OrganizerDashboardComponent implements OnDestroy {
     );
   }
 
+  loadRegisteredUsers(eventId: string, callback?: () => void) {
+    this.eventService
+      .getRegisteredUsers(eventId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.usersMap[eventId] = res.data;
+          if (callback) callback();
+        },
+        error: (error) => {
+          console.error('Error loading registered users:', error);
+          // alert('Failed to load registered users');
+          this.showAlert('error', 'Error', 'Failed to load registered users');
+        },
+      });
+  }
+
   // State/City Filters
   onStateChange() {
     this.selectedState = this.eventForm.get('state')?.value?.trim() || '';
@@ -760,9 +764,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
     });
   }
 
-  // openUserModal(eventId: string) {
-  //   this.loadRegisteredUsers(eventId, () => (this.selectedEventId = eventId));
-  // }
+  openUserModal(eventId: string) {
+    this.loadRegisteredUsers(eventId, () => (this.selectedEventId = eventId));
+  }
 
   closeUserModal() {
     this.selectedEventId = null;
