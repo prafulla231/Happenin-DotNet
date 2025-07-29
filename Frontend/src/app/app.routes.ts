@@ -10,6 +10,8 @@ import { OrganizerAnalyticsComponent } from './components/organizer-analytics/or
 import { AnalyticsComponent } from './components/admin-analytics/admin-analytics';
 import { MyRegisteredEvents } from './components/user-dashboard/my-registered-events/my-registered-events';
 import { PendingApprovals } from './components/admin-dashboard/admin-pending-approvals/admin-pending-approvals';
+import { MyCreatedEventsComponent } from './components/organizer-dashboard/my-created-events/my-created-events';
+import { OrganizerPendingApprovalsComponent } from './components/organizer-dashboard/my-pending-approvals/my-pending-approvals';
 
 export const routes: Routes = [
   {
@@ -56,6 +58,18 @@ export const routes: Routes = [
   {
     path: 'organizer-dashboard',
     component: OrganizerDashboardComponent,
+    canActivate: [AuthGuard],
+    data: { role: 'organizer' },
+  },
+  {
+    path: 'my-created-events',
+    component: MyCreatedEventsComponent,
+    canActivate: [AuthGuard],
+    data: { role: 'organizer' },
+  },
+  {
+    path: 'my-pending-approvals',
+    component: OrganizerPendingApprovalsComponent,
     canActivate: [AuthGuard],
     data: { role: 'organizer' },
   },

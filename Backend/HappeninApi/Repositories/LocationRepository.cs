@@ -48,5 +48,11 @@ namespace HappeninApi.Repositories
             var result = await _locations.UpdateOneAsync(x => x.Id == locationId, update);
             return result.MatchedCount > 0;
         }
+
+        public async Task<List<Location>> GetLocationsByCityAsync(string city)
+        {
+            return await _locations.Find(l => l.City.ToLower() == city.ToLower()).ToListAsync();
+        }
+
     }
 }

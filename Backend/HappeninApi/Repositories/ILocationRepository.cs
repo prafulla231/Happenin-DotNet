@@ -10,5 +10,6 @@ namespace HappeninApi.Repositories
         Task<bool> DeleteAsync(Guid id);
         Task<bool> BookLocationAsync(Guid locationId, Booking booking);
         Task<bool> CancelBookingAsync(Guid locationId, Guid bookingId);
+        Task<List<Location>> GetLocationsByCityAsync(string city);
     }
 }

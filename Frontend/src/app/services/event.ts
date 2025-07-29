@@ -104,7 +104,7 @@ export class EventService {
     });
   }
 
-   getExpiredPaginatedEvents(
+  getExpiredPaginatedEvents(
     page: number = 1,
     pageSize: number = 10,
     filters?: any
@@ -265,5 +265,27 @@ export class EventService {
       { userId, eventId },
       { headers: this.getAuthHeaders() }
     );
+  }
+
+  // In event.service.ts
+  checkEventConflict(
+    locationId: string,
+    date: string,
+    timeSlot: string,
+    excludeEventId?: string
+  ): Observable<any> {
+    let params = new HttpParams()
+      .set('locationId', locationId)
+      .set('date', date)
+      .set('timeSlot', timeSlot);
+
+    if (excludeEventId) {
+      params = params.set('excludeEventId', excludeEventId);
+    }
+
+    return this.http.get(`${environment.apiBaseUrl}/events/check-conflict`, {
+      headers: this.getAuthHeaders(),
+      params,
+    });
   }
 }

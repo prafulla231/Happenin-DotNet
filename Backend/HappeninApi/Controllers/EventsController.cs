@@ -299,7 +299,7 @@ namespace HappeninApi.Controllers
                 return NotFound();
             }
 
-            Console.WriteLine("✅ Event updated successfully.");
+            // Console.WriteLine("✅ Event updated successfully.");
             return NoContent();
         }
     }
