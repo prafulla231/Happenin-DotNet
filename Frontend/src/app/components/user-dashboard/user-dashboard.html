@@ -7,9 +7,8 @@
     (buttonClick)="handleHeaderAction($event)"
   >
   </app-header>
-  <!-- <app-event-filter></app-event-filter> -->
 
-  <section class="filters-section">
+  <!-- <section class="filters-section">
     <div class="filters-container">
       <div class="filters-header">
         <div class="header-actions">
@@ -53,11 +52,9 @@
         </div>
       </div>
 
-      <!-- Collapsible Filter Controls -->
       <div class="filter-dropdown" [class.show]="showFilters">
         <div class="filter-dropdown-content">
           <div class="filter-controls">
-            <!-- Category Filter -->
             <div class="filter-group">
               <label class="filter-label">
                 <span class="label-icon">🏷️</span>
@@ -75,7 +72,6 @@
               </select>
             </div>
 
-            <!-- City Filter -->
             <div class="filter-group">
               <label class="filter-label">
                 <span class="label-icon">🏙️</span>
@@ -94,7 +90,6 @@
               </select>
             </div>
 
-            <!-- Date Range Filter -->
             <div class="filter-group date-range-group">
               <label class="filter-label">
                 <span class="label-icon">📅</span>
@@ -122,7 +117,6 @@
         </div>
       </div>
 
-      <!-- Active Filters Display -->
       <div class="active-filters" *ngIf="hasActiveFilters()">
         <div class="active-filters-header">
           <span class="active-filters-title">Active Filters:</span>
@@ -207,7 +201,7 @@
         </div>
       </div>
     </div>
-  </section>
+  </section> -->
 
   <section class="events-section">
     <div class="section-header">
@@ -300,18 +294,12 @@
       </div>
     </div>
 
-    <!-- Pagination Controls - Add this new section -->
-
     <app-pagination
       [currentPage]="currentPage"
       [totalPages]="totalPages"
       (pageChanged)="onPageChange($event)"
     >
     </app-pagination>
-
-    <!-- Page Numbers -->
-
-    <!-- Next Button -->
   </section>
 
   <!-- Event Details Modal -->
