@@ -8,8 +8,20 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HappeninApi.Helpers
 {
+
+    /// <summary>
+    /// Provides helper methods for generating JWT tokens for user authentication.
+    /// </summary>
     public static class JwtHelper
     {
+
+        /// <summary>
+        /// Generates a JWT token for the specified user.
+        /// </summary>
+        /// <param name="user">The user for whom to generate the token.</param>
+        /// <param name="config">Application configuration containing JWT settings.</param>
+        /// <returns>A JWT token string.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if JWT key is missing in configuration.</exception>
         public static string GenerateJwtToken(User user, IConfiguration config)
         {
             var jwtKey = config["Jwt:Key"] ?? throw new ArgumentNullException("Jwt:Key", "JWT Key is missing in configuration");

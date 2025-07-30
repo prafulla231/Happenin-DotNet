@@ -3,15 +3,27 @@ using MimeKit;
 
 namespace HappeninApi.Helpers
 {
+    /// <summary>
+    /// Provides helper methods for sending emails such as OTPs and registration tickets.
+    /// </summary>
     public class EmailHelper
     {
         private readonly IConfiguration _config;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EmailHelper"/> class.
+        /// </summary>
+        /// <param name="config">Application configuration for email credentials.</param>
         public EmailHelper(IConfiguration config)
         {
             _config = config;
         }
 
+        /// <summary>
+        /// Sends an OTP email to the specified recipient.
+        /// </summary>
+        /// <param name="toEmail">Recipient's email address.</param>
+        /// <param name="otpCode">OTP code to send.</param>
         public async Task SendOtpEmailAsync(string toEmail, string otpCode)
         {
             var message = new MimeMessage();
@@ -30,6 +42,13 @@ namespace HappeninApi.Helpers
             await client.DisconnectAsync(true);
         }
 
+        /// <summary>
+        /// Sends a registration ticket email with an optional PDF attachment.
+        /// </summary>
+        /// <param name="toEmail">Recipient's email address.</param>
+        /// <param name="userName">Name of the user.</param>
+        /// <param name="eventName">Name of the event.</param>
+        /// <param name="pdfAttachment">PDF ticket attachment (optional).</param>
         public async Task SendRegistrationTicketAsync(string toEmail, string userName, string eventName, byte[]? pdfAttachment = null)
         {
             var message = new MimeMessage();
