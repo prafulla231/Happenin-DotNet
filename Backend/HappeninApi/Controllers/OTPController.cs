@@ -8,6 +8,9 @@ using System;
 
 namespace HappeninApi.Controllers
 {
+    /// <summary>
+    /// Controller for OTP (One-Time Password) operations, including sending and verifying OTPs for user authentication.
+    /// </summary>
     [ApiController]
     [Route("api/users")]
     public class OTPController : ControllerBase
@@ -23,6 +26,9 @@ namespace HappeninApi.Controllers
             _config = config;
         }
 
+        /// <summary>
+        /// Sends an OTP to the user's email for authentication.
+        /// </summary>
         [HttpPost("send-otp")]
         public async Task<IActionResult> SendOtp([FromBody] SendOtpDto dto)
         {
@@ -48,6 +54,9 @@ namespace HappeninApi.Controllers
             return Ok(new { message = "OTP sent to email." });
         }
 
+        /// <summary>
+        /// Verifies the OTP entered by the user and returns a JWT token if successful.
+        /// </summary>
         [HttpPost("verify-otp")]
         public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDto dto)
         {

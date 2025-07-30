@@ -6,7 +6,9 @@ using HappeninApi.Repositories;
 namespace HappeninApi.Controllers
 {
 
-
+    /// <summary>
+    /// Controller for event registration operations, including registering, deregistering, and fetching registered users/events.
+    /// </summary>
     [ApiController]
     [Route("api/events")]
     public class RegistrationsController : ControllerBase
@@ -21,7 +23,9 @@ namespace HappeninApi.Controllers
             _locationRepo = locationRepo;
         }
 
-
+        /// <summary>
+        /// Registers a user for an event.
+        /// </summary>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegistrationDto dto)
         {
@@ -35,6 +39,9 @@ namespace HappeninApi.Controllers
 
         }
 
+        /// <summary>
+        /// Deregisters a user from an event.
+        /// </summary>
         [HttpPost("deregister")]
         public async Task<IActionResult> Deregister([FromBody] RegistrationDto dto)
         {
@@ -46,6 +53,9 @@ namespace HappeninApi.Controllers
 
         }
 
+        /// <summary>
+        /// Gets all users registered for a specific event.
+        /// </summary>
         [HttpGet("{eventId}/registered-users")]
         public async Task<IActionResult> GetRegisteredUsers(Guid eventId)
         {
@@ -62,6 +72,9 @@ namespace HappeninApi.Controllers
             });
         }
 
+        /// <summary>
+        /// Deletes a user's registration for an event.
+        /// </summary>
         [HttpDelete("{eventId}/users/{userId}")]
         public async Task<IActionResult> DeleteRegistration(Guid eventId, Guid userId)
         {
@@ -69,6 +82,9 @@ namespace HappeninApi.Controllers
             return success ? NoContent() : NotFound("Registration not found.");
         }
 
+        /// <summary>
+        /// Gets all events a user is registered for, including location data.
+        /// </summary>
         [HttpGet("registered-events/{userId}")]
         public async Task<IActionResult> GetRegisteredEvents(Guid userId)
         {

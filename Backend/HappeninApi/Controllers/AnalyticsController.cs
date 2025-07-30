@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HappeninApi.Controllers
 {
+    /// <summary>
+    /// Controller for analytics endpoints, providing event and registration statistics for organizers and admins.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class AnalyticsController : ControllerBase
@@ -18,6 +21,10 @@ namespace HappeninApi.Controllers
             _regRepo = regRepo;
         }
 
+        /// <summary>
+        /// Returns analytics data for a specific organizer, including event counts, registrations, revenue, and breakdowns.
+        /// </summary>
+        /// <param name="id">Organizer's unique identifier</param>
         [HttpGet("organizer/{id}")]
         public async Task<IActionResult> GetOrganizerAnalytics(Guid id)
         {
@@ -72,6 +79,9 @@ namespace HappeninApi.Controllers
             return Ok(new { success = true, data });
         }
 
+        /// <summary>
+        /// Returns analytics data for admins, aggregating statistics across all events and registrations.
+        /// </summary>
         [HttpGet("admin")]
         public async Task<IActionResult> GetAdminAnalytics()
         {

@@ -6,6 +6,9 @@ using HappeninApi.Helpers;
 
 namespace HappeninApi.Controllers
 {
+    /// <summary>
+    /// Controller for managing events, including creation, status updates, deletion, and retrieval by status or organizer.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class EventsController : ControllerBase
@@ -117,7 +120,9 @@ namespace HappeninApi.Controllers
             return Ok(response);
         }
 
-
+        /// <summary>
+        /// Gets pending events with pagination.
+        /// </summary>
         [HttpGet("pending")]
         public async Task<IActionResult> GetPendingEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
@@ -148,7 +153,9 @@ namespace HappeninApi.Controllers
             return Ok(response);
         }
 
-
+        /// <summary>
+        /// Gets approved events with pagination.
+        /// </summary>
         [HttpGet("approved")]
         public async Task<IActionResult> GetApprovedEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
@@ -179,7 +186,9 @@ namespace HappeninApi.Controllers
             return Ok(response);
         }
 
-
+        /// <summary>
+        /// Gets rejected events with pagination.
+        /// </summary>
         [HttpGet("rejected")]
         public async Task<IActionResult> GetRejectedEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
@@ -200,6 +209,9 @@ namespace HappeninApi.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Gets expired events with pagination.
+        /// </summary>
         [HttpGet("expired")]
         public async Task<IActionResult> GetExpiredEvents([FromQuery] PaginationRequestDto paginationRequest)
         {
@@ -230,7 +242,9 @@ namespace HappeninApi.Controllers
             return Ok(response);
         }
 
-
+        /// <summary>
+        /// Gets events by organizer with pagination.
+        /// </summary>
         [HttpGet("by-organizer/{organizerId}")]
         public async Task<IActionResult> GetEventsByOrganizer(Guid organizerId, [FromQuery] PaginationRequestDto paginationRequest)
         {
@@ -262,6 +276,9 @@ namespace HappeninApi.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// Updates the status of an event.
+        /// </summary>
         [HttpPatch("{id}/status")]
         public async Task<IActionResult> UpdateEventStatus(Guid id, [FromBody] EventStatusUpdateDto dto)
         {
@@ -272,6 +289,9 @@ namespace HappeninApi.Controllers
             return success ? NoContent() : NotFound();
         }
 
+        /// <summary>
+        /// Deletes an event.
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEvent(Guid id)
         {
@@ -286,7 +306,10 @@ namespace HappeninApi.Controllers
             Console.WriteLine("✅ Event deleted successfully.");
             return NoContent();
         }
-
+        /// <summary>
+        /// Updates an existing event.
+        /// Returns 204 No Content if successful, or 404 Not Found if the event does not exist.
+        /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEvent(Guid id, [FromBody] UpdateEventDto dto)
         {

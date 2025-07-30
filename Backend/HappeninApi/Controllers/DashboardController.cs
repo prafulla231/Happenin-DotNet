@@ -4,10 +4,16 @@ using System.Security.Claims;
 
 namespace HappeninApi.Controllers
 {
+    /// <summary>
+    /// Controller for user dashboard redirection based on role.
+    /// </summary>
     [Route("api/users/")]
     [ApiController]
     public class DashboardController : ControllerBase
     {
+        /// <summary>
+        /// Returns a redirect path for the dashboard based on the authenticated user's role.
+        /// </summary>
         [HttpGet("dashboard")]
         [Authorize]
         public IActionResult GetDashboardRedirect()

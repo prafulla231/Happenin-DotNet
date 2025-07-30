@@ -14,6 +14,9 @@ using HappeninApi.Helpers;
 
 namespace HappeninApi.Controllers
 {
+    /// <summary>
+    /// Controller for user registration and authentication.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -27,6 +30,9 @@ namespace HappeninApi.Controllers
             _config = config;
         }
 
+        /// <summary>
+        /// Registers a new user.
+        /// </summary>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
@@ -82,6 +88,9 @@ namespace HappeninApi.Controllers
             });
         }
 
+        /// <summary>
+        /// Authenticates a user and returns a JWT token.
+        /// </summary>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {

@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HappeninApi.Controllers
 {
+    /// <summary>
+    /// Controller for managing event locations, including creation, booking, cancellation, and deletion.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class LocationsController : ControllerBase
@@ -17,6 +20,9 @@ namespace HappeninApi.Controllers
         }
 
         // POST /locations
+        /// <summary>
+        /// Creates a new location.
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreateLocation([FromBody] CreateLocationDto dto)
         {
@@ -40,6 +46,9 @@ namespace HappeninApi.Controllers
         }
 
         // GET /locations
+        /// <summary>
+        /// Retrieves all locations.
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAllLocations()
         {
@@ -48,6 +57,9 @@ namespace HappeninApi.Controllers
         }
 
         // GET /locations/{locationId}
+        /// <summary>
+        /// Retrieves a location by its unique identifier.
+        /// </summary>
         [HttpGet("{locationId}")]
         public async Task<IActionResult> GetLocationById(Guid locationId)
         {
@@ -56,6 +68,9 @@ namespace HappeninApi.Controllers
         }
 
         // POST /locations/book
+        /// <summary>
+        /// Books a location for an event.
+        /// </summary>
         [HttpPost("book")]
         public async Task<IActionResult> BookLocation([FromBody] BookLocationDto dto)
         {
@@ -78,6 +93,9 @@ namespace HappeninApi.Controllers
         }
 
         // POST /locations/cancel
+        /// <summary>
+        /// Cancels a booking for a location.
+        /// </summary>
         [HttpPost("cancel")]
         public async Task<IActionResult> CancelBooking([FromBody] CancelBookingDto dto)
         {
@@ -90,6 +108,9 @@ namespace HappeninApi.Controllers
         }
 
         // DELETE /locations/{locationId}
+        /// <summary>
+        /// Deletes a location.
+        /// </summary>
         [HttpDelete("{locationId}")]
         public async Task<IActionResult> DeleteLocation(Guid locationId)
         {
