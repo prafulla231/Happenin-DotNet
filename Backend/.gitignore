@@ -1,0 +1,41 @@
+# .NET build artifacts
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+*.sln.ide
+
+# Rider
+.idea/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+
+# Logs
+*.log
+
+# Local secrets (if any)
+secrets.json
+
+# Auto-generated config
+launchSettings.json
+
+# Optional: if using ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# Optional: if using JetBrains Rider
+.idea/
