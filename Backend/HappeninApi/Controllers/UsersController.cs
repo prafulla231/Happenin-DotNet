@@ -1,3 +1,4 @@
+// HappeninApi/Controllers/UsersController.cs
 using HappeninApi.DTOs;
 using HappeninApi.Models;
 using HappeninApi.Utils;
@@ -11,7 +12,7 @@ using System.Security.Cryptography;
 using System.Text;
 using HappeninApi.Helpers;
 
-namespace HappeninApi.Controllers   
+namespace HappeninApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -82,29 +83,29 @@ namespace HappeninApi.Controllers
         }
 
         [HttpPost("login")]
-public async Task<IActionResult> Login([FromBody] LoginDto dto)
-{
-    var user = await _users.Find(u => u.Email == dto.Email).FirstOrDefaultAsync();
-
-    if (user == null || !VerifyPassword(dto.Password, user.Password))
-        return Unauthorized("Invalid email or password.");
-
-    
-    var token = JwtHelper.GenerateJwtToken(user, _config);
-
-    return Ok(new
-    {
-        message = "Login successful",
-        token,
-        user = new
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            userId = user.Id,
-            user.Name,
-            user.Email,
-            user.Role
+            var user = await _users.Find(u => u.Email == dto.Email).FirstOrDefaultAsync();
+
+            if (user == null || !VerifyPassword(dto.Password, user.Password))
+                return Unauthorized("Invalid email or password.");
+
+
+            var token = JwtHelper.GenerateJwtToken(user, _config);
+
+            return Ok(new
+            {
+                message = "Login successful",
+                token,
+                user = new
+                {
+                    userId = user.Id,
+                    user.Name,
+                    user.Email,
+                    user.Role
+                }
+            });
         }
-    });
-}
 
 
         private string HashPassword(string password)
@@ -123,7 +124,7 @@ public async Task<IActionResult> Login([FromBody] LoginDto dto)
             return CryptographicOperations.FixedTimeEquals(storedHash, inputHash);
         }
 
-        
+
 
     }
 }
