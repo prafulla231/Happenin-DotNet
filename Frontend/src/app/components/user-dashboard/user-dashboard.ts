@@ -1,4 +1,9 @@
-// user-dashboard.ts
+/**
+ * User Dashboard component for displaying, filtering, and registering for events.
+ * Handles user authentication, event registration, filtering, pagination, and custom alerts.
+ * Integrates with services for events, locations, approvals, authentication, email, and loading.
+ * Provides UI logic for event details, clipboard sharing, and navigation.
+ */
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -19,6 +24,9 @@ import { FooterComponent } from '../../common/footer/footer';
 import { CustomAlertComponent } from '../custom-alert/custom-alert';
 import { PaginationComponent } from '../../common/pagination/pagination';
 
+/**
+ * Event interface representing the structure of an event object.
+ */
 export interface Event {
   id: string;
   title: string;
@@ -38,6 +46,9 @@ export interface Event {
   organization?: string;
 }
 
+/**
+ * CustomAlert interface for alert dialog configuration.
+ */
 export interface CustomAlert {
   show: boolean;
   type: 'success' | 'error' | 'warning' | 'info' | 'confirm';
@@ -49,6 +60,9 @@ export interface CustomAlert {
   autoClose?: boolean;
 }
 
+/**
+ * UserDashboardComponent displays available events, allows registration, filtering, and manages user session.
+ */
 @Component({
   selector: 'app-user-dashboard',
   standalone: true,
@@ -68,14 +82,23 @@ export interface CustomAlert {
   styleUrls: ['./user-dashboard.scss'],
 })
 export class UserDashboardComponent implements OnDestroy {
+  /** List of all events fetched from the server */
   events: Event[] = [];
+  /** List of events after applying filters */
   filteredEvents: Event[] = [];
+  /** Current user's ID */
   userId: string | null = null;
+  /** Current user's name */
   userName: string | null = null;
+  /** Events the user has registered for */
   registeredEvents: Event[] = [];
+  /** Currently selected event for details view */
   selectedEvent: Event | null = null;
+  /** Flag to show/hide event details modal */
   showEventDetails: boolean = false;
+  /** Current user's email */
   userEmail: string | null = null;
+  /** List of available cities for filtering */
   availableCiti: string[] = [
     'Mumbai',
     'Pune',
@@ -112,17 +135,15 @@ export class UserDashboardComponent implements OnDestroy {
     'Noida',
   ];
 
+  /** Timeout handler for search debounce */
   private searchTimeout: any;
-  // tempCity: string = '';
 
-  //  userName = 'John Doe';
-  //  Math = Math;
-
+  /** Returns the display name for the user */
   get displayUserName(): string {
     return this.userName || 'Guest';
   }
-  // tempcity: string ='';
 
+  /** Header navigation buttons configuration */
   headerButtons: HeaderButton[] = [
     { text: 'Available Events', action: 'scrollToAvailableEvents' },
     { text: 'My Events', action: 'scrollToRegisteredEvents' },
@@ -130,6 +151,10 @@ export class UserDashboardComponent implements OnDestroy {
     { text: 'Logout', action: 'logout', style: 'primary' },
   ];
 
+  /**
+   * Handles header button actions.
+   * @param action Action string from header button
+   */
   handleHeaderAction(action: string): void {
     switch (action) {
       case 'scrollToAvailableEvents':
@@ -147,7 +172,7 @@ export class UserDashboardComponent implements OnDestroy {
     }
   }
 
-  // Custom Alert System
+  /** Custom alert dialog configuration */
   customAlert: CustomAlert = {
     show: false,
     type: 'info',
@@ -165,10 +190,12 @@ export class UserDashboardComponent implements OnDestroy {
   selectedPriceRange = '';
   sortBy = 'date';
 
+  /** List of available categories for filtering */
   availableCategories: string[] = [];
-  //availableCities: string[] = [];
+  /** Flag for mobile menu state */
   isMobileMenuOpen = false;
 
+  /** List of event categories */
   categories: string[] = [
     'Music',
     'Sports',
@@ -183,12 +210,20 @@ export class UserDashboardComponent implements OnDestroy {
   ];
 
   // Pagination properties
+  /** Events to display on current page */
   paginatedEvents: Event[] = [];
+  /** Current page number */
   currentPage = 1;
+  /** Total number of pages */
   totalPages = 0;
+  /** Total number of pages */
   eventsPerPage = 6; // Can be passed as `limit`
+  /** Loading state flag */
   isLoading = false;
 
+  /**
+   * Constructor injects required services and initializes dashboard.
+   */
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -211,8 +246,18 @@ export class UserDashboardComponent implements OnDestroy {
       this.loadRegisteredEvents();
     }, 100);
   }
+  /** Flag to show/hide filters section */
   showFilters: boolean = false;
+
   // Custom Alert Methods
+  /**
+   * Shows a custom alert dialog.
+   * @param type Alert type
+   * @param title Alert title
+   * @param message Alert message
+   * @param autoClose Auto-close flag
+   * @param duration Duration before auto-close
+   */
   showAlert(
     type: 'success' | 'error' | 'warning' | 'info',
     title: string,
@@ -237,6 +282,13 @@ export class UserDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Shows a confirmation dialog with actions.
+   * @param title Dialog title
+   * @param message Dialog message
+   * @param confirmAction Action on confirm
+   * @param cancelAction Action on cancel
+   */
   showConfirmation(
     title: string,
     message: string,
@@ -254,6 +306,9 @@ export class UserDashboardComponent implements OnDestroy {
     };
   }
 
+  /**
+   * Copies selected event details to clipboard.
+   */
   copyEventToClipboard() {
     if (!this.selectedEvent) return;
 
@@ -293,6 +348,7 @@ export class UserDashboardComponent implements OnDestroy {
       });
   }
 
+  /** Handles confirmation action for alert dialog */
   handleAlertConfirm() {
     if (this.customAlert.confirmAction) {
       this.customAlert.confirmAction();
@@ -300,6 +356,7 @@ export class UserDashboardComponent implements OnDestroy {
     this.closeAlert();
   }
 
+  /** Handles cancel action for alert dialog */
   handleAlertCancel() {
     if (this.customAlert.cancelAction) {
       this.customAlert.cancelAction();
@@ -307,12 +364,14 @@ export class UserDashboardComponent implements OnDestroy {
     this.closeAlert();
   }
 
+  /** Closes the custom alert dialog */
   closeAlert() {
     this.customAlert.show = false;
     this.customAlert.confirmAction = undefined;
     this.customAlert.cancelAction = undefined;
   }
 
+  /** Handles confirm action for alert dialog */
   onConfirmAction() {
     if (this.customAlert.confirmAction) {
       this.customAlert.confirmAction();
@@ -320,6 +379,7 @@ export class UserDashboardComponent implements OnDestroy {
     this.closeAlert();
   }
 
+  /** Handles cancel action for alert dialog */
   onCancelAction() {
     if (this.customAlert.cancelAction) {
       this.customAlert.cancelAction();
@@ -327,10 +387,16 @@ export class UserDashboardComponent implements OnDestroy {
     this.closeAlert();
   }
 
+  /**
+   * Returns the minimum of two numbers.
+   * @param a First number
+   * @param b Second number
+   */
   getMaxValue(a: number, b: number): number {
     return Math.min(a, b);
   }
 
+  /** Scrolls to the events section in the view */
   scrollToEventsSection() {
     const eventsSection = document.querySelector('.events-section');
     if (eventsSection) {
@@ -341,14 +407,19 @@ export class UserDashboardComponent implements OnDestroy {
     }
   }
 
+  /** Toggles the filters section visibility */
   toggleFilters(): void {
     this.showFilters = !this.showFilters;
   }
 
+  /** Navigates to the contact page */
   openContact() {
     this.router.navigate(['/contact']);
   }
 
+  /**
+   * Loads events the user has registered for.
+   */
   loadRegisteredEvents() {
     if (!this.userId) return;
     this.eventService.getRegisteredEvents(this.userId).subscribe({
@@ -366,6 +437,10 @@ export class UserDashboardComponent implements OnDestroy {
     });
   }
 
+  /**
+   * Fetches paginated events from the server.
+   * @param page Page number
+   */
   fetchEvents(page: number = 1): void {
     this.isLoading = true;
 
@@ -405,6 +480,11 @@ export class UserDashboardComponent implements OnDestroy {
     });
   }
 
+  /**
+   * Fetches paginated events with applied filters.
+   * @param page Page number
+   * @param filters Filter object
+   */
   fetchEventsWithFilters(page: number = 1, filters: any = {}): void {
     this.isLoading = true;
 
@@ -445,6 +525,10 @@ export class UserDashboardComponent implements OnDestroy {
       });
   }
 
+  /**
+   * Registers the user for an event.
+   * @param eventId Event ID
+   */
   registerForEvent(eventId: string) {
     // Validate that we have a user ID
     if (!this.userId) {
@@ -528,6 +612,10 @@ export class UserDashboardComponent implements OnDestroy {
     );
   }
 
+  /**
+   * Sends registration confirmation email with ticket PDF.
+   * @param event Event object
+   */
   private sendRegistrationEmail(event: Event) {
     // Check if we have user email
 
@@ -536,8 +624,10 @@ export class UserDashboardComponent implements OnDestroy {
       return;
     }
 
-    const pdfBase64 = this.emailService.generateTicketPDFBase64(event, this.userName || 'Guest');
-
+    const pdfBase64 = this.emailService.generateTicketPDFBase64(
+      event,
+      this.userName || 'Guest'
+    );
 
     const emailRequest = {
       userId: this.userId || 'anonymous',
@@ -546,7 +636,7 @@ export class UserDashboardComponent implements OnDestroy {
       userName: this.userName || 'Guest',
       sendPDF: true, // Send PDF ticket attachment
       sendDetails: true, // Send event details in email body
-       pdfBase64,
+      pdfBase64,
     };
 
     this.emailService.sendTicketEmail(emailRequest).subscribe({
@@ -559,6 +649,9 @@ export class UserDashboardComponent implements OnDestroy {
     });
   }
 
+  /**
+   * Extracts available filter options from events.
+   */
   extractFilterOptions() {
     this.availableCategories = [
       ...new Set(this.events.map((e) => e.category).filter(Boolean)),
@@ -573,6 +666,10 @@ export class UserDashboardComponent implements OnDestroy {
     ].sort();
   }
 
+  /**
+   * Extracts city name from a location string.
+   * @param location Location string
+   */
   extractCityFromLocation(location: string): string {
     // console.log('Extracting city from location:', location);
     if (!location) return '';
@@ -584,6 +681,10 @@ export class UserDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Extracts city name from a location object or string.
+   * @param location Location object or string
+   */
   extractCityFromLocationObject(location: any): string {
     if (!location) return '';
 
@@ -600,21 +701,33 @@ export class UserDashboardComponent implements OnDestroy {
     return '';
   }
 
+  /**
+   * Returns the full address from a location object or string.
+   * @param location Location object or string
+   */
   getFullAddress(location: any): string {
-  if (!location) return '';
+    if (!location) return '';
 
-  if (typeof location === 'string') {
-    return location;
+    if (typeof location === 'string') {
+      return location;
+    }
+
+    if (typeof location === 'object') {
+      // Customize this based on your location object structure
+      return `${location.address || ''}, ${location.city || ''}, ${
+        location.state || ''
+      }, ${location.country || ''}`
+        .replace(/,\s*,/g, ',')
+        .replace(/^,\s*/, '')
+        .replace(/,\s*$/, '');
+    }
+
+    return JSON.stringify(location);
   }
 
-  if (typeof location === 'object') {
-    // Customize this based on your location object structure
-    return `${location.address || ''}, ${location.city || ''}, ${location.state || ''}, ${location.country || ''}`.replace(/,\s*,/g, ',').replace(/^,\s*/, '').replace(/,\s*$/, '');
-  }
-
-  return JSON.stringify(location);
-}
-
+  /**
+   * Decodes JWT token to extract user information.
+   */
   decodeToken() {
     // console.log('=== TOKEN DECODE START ===');
     const token =
@@ -654,11 +767,18 @@ export class UserDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Checks if the user is registered for a given event.
+   * @param eventId Event ID
+   */
   isRegistered(eventId: string): boolean {
     return this.registeredEvents.some((e) => e.id === eventId);
   }
 
   // Filter logic
+  /**
+   * Handles search input change with debounce.
+   */
   onSearchChange() {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
@@ -669,12 +789,19 @@ export class UserDashboardComponent implements OnDestroy {
     }, 300);
   }
 
+  /**
+   * Angular lifecycle hook for cleanup.
+   */
   ngOnDestroy() {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
   }
 
+  /**
+   * Handles page change for pagination.
+   * @param page Page number
+   */
   onPageChange(page: number): void {
     if (this.hasActiveFilters()) {
       const filters = {
@@ -691,6 +818,10 @@ export class UserDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Applies price filter to events.
+   * @param events List of events
+   */
   applyPriceFilter(events: Event[]): Event[] {
     switch (this.selectedPriceRange) {
       case '0-500':
@@ -706,6 +837,9 @@ export class UserDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Applies sorting to filtered events.
+   */
   applySorting() {
     this.filteredEvents.sort((a, b) => {
       switch (this.sortBy) {
@@ -722,6 +856,10 @@ export class UserDashboardComponent implements OnDestroy {
       }
     });
   }
+
+  /**
+   * Handles filter change and fetches filtered events.
+   */
   onFilterChange() {
     this.currentPage = 1;
     const filters = {
@@ -734,6 +872,10 @@ export class UserDashboardComponent implements OnDestroy {
     };
     this.fetchEventsWithFilters(1, filters);
   }
+
+  /**
+   * Clears all filters and resets events.
+   */
   clearFilters() {
     this.searchQuery = '';
     this.selectedCategory = '';
@@ -746,6 +888,9 @@ export class UserDashboardComponent implements OnDestroy {
     this.showAlert('info', 'Filters Cleared', 'All filters have been reset.');
   }
 
+  /**
+   * Clears search and filters, resets pagination.
+   */
   clearSearch() {
     this.clearFilters();
 
@@ -758,6 +903,9 @@ export class UserDashboardComponent implements OnDestroy {
     this.fetchEvents(1); // Fetch fresh data from server
   }
 
+  /**
+   * Checks if any filters are active.
+   */
   hasActiveFilters(): boolean {
     return !!(
       this.searchQuery ||
@@ -769,6 +917,9 @@ export class UserDashboardComponent implements OnDestroy {
     );
   }
 
+  /**
+   * Formats the date range for display.
+   */
   formatDateRange(): string {
     return this.dateFrom && this.dateTo
       ? `${this.formatDate(this.dateFrom)} - ${this.formatDate(this.dateTo)}`
@@ -779,6 +930,10 @@ export class UserDashboardComponent implements OnDestroy {
       : '';
   }
 
+  /**
+   * Formats a date string for display.
+   * @param date Date string
+   */
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('en-US', {
       month: 'short',
@@ -787,6 +942,9 @@ export class UserDashboardComponent implements OnDestroy {
     });
   }
 
+  /**
+   * Formats the selected price range for display.
+   */
   formatPriceRange(): string {
     switch (this.selectedPriceRange) {
       case '0-500':
@@ -802,18 +960,24 @@ export class UserDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Shows event details modal for a selected event.
+   * @param event Event object
+   */
   showEventDetail(event: Event) {
     this.selectedEvent = event;
     this.showEventDetails = true;
     document.body.style.overflow = 'hidden';
   }
 
+  /** Closes the event details modal */
   closeEventDetails() {
     this.showEventDetails = false;
     this.selectedEvent = null;
     document.body.style.overflow = 'auto';
   }
 
+  /** Scrolls to the available events section */
   scrollToAvailableEvents() {
     const availableSection = document.querySelector('.events-section');
     if (availableSection) {
@@ -824,6 +988,9 @@ export class UserDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Logs out the user and clears session.
+   */
   logout() {
     this.showConfirmation(
       'Confirm Logout',
