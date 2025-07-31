@@ -1,3 +1,62 @@
+/**
+ * LoginComponent
+ * ---------------
+ * Handles user authentication (login, registration, and OTP-based login) for the Happenin app.
+ *
+ * Features:
+ * - Standard login with email and password.
+ * - Registration with enhanced password validation and confirm password.
+ * - OTP-based login with resend timer and validation.
+ * - Success and alert popups for user feedback.
+ * - Automatic navigation based on user role after login/registration.
+ *
+ * Properties:
+ * - isLogin: boolean - Toggles between login and registration forms.
+ * - showSuccessPopup: boolean - Controls visibility of success popup.
+ * - successMessage: string - Message shown in success popup.
+ * - isOtpLogin: boolean - Toggles between password and OTP login.
+ * - otpSent: boolean - Indicates if OTP has been sent.
+ * - otpForm: FormGroup - Form for OTP login.
+ * - resendTimer: number - Timer for OTP resend.
+ * - resendDisabled: boolean - Disables resend button during timer.
+ * - timerInterval: any - Interval reference for timer.
+ * - showAlertPopup: boolean - Controls visibility of alert popup.
+ * - alertMessage: string - Message shown in alert popup.
+ * - alertType: 'error' | 'warning' | 'info' - Type of alert.
+ * - loginForm: FormGroup - Form for standard login.
+ * - registerForm: FormGroup - Form for registration.
+ *
+ * Methods:
+ * - passwordValidator(control): Custom validator for password strength.
+ * - passwordMatchValidator(formGroup): Validator to ensure password and confirm password match.
+ * - toggleLoginMethod(isOtp): Switches between password and OTP login.
+ * - onSendOtp(): Sends OTP to user's email.
+ * - onResendOtp(): Resends OTP if allowed.
+ * - onVerifyOtp(): Verifies entered OTP.
+ * - toggleForm(isLoginForm): Switches between login and registration forms.
+ * - showSuccessMessage(message): Displays a success popup.
+ * - showAlert(message, type): Displays an alert popup.
+ * - sendOtp(email): Sends OTP to the provided email.
+ * - getOtpEmailError(): Returns error message for OTP email field.
+ * - getOtpError(): Returns error message for OTP field.
+ * - startResendTimer(): Starts the resend timer for OTP.
+ * - resetResendTimer(): Resets the resend timer.
+ * - getFormattedTimer(): Returns formatted timer string (mm:ss).
+ * - ngOnDestroy(): Cleans up timer on component destroy.
+ * - verifyOtp(email, otp): Verifies OTP and logs in the user.
+ * - getRoleAndNavigate(): Navigates user based on their role after login.
+ * - hideAlert(): Hides the alert popup.
+ * - onLoginSubmit(): Handles login form submission.
+ * - onRegisterSubmit(): Handles registration form submission.
+ * - markFormGroupTouched(formGroup): Marks all controls in a form as touched.
+ * - getPasswordError(formGroup): Returns password validation error message.
+ * - getConfirmPasswordError(): Returns confirm password validation error message.
+ *
+ * Usage:
+ * - Used as a standalone Angular component for authentication.
+ * - Integrates with AuthService for API calls.
+ * - Provides user feedback via popups and validation messages.
+ */
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -21,25 +80,86 @@ import { environment } from '../../../../environment.prod';
   templateUrl: './login.html',
   styleUrls: ['./login.scss'],
 })
+
+/**
+ * LoginComponent
+ * Handles user authentication (login, registration, OTP login) and navigation.
+ */
 export class LoginComponent implements OnDestroy {
+  /**
+   * Indicates if the login form is active (vs registration).
+   */
   isLogin = true;
+  /**
+   * Controls visibility of the success popup.
+   */
   showSuccessPopup = false;
+  /**
+   * Message displayed in the success popup.
+   */
   successMessage = '';
 
+  /**
+   * Indicates if OTP login is selected.
+   */
   isOtpLogin = false;
+
+  /**
+   * Indicates if OTP has been sent.
+   */
   otpSent = false;
+  /**
+   * Form group for OTP login.
+   */
   otpForm: FormGroup;
+
+  /**
+   * Timer for OTP resend (in seconds).
+   */
   resendTimer = 0;
+
+  /**
+   * Disables resend OTP button when true.
+   */
   resendDisabled = false;
+
+  /**
+   * Reference to the timer interval.
+   */
   private timerInterval: any;
 
   // Alert popup properties
+  /**
+   * Controls visibility of the alert popup.
+   */
   showAlertPopup = false;
+  /**
+   * Message displayed in the alert popup.
+   */
   alertMessage = '';
+
+  /**
+   * Type of alert ('error', 'warning', 'info').
+   */
   alertType: 'error' | 'warning' | 'info' = 'error';
 
+  /**
+   * Form group for login.
+   */
   loginForm: FormGroup;
+
+  /**
+   * Form group for registration.
+   */
   registerForm: FormGroup;
+
+  /**
+   * Creates an instance of LoginComponent.
+   * @param fb FormBuilder for reactive forms
+   * @param router Angular Router for navigation
+   * @param http HttpClient for API calls
+   * @param authService Service for authentication API
+   */
 
   constructor(
     private fb: FormBuilder,
@@ -80,6 +200,12 @@ export class LoginComponent implements OnDestroy {
   }
 
   // Custom password validator
+  /**
+   * Custom validator for password strength.
+   * Requires at least one lowercase, one uppercase, and one number.
+   * @param control Form control for password
+   * @returns Validation errors or null
+   */
   passwordValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.value || '';
 
@@ -103,6 +229,11 @@ export class LoginComponent implements OnDestroy {
   }
 
   // NEW: Custom validator to check if passwords match
+  /**
+   * Validator to check if password and confirm password match.
+   * @param formGroup Registration form group
+   * @returns Validation errors or null
+   */
   passwordMatchValidator(formGroup: AbstractControl): ValidationErrors | null {
     const password = formGroup.get('password')?.value;
     const confirmPassword = formGroup.get('confirmPassword')?.value;
@@ -125,6 +256,10 @@ export class LoginComponent implements OnDestroy {
     return null;
   }
 
+  /**
+   * Switches between password and OTP login methods.
+   * @param isOtp True for OTP login, false for password login
+   */
   toggleLoginMethod(isOtp: boolean): void {
     this.isOtpLogin = isOtp;
     this.otpSent = false;
@@ -134,6 +269,9 @@ export class LoginComponent implements OnDestroy {
     this.otpForm.reset();
   }
 
+  /**
+   * Sends OTP to the email entered in the OTP form.
+   */
   onSendOtp(): void {
     const emailControl = this.otpForm.get('email');
     if (emailControl?.valid) {
@@ -144,6 +282,9 @@ export class LoginComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Resends OTP if allowed.
+   */
   onResendOtp(): void {
     if (!this.resendDisabled) {
       const emailControl = this.otpForm.get('email');
@@ -155,6 +296,9 @@ export class LoginComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Verifies the OTP entered by the user.
+   */
   onVerifyOtp(): void {
     if (this.otpForm.valid) {
       const { email, otp } = this.otpForm.value;
@@ -165,6 +309,10 @@ export class LoginComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Switches between login and registration forms.
+   * @param isLoginForm True for login form, false for registration form
+   */
   toggleForm(isLoginForm: boolean): void {
     this.isLogin = isLoginForm;
     // Reset forms when switching
@@ -176,6 +324,10 @@ export class LoginComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Displays a success popup with the given message.
+   * @param message Message to display
+   */
   showSuccessMessage(message: string): void {
     this.successMessage = message;
     this.showSuccessPopup = true;
@@ -187,6 +339,11 @@ export class LoginComponent implements OnDestroy {
   }
 
   // New method to show alert popup
+  /**
+   * Displays an alert popup with the given message and type.
+   * @param message Message to display
+   * @param type Type of alert ('error', 'warning', 'info')
+   */
   showAlert(
     message: string,
     type: 'error' | 'warning' | 'info' = 'error'
@@ -201,6 +358,10 @@ export class LoginComponent implements OnDestroy {
     }, 4000);
   }
 
+  /**
+   * Sends OTP to the specified email.
+   * @param email Email address to send OTP
+   */
   sendOtp(email: string) {
     this.http
       .post(`${environment.apiBaseUrl}${environment.apis.sendOtp}`, { email })
@@ -221,6 +382,10 @@ export class LoginComponent implements OnDestroy {
       });
   }
 
+  /**
+   * Returns error message for OTP email field, if any.
+   * @returns Error message or null
+   */
   getOtpEmailError(): string | null {
     const emailControl = this.otpForm.get('email');
     if (!emailControl?.errors || !emailControl?.touched) {
@@ -237,6 +402,10 @@ export class LoginComponent implements OnDestroy {
     return null;
   }
 
+  /**
+   * Returns error message for OTP field, if any.
+   * @returns Error message or null
+   */
   getOtpError(): string | null {
     const otpControl = this.otpForm.get('otp');
     if (!otpControl?.errors || !otpControl?.touched) {
@@ -253,6 +422,9 @@ export class LoginComponent implements OnDestroy {
     return null;
   }
 
+  /**
+   * Starts the resend timer for OTP.
+   */
   public startResendTimer(): void {
     this.resendTimer = 180; // 3 minutes = 180 seconds
     this.resendDisabled = true;
@@ -266,6 +438,9 @@ export class LoginComponent implements OnDestroy {
     }, 1000);
   }
 
+  /**
+   * Resets the resend timer and enables resend button.
+   */
   private resetResendTimer(): void {
     this.resendTimer = 0;
     this.resendDisabled = false;
@@ -276,6 +451,10 @@ export class LoginComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Returns formatted timer string (mm:ss).
+   * @returns Formatted timer string
+   */
   getFormattedTimer(): string {
     const minutes = Math.floor(this.resendTimer / 60);
     const seconds = this.resendTimer % 60;
@@ -285,10 +464,18 @@ export class LoginComponent implements OnDestroy {
   }
 
   // Clean up timer on component destroy
+  /**
+   * Cleans up timer when component is destroyed.
+   */
   ngOnDestroy(): void {
     this.resetResendTimer();
   }
 
+  /**
+   * Verifies OTP and logs in the user.
+   * @param email User's email
+   * @param otp OTP code
+   */
   verifyOtp(email: string, otp: string) {
     this.http
       .post(`${environment.apiBaseUrl}${environment.apis.verifyOtp}`, {
@@ -337,6 +524,9 @@ export class LoginComponent implements OnDestroy {
       });
   }
 
+  /**
+   * Navigates user based on their role after login.
+   */
   getRoleAndNavigate() {
     const token = localStorage.getItem('token');
     // console.log('Token from localStorage:', token);
@@ -363,10 +553,16 @@ export class LoginComponent implements OnDestroy {
   }
 
   // Method to manually hide alert popup
+  /**
+   * Hides the alert popup.
+   */
   hideAlert(): void {
     this.showAlertPopup = false;
   }
 
+  /**
+   * Handles login form submission.
+   */
   onLoginSubmit(): void {
     if (this.loginForm.valid) {
       const data = this.loginForm.value;
@@ -423,6 +619,9 @@ export class LoginComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Handles registration form submission.
+   */
   onRegisterSubmit(): void {
     if (this.registerForm.valid) {
       const data = this.registerForm.value;
@@ -489,6 +688,10 @@ export class LoginComponent implements OnDestroy {
   }
 
   // Utility method to mark all form controls as touched
+  /**
+   * Marks all controls in a form group as touched.
+   * @param formGroup Form group to mark
+   */
   private markFormGroupTouched(formGroup: FormGroup): void {
     Object.keys(formGroup.controls).forEach((key) => {
       const control = formGroup.get(key);
@@ -497,6 +700,11 @@ export class LoginComponent implements OnDestroy {
   }
 
   // Get password validation error message (one at a time)
+  /**
+   * Returns password validation error message for the given form group.
+   * @param formGroup Form group containing password field
+   * @returns Error message or null
+   */
   getPasswordError(formGroup: FormGroup): string | null {
     const passwordControl = formGroup.get('password');
     if (!passwordControl?.errors || !passwordControl?.touched) {
@@ -527,6 +735,10 @@ export class LoginComponent implements OnDestroy {
   }
 
   // NEW: Get confirm password validation error message
+  /**
+   * Returns confirm password validation error message for registration form.
+   * @returns Error message or null
+   */
   getConfirmPasswordError(): string | null {
     const confirmPasswordControl = this.registerForm.get('confirmPassword');
     if (!confirmPasswordControl?.errors || !confirmPasswordControl?.touched) {
