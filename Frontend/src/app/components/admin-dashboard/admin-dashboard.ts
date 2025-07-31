@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule, Router } from '@angular/router';
-// import { FormsModule } from '@angular/forms';
 import { LoadingService } from '../loading';
 import { UserService } from '../../services/user.service';
 import {
@@ -13,34 +12,25 @@ import {
   Validators,
 } from '@angular/forms';
 import { LocationService } from '../../services/location';
-import { ApprovalService } from '../../services/approval';
 import { AuthService } from '../../services/auth';
-import { EventService } from '../../services/event';
-import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { environment } from '../../../environment';
 import { HeaderComponent, HeaderButton } from '../../common/header/header';
 import { FooterComponent } from '../../common/footer/footer';
 import { CustomAlertComponent } from '../custom-alert/custom-alert';
 
-// export interface Location {
-//   id: string; // This should be a GUID string
-//   state: string;
-//   city: string;
-//   placeName: string;
-//   address: string;
-//   maxSeatingCapacity: number;
-//   amenities: string[];
-//   bookings?: Booking[]; // This might be optional
-// }
-
+/**
+ * Booking interface representing a booking for an event.
+ */
 export interface Booking {
-  id: string; // This should be a GUID string (BookingId)
-  date: string; // or Date type
+  id: string;
+  date: string;
   timeSlot: string;
-  eventId: string; // This should be a GUID string
+  eventId: string;
 }
 
+/**
+ * Event interface representing an event's details.
+ */
 export interface Event {
   id: string;
   title: string;
@@ -58,6 +48,9 @@ export interface Event {
   organization?: string;
 }
 
+/**
+ * RegisteredUser interface for a user registered for an event.
+ */
 export interface RegisteredUser {
   userId: string;
   name: string;
@@ -65,6 +58,9 @@ export interface RegisteredUser {
   id: string;
 }
 
+/**
+ * AdminRegisteredUser interface for admin-registered users.
+ */
 export interface AdminRegisteredUser {
   userId: string;
   name: string;
@@ -72,11 +68,17 @@ export interface AdminRegisteredUser {
   id: string;
 }
 
+/**
+ * Response containing admin registered users and current registration count.
+ */
 export interface AdminRegisteredUsersResponse {
   users: AdminRegisteredUser[];
   currentRegistration: number;
 }
 
+/**
+ * Location interface representing a physical event location.
+ */
 export interface Location {
   id?: string;
   state: string;
@@ -88,11 +90,17 @@ export interface Location {
   createdBy?: string;
 }
 
+/**
+ * Response containing registered users and current registration count.
+ */
 export interface RegisteredUsersResponse {
   users: RegisteredUser[];
   currentRegistration: number;
 }
 
+/**
+ * CustomAlert interface for alert system configuration.
+ */
 export interface CustomAlert {
   show: boolean;
   type: 'success' | 'error' | 'warning' | 'info' | 'confirm';
@@ -104,6 +112,9 @@ export interface CustomAlert {
   autoClose?: boolean;
 }
 
+/**
+ * DashboardCard interface for admin dashboard cards.
+ */
 interface DashboardCard {
   id: string;
   title: string;
@@ -115,6 +126,10 @@ interface DashboardCard {
   color: string;
 }
 
+/**
+ * AdminDashboardComponent
+ * Main admin dashboard for managing events, users, locations, and analytics.
+ */
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -132,8 +147,10 @@ interface DashboardCard {
   styleUrls: ['./admin-dashboard.scss'],
 })
 export class AdminDashboardComponent implements OnInit {
+  /**
+   * Initializes the dashboard and loads user counts.
+   */
   ngOnInit(): void {
-    // Add this to your existing ngOnInit or create one if it doesn't exist
     this.loadUserCounts();
   }
   private fb = inject(FormBuilder);
@@ -141,10 +158,6 @@ export class AdminDashboardComponent implements OnInit {
   userName: string | null = null;
 
   showViewLocations = false;
-
-  // get displayUserName(): string {
-  //     return this.userName || 'Guest';
-  //   }
 
   userCounts = {
     users: 0,
@@ -162,6 +175,10 @@ export class AdminDashboardComponent implements OnInit {
     { text: 'Logout', action: 'logout', style: 'primary' },
   ];
 
+  /**
+   * Handles header button actions.
+   * @param action The action string from header button.
+   */
   handleHeaderAction(action: string): void {
     switch (action) {
       case 'logout':
@@ -280,9 +297,6 @@ export class AdminDashboardComponent implements OnInit {
   ) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // this.loadLocations();
-    // console.log('Locations have been loaded');
-
     this.setUserFromLocalUser();
 
     this.registerForm = this.fb.group({
@@ -290,11 +304,14 @@ export class AdminDashboardComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
       phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      role: ['admin'], // Fixed value
+      role: ['admin'],
     });
   }
 
-  // Admin dashboard cards test
+  /**
+   * Navigates to a page by route.
+   * @param route Route string.
+   */
   navigateToPage(route: string): void {
     try {
       this.router.navigate([route]);
@@ -305,12 +322,22 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  /**
+   * Handles navigation errors.
+   * @param route Route string.
+   */
   private handleNavigationError(route: string): void {
     // You can implement custom error handling here
     console.warn(
       `Failed to navigate to ${route}. Please check if the route exists.`
     );
   }
+
+  /**
+   * Handles keyboard navigation for dashboard cards.
+   * @param event Keyboard event.
+   * @param route Route string.
+   */
   onKeyboardNavigation(event: KeyboardEvent, route: string): void {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -318,14 +345,29 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  /**
+   * Gets a dashboard card by its ID.
+   * @param cardId Card ID.
+   * @returns DashboardCard or undefined.
+   */
   getCardById(cardId: string): DashboardCard | undefined {
     return this.dashboardCards.find((card) => card.id === cardId);
   }
 
+  /**
+   * Checks if a route is accessible.
+   * @param route Route string.
+   * @returns True if accessible.
+   */
   isRouteAccessible(route: string): boolean {
     return true;
   }
 
+  /**
+   * Handles dashboard card click.
+   * @param cardId Card ID.
+   * @param route Route string.
+   */
   onCardClick(cardId: string, route: string): void {
     // Track analytics if needed
     this.trackCardClick(cardId);
@@ -334,11 +376,18 @@ export class AdminDashboardComponent implements OnInit {
     this.navigateToPage(route);
   }
 
+  /**
+   * Tracks dashboard card click for analytics.
+   * @param cardId Card ID.
+   */
   private trackCardClick(cardId: string): void {
     // Implement analytics tracking here
     console.log(`Card clicked: ${cardId}`);
   }
 
+  /**
+   * Navigates to analytics page.
+   */
   viewAnalytics(): void {
     this.router.navigate(['/admin-analytics']);
   }
@@ -346,6 +395,13 @@ export class AdminDashboardComponent implements OnInit {
   private alertTimeout: any;
 
   // Custom Alert Methods
+  /**
+   * Shows a custom alert.
+   * @param type Alert type.
+   * @param title Alert title.
+   * @param message Alert message.
+   * @param duration Duration before auto-close (ms).
+   */
   showAlert(
     type: 'success' | 'error' | 'warning' | 'info',
     title: string,
@@ -367,6 +423,13 @@ export class AdminDashboardComponent implements OnInit {
     }, duration);
   }
 
+  /**
+   * Shows a confirmation alert.
+   * @param title Confirmation title.
+   * @param message Confirmation message.
+   * @param confirmAction Action on confirm.
+   * @param cancelAction Action on cancel.
+   */
   showConfirmation(
     title: string,
     message: string,
@@ -385,6 +448,9 @@ export class AdminDashboardComponent implements OnInit {
     };
   }
 
+  /**
+   * Handles confirmation of alert.
+   */
   handleAlertConfirm() {
     if (this.customAlert.confirmAction) {
       this.customAlert.confirmAction();
@@ -392,6 +458,9 @@ export class AdminDashboardComponent implements OnInit {
     this.closeAlert();
   }
 
+  /**
+   * Handles cancellation of alert.
+   */
   handleAlertCancel() {
     if (this.customAlert.cancelAction) {
       this.customAlert.cancelAction();
@@ -399,6 +468,9 @@ export class AdminDashboardComponent implements OnInit {
     this.closeAlert();
   }
 
+  /**
+   * Closes the custom alert.
+   */
   closeAlert() {
     this.customAlert.show = false;
     this.customAlert.confirmAction = undefined;
@@ -406,6 +478,9 @@ export class AdminDashboardComponent implements OnInit {
     this.clearAlertTimeout();
   }
 
+  /**
+   * Clears the alert timeout.
+   */
   private clearAlertTimeout() {
     if (this.alertTimeout) {
       clearTimeout(this.alertTimeout);
@@ -413,6 +488,9 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  /**
+   * Toggles the view locations modal.
+   */
   toggleViewLocations(): void {
     this.showViewLocations = !this.showViewLocations;
     if (this.showViewLocations) {
@@ -423,11 +501,21 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  /**
+   * Closes the view locations modal.
+   */
   closeViewLocations(): void {
     this.showViewLocations = false;
     document.body.style.overflow = 'auto';
   }
 
+  /**
+   * Shows confirmation before deleting a location.
+   * @param locationId Location ID.
+   * @param placeName Location name.
+   * @param city City name.
+   * @param state State name.
+   */
   confirmDeleteLocation(
     locationId: string,
     placeName: string,
@@ -447,6 +535,11 @@ export class AdminDashboardComponent implements OnInit {
     );
   }
 
+  /**
+   * Deletes a location.
+   * @param locationId Location ID.
+   * @param placeName Location name.
+   */
   deleteLocation(locationId: string, placeName: string): void {
     console.log(
       '[DEBUG] deleteLocation called with locationId:',
@@ -483,18 +576,17 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  // Read user info from sessiontorage key 'user' and set email & isSuperAdmin flag
+  /**
+   * Reads user info from localStorage and sets email and super admin flag.
+   */
   setUserFromLocalUser() {
     try {
       const userString = localStorage.getItem('user');
-      // console.log('User string from sessionStorage:', userString);
 
       if (userString) {
         const user = JSON.parse(userString);
         this.userEmail = user.email || '';
         this.isSuperAdmin = this.userEmail === 'happenin.events.app@gmail.com';
-        // console.log('Parsed user:', user);
-        // console.log('User email:', this.userEmail);
       } else {
         this.userEmail = '';
         this.isSuperAdmin = false;
@@ -506,14 +598,19 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  /**
+   * Toggles the register form visibility.
+   */
   toggleRegisterForm(): void {
     this.showRegisterForm = !this.showRegisterForm;
   }
 
+  /**
+   * Handles admin registration form submission.
+   */
   onRegisterSubmit(): void {
     if (this.registerForm.valid) {
       const data = this.registerForm.value;
-      // console.log('Registering admin with data:', data);
 
       this.authService.registerUser(data).subscribe({
         next: () => {
@@ -537,6 +634,9 @@ export class AdminDashboardComponent implements OnInit {
     }
   }
 
+  /**
+   * Logs out the current user.
+   */
   logout() {
     this.showConfirmation(
       'Logout Confirmation',
@@ -556,18 +656,33 @@ export class AdminDashboardComponent implements OnInit {
     );
   }
 
+  /**
+   * Toggles the location form visibility.
+   */
   toggleLocationForm() {
     this.showLocationForm = !this.showLocationForm;
   }
 
+  /**
+   * Handles state change for location form.
+   */
   onStateChange() {
     this.availablecitys = this.statesAndcitys[this.newLocation.state] || [];
   }
 
+  /**
+   * Gets available states for location form.
+   * @returns Array of state names.
+   */
   getStates(): string[] {
     return Object.keys(this.statesAndcitys);
   }
 
+  /**
+   * Toggles amenity selection for location form.
+   * @param amenity Amenity name.
+   * @param event Event object.
+   */
   toggleAmenity(amenity: string, event: any) {
     const checked = event.target.checked;
     if (checked) this.newLocation.amenities.push(amenity);
@@ -577,6 +692,10 @@ export class AdminDashboardComponent implements OnInit {
       );
   }
 
+  /**
+   * Adds a new location.
+   * @param location Location object.
+   */
   addLocation(location: Location): void {
     this.locationService.addLocation(location).subscribe({
       next: (response) => {
@@ -600,6 +719,9 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  /**
+   * Loads all locations.
+   */
   loadLocations(): void {
     this.locationService.fetchLocations().subscribe({
       next: (locations) => {
@@ -612,6 +734,9 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  /**
+   * Resets the location form.
+   */
   resetForm() {
     this.newLocation = {
       state: '',
@@ -624,8 +749,10 @@ export class AdminDashboardComponent implements OnInit {
     this.availablecitys = [];
   }
 
+  /**
+   * Loads user, organizer, and admin counts.
+   */
   loadUserCounts(): void {
-    // Load users count
     this.userService.getAllUsers().subscribe({
       next: (users) => {
         this.userCounts.users = users.length;
@@ -650,6 +777,10 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  /**
+   * Downloads user data as CSV.
+   * @param type Type of user data to download.
+   */
   downloadUserData(type: 'users' | 'organizers' | 'admins'): void {
     this.downloadingData[type] = true;
 
@@ -693,6 +824,12 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  /**
+   * Exports data to CSV and triggers download.
+   * @param data Array of data objects.
+   * @param filename Filename for download.
+   * @param type Type of data.
+   */
   private exportToExcel(data: any[], filename: string, type: string): void {
     // Create workbook and worksheet
     const ws: any = {};
