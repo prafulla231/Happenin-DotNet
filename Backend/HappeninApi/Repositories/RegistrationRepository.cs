@@ -2,12 +2,20 @@ using Microsoft.AspNetCore.Mvc;
 using HappeninApi.Models;
 using MongoDB.Driver;
 using HappeninApi.Repositories;
+
+/// <summary>
+/// Repository for registration-related data operations.
+/// </summary>
 public class RegistrationRepository : IRegistrationRepository
 {
     private readonly IMongoCollection<Registration> _registrations;
     private readonly IMongoCollection<Event> _events;
     private readonly IMongoCollection<User> _users;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RegistrationRepository"/> class.
+    /// </summary>
+    /// <param name="db">MongoDB database instance.</param>
     public RegistrationRepository(IMongoDatabase db)
     {
         _registrations = db.GetCollection<Registration>("Registrations");
@@ -15,6 +23,12 @@ public class RegistrationRepository : IRegistrationRepository
         _users = db.GetCollection<User>("Users");
     }
 
+    /// <summary>
+    /// Registers a user for an event.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="eventId"></param>
+    /// <returns></returns>
     public async Task<bool> RegisterAsync(Guid userId, Guid eventId)
     {
         var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
@@ -53,6 +67,9 @@ public class RegistrationRepository : IRegistrationRepository
         return true;
     }
 
+    /// <summary>
+    /// Deregisters a user for an event.
+    /// </summary>
     public async Task<bool> DeregisterAsync(Guid userId, Guid eventId)
     {
         var update = Builders<Registration>.Update.Set(r => r.IsDeleted, true);
@@ -67,6 +84,9 @@ public class RegistrationRepository : IRegistrationRepository
         return true;
     }
 
+    /// <summary>
+    /// Get users for an event.
+    /// </summary>
     public async Task<IEnumerable<User>> GetUsersForEventAsync(Guid eventId)
     {
         var registrations = await _registrations
@@ -76,6 +96,9 @@ public class RegistrationRepository : IRegistrationRepository
         return registrations.Select(r => r.User).Where(u => u != null).ToList();
     }
 
+    /// <summary>
+    /// Get registered events.
+    /// </summary>
     public async Task<IEnumerable<Event>> GetRegisteredEventsAsync(Guid userId)
     {
         var registrations = await _registrations
@@ -85,12 +108,20 @@ public class RegistrationRepository : IRegistrationRepository
         return registrations.Select(r => r.Event).Where(e => e != null && !e.IsDeleted).ToList();
     }
 
+    /// <summary>
+    /// Delete registration for an event.
+    /// </summary>
     public async Task<bool> DeleteRegistrationAsync(Guid eventId, Guid userId)
     {
         var result = await _registrations.DeleteOneAsync(r => r.EventId == eventId && r.UserId == userId);
         return result.DeletedCount > 0;
     }
 
+    /// <summary>
+    /// Gets registrations by event IDs.
+    /// </summary>
+    /// <param name="eventIds"></param>
+    /// <returns></returns>
     public async Task<List<Registration>> GetByEventIdsAsync(List<Guid> eventIds)
     {
         var filter = Builders<Registration>.Filter.And(
