@@ -1,4 +1,10 @@
-// organizer-dashboard.ts
+/**
+ * Organizer Dashboard component for managing events, venues, and user registrations.
+ * Handles event creation, editing, deletion, and displays analytics and user lists.
+ * Integrates with services for authentication, event management, location, and approval.
+ * Provides UI feedback via custom alerts and confirmation dialogs.
+ * Implements state/city/venue filtering and form validation.
+ */
 import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -23,30 +29,33 @@ import { OnInit } from '@angular/core';
 import { ChatbotWidgetComponent } from '../chatbot-widget/chatbot-widget';
 import { CustomAlertComponent } from '../custom-alert/custom-alert';
 
-// Interfaces
+/**
+ * Event interface representing an event's properties.
+ */
 export interface Event {
   id: string;
   title: string;
   description: string;
   date: string;
   timeSlot: string;
-  duration: string; // Changed from string to number (minutes)
-  locationId: string; // Added locationId
-  // location: string;
-  //  // This will be the place name for display
+  duration: string;
+  locationId: string;
   location: Location;
   category: string;
   price: number;
   maxRegistrations: number;
-  currentRegistrations: number; // Added this field
-  createdById: string; // Changed from createdBy
+  currentRegistrations: number;
+  createdById: string;
   artist?: string;
   organization?: string;
-  status: 'Pending' | 'Approved' | 'Rejected' | 'Expired'; // Added status
-  createdAt: string; // Added timestamps
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Expired';
+  createdAt: string;
   updatedAt: string;
 }
 
+/**
+ * Location interface representing a venue's properties.
+ */
 export interface Location {
   id: string;
   state: string;
@@ -55,20 +64,29 @@ export interface Location {
   address: string;
   maxSeatingCapacity: number;
   amenities: string[];
-  bookings: any[]; // You can replace `any` with a more specific interface if bookings have a defined structure
+  bookings: any[];
 }
 
+/**
+ * RegisteredUser interface representing a user's registration details.
+ */
 export interface RegisteredUser {
   id: string;
   name: string;
   email: string;
 }
 
+/**
+ * RegisteredUsersResponse interface for event registration data.
+ */
 export interface RegisteredUsersResponse {
   currentRegistration: number;
   users: RegisteredUser[];
 }
 
+/**
+ * PopupConfig interface for alert and confirmation dialog configuration.
+ */
 export interface PopupConfig {
   title: string;
   message: string;
@@ -78,6 +96,9 @@ export interface PopupConfig {
   cancelText?: string;
 }
 
+/**
+ * CustomAlert interface for custom alert dialog properties.
+ */
 export interface CustomAlert {
   show: boolean;
   type: 'success' | 'error' | 'warning' | 'info' | 'confirm';
@@ -106,46 +127,79 @@ export interface CustomAlert {
   styleUrls: ['./organizer-dashboard.scss'],
 })
 export class OrganizerDashboardComponent implements OnDestroy {
+  /**
+   * Initializes component, decodes token, and loads initial data.
+   */
   ngOnInit() {
-    // Move initialization logic here instead of constructor
     this.decodeToken();
     this.initializeData();
   }
+
+  /** Subject for unsubscribing observables on destroy. */
   private destroy$ = new Subject<void>();
+  /** Organizer's display name. */
   userName: string | null = null;
+  /** Flag to show/hide event creation form. */
   showCreateForm = false;
+  /** Flag for edit mode. */
   isEditMode = false;
+  /** Uploaded poster file for event. */
   posterFile: File | null = null;
+  /** URL of uploaded poster. */
   uploadedPosterUrl: string | null = null;
+  /** List of approved events. */
   events: Event[] = [];
+  /** List of all events (unused). */
   eventsone: Event[] = [];
+  /** ID of event being edited. */
   currentEditEventId: string | null = null;
+  /** Organizer's user ID. */
   organizerId: string | null = null;
+  /** Loading state flag. */
   isLoading = false;
+  /** List of pending events. */
   pendingEvents: Event[] = [];
+  /** Map of event IDs to registered users. */
   usersMap: {
     [eventId: string]: { currentRegistration: number; users: RegisteredUser[] };
   } = {};
+  /** Reactive form for event creation/editing. */
   eventForm: FormGroup;
 
+  /** List of all locations. */
   locations: any[] = [];
+  /** Filtered states for dropdown. */
   filteredStates: string[] = [];
+  /** Filtered cities for dropdown. */
   filteredCities: string[] = [];
+  /** Filtered place names for dropdown. */
   filteredPlaceNames: string[] = [];
+  /** List of places (venues). */
   places: any[] = [];
 
+  /** Selected state for filtering. */
   selectedState = '';
+  /** Selected city for filtering. */
   selectedCity = '';
+  /** Selected venue object. */
   selectedVenue: any = null;
+  /** Timeout for auto-closing alerts. */
   private alertTimeout?: any;
+  /** Popup visibility flag. */
   showPopup = false;
+  /** Popup configuration object. */
   popupConfig: PopupConfig = { title: '', message: '', type: 'info' };
+  /** Promise resolver for popup confirmation. */
   popupResolve: ((value: boolean) => void) | null = null;
 
+  /** Selected event ID for user modal. */
   selectedEventId: string | null = null;
+  /** Selected event for details view. */
   selectedEvent: Event | null = null;
+  /** Flag to show/hide event details modal. */
   isEventDetailVisible: boolean = false;
 
+  /** List of event categories. */
   categories: string[] = [
     'Music',
     'Sports',
@@ -158,31 +212,34 @@ export class OrganizerDashboardComponent implements OnDestroy {
     'Exhibition',
     'other',
   ];
+  /** Minimum date for event creation (tomorrow). */
   minDate: string = '';
 
+  /**
+   * Returns the display name of the organizer.
+   */
   get displayUserName(): string {
     return this.userName || 'Guest';
   }
 
+  /** Header buttons configuration for dashboard navigation. */
   organizerButtons: HeaderButton[] = [
     { text: 'My Events', action: 'viewMyEvents' },
-    // { text: 'Pending Events', action: 'viewPendingEvents' },
     { text: 'Create Event', action: 'createEvent', style: 'primary' },
     { text: 'Analytics', action: 'openAnalytics', style: 'primary' },
-    // { text: 'Analytics', action: 'viewAnalytics' },
-    // { text: 'Settings', action: 'openSettings' },
     { text: 'Contact', action: 'openContact' },
     { text: 'Logout', action: 'logout' },
   ];
 
+  /**
+   * Handles header button actions.
+   * @param action Action string from button.
+   */
   handleHeaderAction(action: string): void {
     switch (action) {
       case 'viewMyEvents':
         this.viewMyEvents();
         break;
-      // case 'viewPendingEvents':
-      //   this.viewPendingEvents();
-      //   break;
       case 'createEvent':
         this.createEvent();
         break;
@@ -198,6 +255,7 @@ export class OrganizerDashboardComponent implements OnDestroy {
     }
   }
 
+  /** Custom alert dialog configuration. */
   customAlert: CustomAlert = {
     show: false,
     type: 'info',
@@ -206,6 +264,17 @@ export class OrganizerDashboardComponent implements OnDestroy {
     showCancel: false,
   };
 
+  /**
+   * Constructor for OrganizerDashboardComponent.
+   * @param fb FormBuilder for reactive forms.
+   * @param http HttpClient for API calls.
+   * @param loadingService Service for loading spinner.
+   * @param authService Service for authentication.
+   * @param eventService Service for event management.
+   * @param locationService Service for location management.
+   * @param ApprovalService Service for event approval.
+   * @param router Angular Router for navigation.
+   */
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
@@ -247,10 +316,17 @@ export class OrganizerDashboardComponent implements OnDestroy {
         this.calculateDuration();
       });
 
-    // Initialize component data
     this.initializeData();
   }
 
+  /**
+   * Shows a custom alert dialog.
+   * @param type Alert type.
+   * @param title Alert title.
+   * @param message Alert message.
+   * @param autoClose Auto-close flag.
+   * @param duration Duration before auto-close (ms).
+   */
   showAlert(
     type: 'success' | 'error' | 'warning' | 'info',
     title: string,
@@ -275,6 +351,13 @@ export class OrganizerDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Shows a confirmation dialog.
+   * @param title Dialog title.
+   * @param message Dialog message.
+   * @param confirmAction Action on confirm.
+   * @param cancelAction Action on cancel.
+   */
   showConfirmation(
     title: string,
     message: string,
@@ -292,6 +375,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
     };
   }
 
+  /**
+   * Cleans up subscriptions and loading state on destroy.
+   */
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -303,6 +389,10 @@ export class OrganizerDashboardComponent implements OnDestroy {
       clearTimeout(this.alertTimeout);
     }
   }
+
+  /**
+   * Initializes dashboard data and checks authentication.
+   */
   private async initializeData() {
     // Decode token and get organizer ID
     this.decodeToken();
@@ -322,6 +412,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
     this.loadAllData();
   }
 
+  /**
+   * Decodes JWT token to extract organizer ID and name.
+   */
   private decodeToken(): void {
     try {
       const token =
@@ -347,6 +440,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Handles confirmation of alert dialog.
+   */
   handleAlertConfirm() {
     if (this.customAlert.confirmAction) {
       this.customAlert.confirmAction();
@@ -354,18 +450,28 @@ export class OrganizerDashboardComponent implements OnDestroy {
     this.closeAlert();
   }
 
+  /**
+   * Handles cancellation of alert dialog.
+   */
   handleAlertCancel() {
     if (this.customAlert.cancelAction) {
       this.customAlert.cancelAction();
     }
     this.closeAlert();
   }
+
+  /**
+   * Closes the custom alert dialog.
+   */
   closeAlert() {
     this.customAlert.show = false;
     this.customAlert.confirmAction = undefined;
     this.customAlert.cancelAction = undefined;
   }
 
+  /**
+   * Scrolls to "My Events" section.
+   */
   viewMyEvents() {
     const availableSection = document.querySelector('.events-section');
     if (availableSection) {
@@ -377,6 +483,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
     // this.router.navigate(['/my-created-events']);
   }
 
+  /**
+   * Scrolls to "Pending Events" section.
+   */
   viewPendingEvents() {
     const availableSection = document.querySelector('.events-section');
     if (availableSection) {
@@ -388,6 +497,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
     // this.router.navigate(['/my-pending-approvals']);
   }
 
+  /**
+   * Scrolls to "Create Event" section.
+   */
   createEvent() {
     const availableSection = document.querySelector('.create-event-btn');
     if (availableSection) {
@@ -398,6 +510,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Loads all required dashboard data (locations, events).
+   */
   private loadAllData(): void {
     this.isLoading = true;
     this.loadingService.show();
@@ -456,6 +571,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Calculates event duration from start and end time.
+   */
   calculateDuration() {
     const start = this.eventForm.get('startTime')?.value;
     const end = this.eventForm.get('endTime')?.value;
@@ -484,6 +602,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
   }
 
   // Updated venue change method
+  /**
+   * Handles venue selection change and validates max registrations.
+   */
   onVenueChange(): void {
     const selectedPlace = this.eventForm.get('location')?.value;
     this.selectedVenue =
@@ -492,7 +613,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
     this.validateMaxRegistrations();
   }
 
-  // Added validation method
+  /**
+   * Validates max registrations against venue capacity.
+   */
   validateMaxRegistrations(): void {
     const maxRegistrationsControl = this.eventForm.get('maxRegistrations');
     const maxRegistrationsValue = maxRegistrationsControl?.value;
@@ -514,12 +637,17 @@ export class OrganizerDashboardComponent implements OnDestroy {
     }
   }
 
-  // Added method for max registrations change
+  /**
+   * Handles change in max registrations field.
+   */
   onMaxRegistrationsChange(): void {
     this.validateMaxRegistrations();
   }
 
   // Event Submit/Create/Update
+  /**
+   * Handles event form submission for create/update.
+   */
   async onSubmit() {
     if (this.eventForm.invalid) {
       this.showAlert(
@@ -551,9 +679,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
       const eventData = {
         title: form.title,
         description: form.description,
-        date: new Date(form.date).toISOString(), // ✅ Make sure it's ISO (or omit if it's already ISO)
+        date: new Date(form.date).toISOString(),
         timeSlot,
-        duration: this.eventService.convertDurationToMinutes(form.duration), // ✅ Must be integer
+        duration: this.eventService.convertDurationToMinutes(form.duration),
         locationId: selectedPlace.id,
         category: form.category,
         price: form.price,
@@ -597,7 +725,12 @@ export class OrganizerDashboardComponent implements OnDestroy {
     }
   }
 
-  // Add helper method for duration conversion
+  // Helper method for duration conversion
+  /**
+   * Converts duration string to minutes.
+   * @param durationStr Duration string (e.g., "2 hours 30 mins").
+   * @returns Duration in minutes.
+   */
   private convertDurationToMinutes(durationStr: string): number {
     if (!durationStr) return 0;
 
@@ -610,6 +743,10 @@ export class OrganizerDashboardComponent implements OnDestroy {
     return hours * 60 + minutes;
   }
 
+  /**
+   * Loads event data into form for editing.
+   * @param event Event to edit.
+   */
   onEdit(event: Event) {
     window.scrollTo(0, 0);
     const loc = this.locations.find((l) => l.id === event.locationId);
@@ -648,6 +785,10 @@ export class OrganizerDashboardComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Deletes an event after confirmation.
+   * @param eventId Event ID to delete.
+   */
   async onDelete(eventId: string) {
     this.showConfirmation(
       'Confirm',
@@ -678,6 +819,11 @@ export class OrganizerDashboardComponent implements OnDestroy {
     );
   }
 
+  /**
+   * Loads registered users for an event.
+   * @param eventId Event ID.
+   * @param callback Optional callback after loading.
+   */
   loadRegisteredUsers(eventId: string, callback?: () => void) {
     this.eventService
       .getRegisteredUsers(eventId)
@@ -689,13 +835,15 @@ export class OrganizerDashboardComponent implements OnDestroy {
         },
         error: (error) => {
           console.error('Error loading registered users:', error);
-          // alert('Failed to load registered users');
           this.showAlert('error', 'Error', 'Failed to load registered users');
         },
       });
   }
 
   // State/City Filters
+  /**
+   * Handles state selection change for filtering.
+   */
   onStateChange() {
     this.selectedState = this.eventForm.get('state')?.value?.trim() || '';
     const state = this.selectedState;
@@ -710,6 +858,9 @@ export class OrganizerDashboardComponent implements OnDestroy {
     this.eventForm.patchValue({ city: '', location: '' });
   }
 
+  /**
+   * Handles city selection change for filtering.
+   */
   onCityChange() {
     this.selectedCity = this.eventForm.get('city')?.value?.trim() || '';
     const state = this.selectedState;
@@ -726,12 +877,18 @@ export class OrganizerDashboardComponent implements OnDestroy {
     this.eventForm.patchValue({ location: '' });
   }
 
+  /**
+   * Toggles the event creation form visibility.
+   */
   toggleCreateForm() {
     this.showCreateForm = !this.showCreateForm;
     this.isEditMode = false;
     this.resetForm();
   }
 
+  /**
+   * Resets the event form and related state.
+   */
   resetForm() {
     this.eventForm.reset({
       price: 0,
@@ -747,14 +904,23 @@ export class OrganizerDashboardComponent implements OnDestroy {
     this.currentEditEventId = null;
   }
 
+  /**
+   * Navigates to contact page.
+   */
   openContact() {
     this.router.navigate(['/contact']);
   }
 
+  /**
+   * Navigates to analytics page.
+   */
   openAnalytics() {
     this.router.navigate(['/analytics']);
   }
 
+  /**
+   * Logs out the organizer after confirmation.
+   */
   async logout() {
     this.showConfirmation('Confirm', 'Are you sure you want to logout?', () => {
       localStorage.clear();
@@ -764,20 +930,34 @@ export class OrganizerDashboardComponent implements OnDestroy {
     });
   }
 
+  /**
+   * Opens modal to show registered users for an event.
+   * @param eventId Event ID.
+   */
   openUserModal(eventId: string) {
     this.loadRegisteredUsers(eventId, () => (this.selectedEventId = eventId));
   }
 
+  /**
+   * Closes the registered users modal.
+   */
   closeUserModal() {
     this.selectedEventId = null;
   }
 
+  /**
+   * Shows event details modal.
+   * @param event Event to show.
+   */
   showEventDetail(event: Event) {
     this.selectedEvent = event;
     this.isEventDetailVisible = true;
     document.body.style.overflow = 'auto';
   }
 
+  /**
+   * Closes the event details modal.
+   */
   closeEventDetails() {
     this.isEventDetailVisible = false;
     this.selectedEvent = null;
