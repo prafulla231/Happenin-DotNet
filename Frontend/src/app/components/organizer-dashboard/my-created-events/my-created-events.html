@@ -17,7 +17,7 @@
     </div>
 
     <div class="events-grid">
-      <div class="event-card" *ngFor="let event of events">
+      <div class="event-card" *ngFor="let event of paginatedEvents">
         <div class="event-card-header">
           <div class="event-category">{{ event.category || 'General' }}</div>
           <div class="event-price">₹{{ event.price || 0 }}</div>
@@ -87,7 +87,14 @@
           </button>
         </div>
       </div>
+
     </div>
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      (pageChanged)="onPageChange($event)"
+    >
+    </app-pagination>
 
     <!-- Registered Users Modal -->
     <div

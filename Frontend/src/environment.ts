@@ -10,7 +10,7 @@ export const environment = {
     getAllEvents: '/events',
     createEvent: '/events',
     getEventsByOrganizer: (organizerId: string) => `/events/${organizerId}`,
-    // getEventsByOrganizer: (organizerId: string) => `/events/by-organizer/{organizerId}`,
+    getEventsByOrganizerAndStatus: (organizerId: string, status: string) => `/events/by-organizer/${organizerId}/status/${status}`,
     updateEvent: (eventId: string) => `/events/${eventId}`,
     deleteEvent: (eventId: string) => `/events/${eventId}`,
     registeredEvents: (userId: string) => `/events/registered-events/${userId}`,

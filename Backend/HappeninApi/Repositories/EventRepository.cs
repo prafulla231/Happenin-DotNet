@@ -1,3 +1,6 @@
+        // ...existing code...
+
+       
 using HappeninApi.Models;
 using MongoDB.Driver;
 using HappeninApi.DTOs;
@@ -53,6 +56,32 @@ namespace HappeninApi.Repositories
         public async Task<(IEnumerable<Event> Events, int TotalCount)> GetEventsByStatusAsync(EventStatus status, PaginationHelper pagination)
         {
             var filter = Builders<Event>.Filter.And(
+                Builders<Event>.Filter.Eq(e => e.Status, status),
+                Builders<Event>.Filter.Eq(e => e.IsDeleted, false)
+            );
+
+            var totalCount = (int)await _events.CountDocumentsAsync(filter);
+
+            var events = await _events
+                .Find(filter)
+                .Skip(pagination.Skip)
+                .Limit(pagination.Take)
+                .SortByDescending(e => e.CreatedAt)
+                .ToListAsync();
+
+            return (events, totalCount);
+        }
+         /// <summary>
+        /// Retrieves events by organizer and status with pagination.
+        /// </summary>
+        /// <param name="organizerId">The organizer's unique identifier.</param>
+        /// <param name="status">The status to filter events by.</param>
+        /// <param name="pagination">Pagination parameters.</param>
+        /// <returns>A tuple containing the events and the total count.</returns>
+        public async Task<(IEnumerable<Event> Events, int TotalCount)> GetEventsByOrganizerAndStatusAsync(Guid organizerId, EventStatus status, PaginationHelper pagination)
+        {
+            var filter = Builders<Event>.Filter.And(
+                Builders<Event>.Filter.Eq(e => e.CreatedById, organizerId),
                 Builders<Event>.Filter.Eq(e => e.Status, status),
                 Builders<Event>.Filter.Eq(e => e.IsDeleted, false)
             );

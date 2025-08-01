@@ -15,6 +15,7 @@ import {
   EventEditOverlayComponent,
   EventData,
 } from '../edit-event-overlay/edit-event-overlay'; // Import the overlay component
+import { PaginationComponent } from '../../../common/pagination/pagination';
 
 // Use the renamed interface from the overlay component or keep your own
 export interface Event {
@@ -81,6 +82,7 @@ export interface CustomAlert {
     FooterComponent,
     CustomAlertComponent,
     EventEditOverlayComponent, // Add the overlay component to imports
+    PaginationComponent
   ],
   templateUrl: './my-created-events.html',
   styleUrls: ['./my-created-events.scss'],
@@ -92,7 +94,15 @@ export class MyCreatedEventsComponent implements OnInit, OnDestroy {
   organizerId: string | null = null;
   isLoading = false;
   events: Event[] = [];
+  // Pagination properties
+  paginatedEvents: Event[] = [];
+  currentPage = 1;
+  totalPages = 0;
+  eventsPerPage = 6;
   locations: any[] = [];
+
+  // Status filter for events (Approved or Pending)
+  eventStatus: 'Approved' | 'Pending' = 'Approved';
 
   selectedEventId: string | null = null;
   selectedEvent: Event | null = null;
@@ -204,32 +214,48 @@ export class MyCreatedEventsComponent implements OnInit, OnDestroy {
         },
       });
 
-    // Load approved events only
-    if (this.organizerId) {
-      this.eventService
-        .getEventById(this.organizerId, 1, 100)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            const allEvents = response.data || [];
-            // Only show approved events
-            this.events = allEvents.filter(
-              (event: Event) => event.status === 'Approved'
-            );
-          },
-          error: (error) => {
-            console.error('Error loading events:', error);
-            this.events = [];
-          },
-          complete: () => {
-            this.isLoading = false;
-            this.loadingService.hide();
-          },
-        });
-    } else {
-      this.isLoading = false;
-      this.loadingService.hide();
+    // Load paginated approved events only
+    this.fetchPaginatedEvents();
+  }
+
+  // Fetch paginated events for this organizer and status
+  fetchPaginatedEvents(page: number = 1): void {
+    if (!this.organizerId) return;
+    this.isLoading = true;
+    this.eventService
+      .getEventsByOrganizerAndStatus(this.organizerId, this.eventStatus, page, this.eventsPerPage)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          const pageEvents = response.data || [];
+          this.events = pageEvents;
+          this.paginatedEvents = pageEvents;
+          this.currentPage = response.currentPage || page;
+          this.totalPages = response.totalPages || 1;
+          this.isLoading = false;
+          this.loadingService.hide();
+        },
+        error: (error) => {
+          this.isLoading = false;
+          this.loadingService.hide();
+          console.error('Error loading events:', error);
+          this.events = [];
+        },
+      });
+  }
+
+  // Switch between Approved and Pending events
+  setEventStatus(status: 'Approved' | 'Pending') {
+    if (this.eventStatus !== status) {
+      this.eventStatus = status;
+      this.currentPage = 1;
+      this.fetchPaginatedEvents(1);
     }
+  }
+
+  // Called by pagination component
+  onPageChange(page: number): void {
+    this.fetchPaginatedEvents(page);
   }
 
   handleHeaderAction(action: string): void {

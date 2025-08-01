@@ -1,3 +1,5 @@
+
+// ...existing code...
 import { Injectable } from '@angular/core';
 import { environment } from '../../environment';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
@@ -16,7 +18,21 @@ import { map } from 'rxjs/operators';
  * Service for handling event-related API calls.
  */
 export class EventService {
+
   constructor(private http: HttpClient) {}
+
+  /**
+   * Gets paginated events by organizer and status.
+   * @param organizerId Organizer ID
+   * @param status Event status (Approved, Pending, etc.)
+   * @param page Page number
+   * @param pageSize Page size
+   * @returns API response
+   */
+  getEventsByOrganizerAndStatus(organizerId: string, status: string, page: number = 1, pageSize: number = 6): Observable<any> {
+    const url = `${environment.apiBaseUrl}${environment.apis.getEventsByOrganizerAndStatus(organizerId, status)}?page=${page}&pageSize=${pageSize}`;
+    return this.http.get<any>(url, { headers: this.getAuthHeaders() });
+  }
 
   /**
    * Returns HTTP headers with authorization token.
@@ -62,6 +78,8 @@ export class EventService {
       }
     );
   }
+
+
 
   // Add helper method to convert duration
   /**

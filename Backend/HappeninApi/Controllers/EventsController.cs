@@ -1,3 +1,4 @@
+
 using HappeninApi.DTOs;
 using HappeninApi.Models;
 using HappeninApi.Repositories;
@@ -22,55 +23,26 @@ namespace HappeninApi.Controllers
             _locationRepo = locationRepo;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto)
+        /// <summary>
+        /// Gets events by organizer and status with pagination.
+        /// </summary>
+        [HttpGet("by-organizer/{organizerId}/status/{status}")]
+        public async Task<IActionResult> GetEventsByOrganizerAndStatus(Guid organizerId, string status, [FromQuery] PaginationRequestDto paginationRequest)
         {
-            // Console.WriteLine($"📥 Creating Event: {dto.Title} by {dto.CreatedById}");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            var evnt = new Event
-            {
-                Id = Guid.NewGuid(),
-                Title = dto.Title,
-                Description = dto.Description,
-                Date = dto.Date,
-                TimeSlot = dto.TimeSlot,
-                Duration = dto.Duration,
-                LocationId = dto.LocationId,
-                Category = dto.Category,
-                Price = dto.Price,
-                MaxRegistrations = dto.MaxRegistrations,
-                CurrentRegistrations = 0,
-                CreatedById = dto.CreatedById,
-                Artist = dto.Artist,
-                Organization = dto.Organization,
-                IsDeleted = false,
-                Status = EventStatus.Pending,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                Location = new Location
-                {
-                    Id = dto.LocationId,
-                    State = "",
-                    City = "",
-                    PlaceName = "",
-                    Address = ""
-                },
-                CreatedBy = new User
-                {
-                    Id = dto.CreatedById,
-                    Name = "",
-                    Phone = "",
-                    Email = "",
-                    Password = ""
-                }
-            };
+            if (!Enum.TryParse<EventStatus>(status, true, out var parsedStatus))
+                return BadRequest($"Invalid status: {status}");
 
-            var created = await _repository.CreateEventAsync(evnt);
+            var pagination = new HappeninApi.Helpers.PaginationHelper(paginationRequest.Page, paginationRequest.PageSize);
+            var (events, totalCount) = await _repository.GetEventsByOrganizerAndStatusAsync(organizerId, parsedStatus, pagination);
 
-            // Console.WriteLine("✅ Event created with ID: " + created.Id);
-
-            return CreatedAtAction(nameof(GetEvent), new { id = created.Id }, created);
+            var response = new PaginatedResponseDto<Event>(events, paginationRequest.Page, paginationRequest.PageSize, totalCount);
+            return Ok(response);
         }
+
+// Duplicate namespace and class removed. Only one EventsController class and namespace block should exist.
 
         [HttpGet("by-id/{id}")]
         public async Task<IActionResult> GetEvent(Guid id)

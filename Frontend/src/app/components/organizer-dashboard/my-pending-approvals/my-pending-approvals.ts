@@ -15,6 +15,7 @@ import { LocationService } from '../../../services/location';
 import { HeaderComponent, HeaderButton } from '../../../common/header/header';
 import { FooterComponent } from '../../../common/footer/footer';
 import { CustomAlertComponent } from '../../custom-alert/custom-alert';
+import { PaginationComponent } from '../../../common/pagination/pagination';
 
 // Interfaces (reuse from organizer-dashboard)
 export interface Event {
@@ -69,6 +70,7 @@ export interface CustomAlert {
     HeaderComponent,
     FooterComponent,
     CustomAlertComponent,
+    PaginationComponent
   ],
   templateUrl: './my-pending-approvals.html',
   styleUrls: ['./my-pending-approvals.scss'],
@@ -86,6 +88,11 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
   // Events data
   pendingEvents: Event[] = [];
   filteredEvents: Event[] = [];
+  // Pagination
+  paginatedEvents: Event[] = [];
+  currentPage = 1;
+  totalPages = 0;
+  eventsPerPage = 6;
 
   // Modal data
   selectedEvent: Event | null = null;
@@ -140,7 +147,7 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.decodeToken();
-    this.loadPendingEvents();
+    this.loadPendingEvents(1);
   }
 
   ngOnDestroy() {
@@ -177,15 +184,8 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
   }
 
   // Data loading
-  private loadPendingEvents(): void {
+  private loadPendingEvents(page: number = 1): void {
     if (!this.organizerId) {
-      console.error('No organizer ID found');
-      this.showAlert(
-        'error',
-        'Authentication Error',
-        'No organizer ID found. Please login again.'
-      );
-      this.logout();
       return;
     }
 
@@ -193,28 +193,33 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
     this.loadingService.show();
 
     this.eventService
-      .getEventById(this.organizerId, 1, 100)
+      .getEventsByOrganizerAndStatus(this.organizerId, 'Pending', page, this.eventsPerPage)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          const allEvents = response.data || [];
-          this.pendingEvents = allEvents.filter(
-            (event: Event) => event.status === 'Pending'
-          );
-          this.applyFilters();
-        },
-        error: (error) => {
-          console.error('Error loading pending events:', error);
-          this.pendingEvents = [];
-          this.showAlert('error', 'Error', 'Failed to load pending events');
-        },
-        complete: () => {
+          const pageEvents = response.data || [];
+          this.pendingEvents = pageEvents;
+          this.paginatedEvents = pageEvents;
+          this.filteredEvents = pageEvents;
+          this.currentPage = response.currentPage || page;
+          this.totalPages = response.totalPages || 1;
           this.isLoading = false;
           this.loadingService.hide();
         },
+        error: (error) => {
+          this.isLoading = false;
+          this.loadingService.hide();
+          this.pendingEvents = [];
+          this.filteredEvents = [];
+        },
+        complete: () => {},
       });
   }
 
+  // Called by pagination component
+  onPageChange(page: number): void {
+    this.loadPendingEvents(page);
+  }
   // Filtering and sorting
   applyFilters(): void {
     let filtered = [...this.pendingEvents];

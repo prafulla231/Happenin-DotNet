@@ -91,5 +91,14 @@ namespace HappeninApi.Repositories
         /// <param name="dto">Update details.</param>
         /// <returns>True if updated; otherwise, false.</returns>
         Task<bool> UpdateEventAsync(Guid id, UpdateEventDto dto);
+
+        /// <summary>
+        /// Gets events by organizer and status with pagination.
+        /// </summary>
+        /// <param name="organizerId">Organizer ID.</param>
+        /// <param name="status">Event status.</param>
+        /// <param name="pagination">Pagination helper.</param>
+        /// <returns>Tuple of events and total count.</returns>
+        Task<(IEnumerable<Event> Events, int TotalCount)> GetEventsByOrganizerAndStatusAsync(Guid organizerId, EventStatus status, PaginationHelper pagination);
     }
 }
