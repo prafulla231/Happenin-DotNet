@@ -11,10 +11,17 @@ import { map } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root',
 })
+
+/**
+ * Service for handling event-related API calls.
+ */
 export class EventService {
   constructor(private http: HttpClient) {}
 
-  // Helper method to get auth headers
+  /**
+   * Returns HTTP headers with authorization token.
+   * @returns {HttpHeaders} Auth headers
+   */
   private getAuthHeaders(): HttpHeaders {
     const token =
       localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -24,6 +31,11 @@ export class EventService {
     });
   }
 
+  /**
+   * Creates a new event.
+   * @param {any} data Event data
+   * @returns {Observable<any>} API response
+   */
   createEvent(data: any) {
     // Transform the data to match C# backend expectations
     const eventData = {
@@ -52,6 +64,11 @@ export class EventService {
   }
 
   // Add helper method to convert duration
+  /**
+   * Converts a duration string (e.g., "2 hours 30 min") to minutes.
+   * @param {string} durationStr Duration string
+   * @returns {number} Duration in minutes
+   */
   convertDurationToMinutes(durationStr: string): number {
     if (!durationStr || typeof durationStr !== 'string') return 0;
 
@@ -66,6 +83,12 @@ export class EventService {
     return hours * 60 + minutes;
   }
 
+  /**
+   * Gets all events with pagination.
+   * @param {number} [page=1] Page number
+   * @param {number} [pageSize=10] Page size
+   * @returns {Observable<any>} API response
+   */
   getAllEvents(page: number = 1, pageSize: number = 10): Observable<any> {
     let params = new HttpParams().set('page', page).set('pageSize', pageSize);
 
@@ -76,6 +99,13 @@ export class EventService {
     });
   }
 
+  /**
+   * Gets paginated approved events with optional filters.
+   * @param {number} [page=1] Page number
+   * @param {number} [pageSize=10] Page size
+   * @param {any} [filters] Filter options
+   * @returns {Observable<any>} API response
+   */
   getPaginatedEvents(
     page: number = 1,
     pageSize: number = 10,
@@ -104,6 +134,13 @@ export class EventService {
     });
   }
 
+  /**
+   * Gets paginated expired events with optional filters.
+   * @param {number} [page=1] Page number
+   * @param {number} [pageSize=10] Page size
+   * @param {any} [filters] Filter options
+   * @returns {Observable<any>} API response
+   */
   getExpiredPaginatedEvents(
     page: number = 1,
     pageSize: number = 10,
@@ -132,6 +169,13 @@ export class EventService {
     });
   }
 
+  /**
+   * Gets paginated pending events with optional filters.
+   * @param {number} [page=1] Page number
+   * @param {number} [pageSize=10] Page size
+   * @param {any} [filters] Filter options
+   * @returns {Observable<any>} API response
+   */
   getPendingPaginatedEvents(
     page: number = 1,
     pageSize: number = 10,
@@ -159,6 +203,11 @@ export class EventService {
       params,
     });
   }
+
+  /**
+   * Gets upcoming events.
+   * @returns {Observable<Event[]>} List of upcoming events
+   */
   getUpcomingEvents(): Observable<Event[]> {
     const url = `${environment.apiBaseUrl}${environment.apis.getUpcomingEvent}`;
     return this.http
@@ -168,6 +217,10 @@ export class EventService {
       .pipe(map((res) => res.data));
   }
 
+  /**
+   * Gets expired events.
+   * @returns {Observable<Event[]>} List of expired events
+   */
   getExpiredEvents(): Observable<Event[]> {
     const url = `${environment.apiBaseUrl}${environment.apis.getExpiredEvent}`;
     return this.http
@@ -177,6 +230,13 @@ export class EventService {
       .pipe(map((res) => res.data));
   }
 
+  /**
+   * Gets events by organizer ID with pagination.
+   * @param {string} organizerId Organizer ID
+   * @param {number} [page=1] Page number
+   * @param {number} [pageSize=10] Page size
+   * @returns {Observable<any>} API response
+   */
   getEventById(
     organizerId: string,
     page: number = 1,
@@ -193,6 +253,12 @@ export class EventService {
     );
   }
 
+  /**
+   * Updates an event.
+   * @param {string} eventId Event ID
+   * @param {any} data Updated event data
+   * @returns {Observable<any>} API response
+   */
   updateEvent(eventId: string, data: any) {
     return this.http.put(
       `${environment.apiBaseUrl}${environment.apis.updateEvent(eventId)}`,
@@ -203,6 +269,11 @@ export class EventService {
     );
   }
 
+  /**
+   * Deletes an event.
+   * @param {string} eventId Event ID
+   * @returns {Observable<any>} API response
+   */
   deleteEvent(eventId: string) {
     return this.http.delete(
       `${environment.apiBaseUrl}${environment.apis.deleteEvent(eventId)}`,
@@ -212,6 +283,11 @@ export class EventService {
     );
   }
 
+  /**
+   * Gets registered users for an event.
+   * @param {string} eventId Event ID
+   * @returns {Observable<{ data: RegisteredUsersResponse }>} Registered users
+   */
   getRegisteredUsers(
     eventId: string
   ): Observable<{ data: RegisteredUsersResponse }> {
@@ -225,6 +301,12 @@ export class EventService {
     );
   }
 
+  /**
+   * Removes a user from an event.
+   * @param {string} eventId Event ID
+   * @param {string} userId User ID
+   * @returns {Observable<any>} API response
+   */
   removeUserFromEvent(eventId: string, userId: string) {
     return this.http.delete(
       `${environment.apiBaseUrl}${environment.apis.removeUserFromEvent(
@@ -237,6 +319,11 @@ export class EventService {
     );
   }
 
+  /**
+   * Gets events registered by a user.
+   * @param {string} userId User ID
+   * @returns {Observable<Event[]>} Registered events
+   */
   getRegisteredEvents(userId: string): Observable<Event[]> {
     return this.http
       .get<{ events: Event[] }>(
@@ -248,6 +335,12 @@ export class EventService {
       .pipe(map((res) => res.events));
   }
 
+  /**
+   * Registers a user for an event.
+   * @param {string} userId User ID
+   * @param {string} eventId Event ID
+   * @returns {Observable<any>} API response
+   */
   registerForEvent(userId: string, eventId: string): Observable<any> {
     const payload = { userId, eventId };
     const url = `${environment.apiBaseUrl}${environment.apis.registerForEvent}`;
@@ -256,6 +349,12 @@ export class EventService {
     });
   }
 
+  /**
+   * Deregisters a user from an event.
+   * @param {string} userId User ID
+   * @param {string} eventId Event ID
+   * @returns {Observable<any>} API response
+   */
   deregisterFromEvent(userId: string, eventId: string): Observable<any> {
     const url = `${environment.apiBaseUrl}${environment.apis.deregisterForEvent}`;
     const payload = { userId, eventId };
@@ -267,7 +366,14 @@ export class EventService {
     );
   }
 
-  // In event.service.ts
+  /**
+   * Checks for event conflict at a location, date, and time slot.
+   * @param {string} locationId Location ID
+   * @param {string} date Date string
+   * @param {string} timeSlot Time slot
+   * @param {string} [excludeEventId] Event ID to exclude from conflict check
+   * @returns {Observable<any>} API response
+   */
   checkEventConflict(
     locationId: string,
     date: string,
