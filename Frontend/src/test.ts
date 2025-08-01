@@ -2,14 +2,16 @@ import 'zone.js';
 import 'zone.js/testing';
 
 import { getTestBed } from '@angular/core/testing';
-import { BrowserTestingModule, platformBrowserTesting } from '@angular/platform-browser/testing';
+import {
+  BrowserTestingModule,
+  platformBrowserTesting,
+} from '@angular/platform-browser/testing';
 
 getTestBed().initTestEnvironment(
   BrowserTestingModule,
   platformBrowserTesting()
 );
 
-// ✅ Import your actual project spec files only:
 import './app/app.spec';
 import './app/components/auth/login/login.spec';
 import './app/components/chatbot-widget/chatbot-widget.spec';

@@ -473,28 +473,28 @@ export class OrganizerDashboardComponent implements OnDestroy {
    * Scrolls to "My Events" section.
    */
   viewMyEvents() {
-    const availableSection = document.querySelector('.events-section');
-    if (availableSection) {
-      availableSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-    // this.router.navigate(['/my-created-events']);
+    // const availableSection = document.querySelector('.events-section');
+    // if (availableSection) {
+    //   availableSection.scrollIntoView({
+    //     behavior: 'smooth',
+    //     block: 'start',
+    //   });
+    // }
+    this.router.navigate(['/my-created-events']);
   }
 
   /**
    * Scrolls to "Pending Events" section.
    */
   viewPendingEvents() {
-    const availableSection = document.querySelector('.events-section');
-    if (availableSection) {
-      availableSection.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
-    // this.router.navigate(['/my-pending-approvals']);
+    // const availableSection = document.querySelector('.events-section');
+    // if (availableSection) {
+    //   availableSection.scrollIntoView({
+    //     behavior: 'smooth',
+    //     block: 'start',
+    //   });
+    // }
+    this.router.navigate(['/my-pending-approvals']);
   }
 
   /**
