@@ -11,8 +11,12 @@ import { LocationService } from '../../../services/location';
 import { HeaderComponent, HeaderButton } from '../../../common/header/header';
 import { FooterComponent } from '../../../common/footer/footer';
 import { CustomAlertComponent } from '../../custom-alert/custom-alert';
+import {
+  EventEditOverlayComponent,
+  EventData,
+} from '../edit-event-overlay/edit-event-overlay'; // Import the overlay component
 
-// Interfaces
+// Use the renamed interface from the overlay component or keep your own
 export interface Event {
   id: string;
   title: string;
@@ -76,6 +80,7 @@ export interface CustomAlert {
     HeaderComponent,
     FooterComponent,
     CustomAlertComponent,
+    EventEditOverlayComponent, // Add the overlay component to imports
   ],
   templateUrl: './my-created-events.html',
   styleUrls: ['./my-created-events.scss'],
@@ -92,6 +97,10 @@ export class MyCreatedEventsComponent implements OnInit, OnDestroy {
   selectedEventId: string | null = null;
   selectedEvent: Event | null = null;
   isEventDetailVisible: boolean = false;
+
+  // Add properties for edit overlay
+  isEditOverlayVisible: boolean = false;
+  eventToEdit: Event | null = null;
 
   usersMap: {
     [eventId: string]: { currentRegistration: number; users: RegisteredUser[] };
@@ -259,11 +268,32 @@ export class MyCreatedEventsComponent implements OnInit, OnDestroy {
     this.router.navigate(['/contact']);
   }
 
+  // Updated onEdit method to open the overlay instead of navigating
   onEdit(event: Event) {
-    // Navigate back to dashboard with edit mode
-    this.router.navigate(['/organizer-dashboard'], {
-      queryParams: { editEventId: event.id },
-    });
+    console.log('Editing event:', event); // Debug log
+    this.eventToEdit = event;
+    this.isEditOverlayVisible = true;
+  }
+
+  // Methods to handle overlay events
+  onCloseEditOverlay() {
+    console.log('Closing overlay'); // Debug log
+    this.isEditOverlayVisible = false;
+    this.eventToEdit = null;
+  }
+
+  onEventUpdated() {
+    // Reload the events list after successful update
+    this.loadAllData();
+    this.onCloseEditOverlay();
+  }
+
+  onShowAlertFromOverlay(alertData: {
+    type: string;
+    title: string;
+    message: string;
+  }) {
+    this.showAlert(alertData.type as any, alertData.title, alertData.message);
   }
 
   async onDelete(eventId: string) {

@@ -1628,210 +1628,332 @@ width: 95%;
   }
 }
 
-// Navigation Cards Styles
-.navigation-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
+/* Navigation Section Styles */
+.navigation-section {
   margin: 2rem 0;
-  padding: 0 1rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin: 1.5rem 0;
-  }
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
+.navigation-section .section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.navigation-section .section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.navigation-section .section-subtitle {
+  color: #64748b;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+/* Navigation Cards Grid */
+.nav-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 3fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Navigation Card Base Styles */
 .nav-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+  background: white;
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 
-    0 10px 30px rgba(0, 0, 0, 0.1),
-    0 1px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-  }
-
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 
-      0 20px 40px rgba(0, 0, 0, 0.15),
-      0 5px 15px rgba(0, 0, 0, 0.1);
-
-    &::before {
-      transform: scaleX(1);
-    }
-  }
-
-  &.pending-card {
-    &::before {
-      background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 100%);
-    }
-
-    .nav-btn {
-      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-      
-      &:hover {
-        background: linear-gradient(135deg, #ff8a95 0%, #fdbde8 100%);
-        transform: translateY(-2px);
-      }
-    }
-  }
-
-  &.events-card {
-    &::before {
-      background: linear-gradient(90deg, #a8edea 0%, #fed6e3 100%);
-    }
-
-    .nav-btn {
-      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-      
-      &:hover {
-        background: linear-gradient(135deg, #9de4e0 0%, #fcc8d9 100%);
-        transform: translateY(-2px);
-      }
-    }
-  }
+  border: 1px solid #e2e8f0;
 }
 
-.card-image {
-  text-align: center;
-  margin-bottom: 1.5rem;
-
-  img {
-    width: 80px;
-    height: 80px;
-    object-fit: contain;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-    transition: transform 0.3s ease;
-  }
-
-  .nav-card:hover & img {
-    transform: scale(1.1) rotate(5deg);
-  }
+.nav-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
 }
 
-.card-content {
-  text-align: center;
-
-  h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #2d3748;
-    margin-bottom: 0.75rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  p {
-    color: #718096;
-    font-size: 1rem;
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-    font-weight: 400;
-  }
+.nav-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-.nav-btn {
-  display: inline-flex;
+.nav-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Card Variants */
+.created-events-card {
+  border-left: 4px solid #10b981;
+}
+
+.created-events-card::before {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+.pending-events-card {
+  border-left: 4px solid #f59e0b;
+}
+
+.pending-events-card::before {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+}
+
+.analytics-card {
+  border-left: 4px solid #8e3490;
+}
+
+.analytics-card::before {
+  background: linear-gradient(90deg, #8e3490 0%, #540655 100%);
+}
+
+/* Card Header */
+.nav-card-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
+  margin-bottom: 1.5rem;
+}
+
+.nav-card-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.created-events-card .nav-card-icon {
+  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  color: #059669;
+}
+
+.pending-events-card .nav-card-icon {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #d97706;
+}
+
+.nav-card-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.5rem 1rem;
   border-radius: 50px;
   font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 40px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.nav-card-badge.pending {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Card Body */
+.nav-card-body {
+  margin-bottom: 2rem;
+}
+
+.nav-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+}
+
+.nav-card-description {
+  color: #64748b;
   font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+/* Card Stats */
+.nav-card-stats {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  min-width: 80px;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Card Footer */
+.nav-card-footer {
+  margin-top: auto;
+}
+
+.nav-card-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
   position: relative;
   overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-  }
-
-  &:active::before {
-    width: 300px;
-    height: 300px;
-  }
-
-  .btn-icon {
-    font-size: 1.1rem;
-    transition: transform 0.3s ease;
-  }
-
-  &:hover .btn-icon {
-    transform: scale(1.2);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
 }
 
-// Responsive adjustments
-@media (max-width: 480px) {
-  .navigation-cards {
-    padding: 0 0.5rem;
-  }
+.nav-card-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
 
+.nav-card-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+.nav-card-btn:hover::before {
+  left: 100%;
+}
+
+.nav-card-btn:active {
+  transform: translateY(0);
+}
+
+.created-events-card .nav-card-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+// .created-events-card .nav-card-btn:hover {
+//   box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+// }
+
+.pending-events-card .nav-card-btn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+}
+
+// .pending-events-card .nav-card-btn:hover {
+//   box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+// }
+
+.btn-text {
+  font-weight: 600;
+}
+
+.btn-arrow {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.nav-card-btn:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navigation-section {
+    padding: 1.5rem;
+    margin: 1rem 0;
+  }
+  
+  .nav-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
   .nav-card {
     padding: 1.5rem;
-
-    .card-image img {
-      width: 60px;
-      height: 60px;
-    }
-
-    .card-content {
-      h3 {
-        font-size: 1.25rem;
-      }
-
-      p {
-        font-size: 0.9rem;
-      }
-    }
-
-    .nav-btn {
-      padding: 0.6rem 1.2rem;
-      font-size: 0.9rem;
-    }
+  }
+  
+  .navigation-section .section-title {
+    font-size: 1.75rem;
+  }
+  
+  .nav-card-title {
+    font-size: 1.25rem;
+  }
+  
+  .nav-card-stats {
+    justify-content: center;
   }
 }
 
-/* Add these popup styles to your existing SCSS file */
-
+@media (max-width: 480px) {
+  .navigation-section {
+    padding: 1rem;
+  }
+  
+  .nav-card {
+    padding: 1rem;
+  }
+  
+  .nav-card-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  
+  .navigation-section .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .navigation-section .section-subtitle {
+    font-size: 1rem;
+  }
+}
 /* Popup Overlay */
 .popup-overlay {
   position: fixed;

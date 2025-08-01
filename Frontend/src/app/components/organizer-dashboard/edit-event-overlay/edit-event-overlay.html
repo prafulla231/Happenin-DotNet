@@ -1,0 +1,240 @@
+<div class="overlay" *ngIf="isVisible" (click)="onOverlayClick($event)">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEditMode ? 'Edit Event' : 'Create Event' }}</h2>
+      <button class="close-btn" (click)="closeModal()" type="button">
+        <span>&times;</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form [formGroup]="eventForm" (ngSubmit)="onSubmit()">
+        <!-- Event Title -->
+        <div class="form-group">
+          <label for="title">Event Title *</label>
+          <input
+            type="text"
+            id="title"
+            formControlName="title"
+            placeholder="Enter event title"
+            class="form-control"
+          />
+          <div
+            class="error-message"
+            *ngIf="eventForm.get('title')?.touched && eventForm.get('title')?.errors?.['required']"
+          >
+            Event title is required
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            placeholder="Enter event description"
+            rows="4"
+            class="form-control"
+          ></textarea>
+        </div>
+
+        <!-- Date -->
+        <div class="form-group">
+          <label for="date">Event Date *</label>
+          <input
+            type="date"
+            id="date"
+            formControlName="date"
+            [min]="minDate"
+            class="form-control"
+          />
+          <div
+            class="error-message"
+            *ngIf="eventForm.get('date')?.touched && eventForm.get('date')?.errors?.['required']"
+          >
+            Event date is required
+          </div>
+        </div>
+
+        <!-- Time Slots -->
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label for="startTime">Start Time *</label>
+            <input
+              type="time"
+              id="startTime"
+              formControlName="startTime"
+              class="form-control"
+            />
+          </div>
+          <div class="form-group half-width">
+            <label for="endTime">End Time *</label>
+            <input
+              type="time"
+              id="endTime"
+              formControlName="endTime"
+              class="form-control"
+            />
+          </div>
+        </div>
+
+        <!-- Duration (Read-only) -->
+        <div class="form-group">
+          <label for="duration">Duration</label>
+          <input
+            type="text"
+            id="duration"
+            formControlName="duration"
+            readonly
+            class="form-control readonly"
+          />
+        </div>
+
+        <!-- Location Fields -->
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label for="state">State *</label>
+            <select
+              id="state"
+              formControlName="state"
+              (change)="onStateChange()"
+              class="form-control"
+            >
+              <option value="">Select State</option>
+              <option *ngFor="let state of filteredStates" [value]="state">
+                {{ state }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group half-width">
+            <label for="city">City *</label>
+            <select
+              id="city"
+              formControlName="city"
+              (change)="onCityChange()"
+              [disabled]="!selectedState"
+              class="form-control"
+            >
+              <option value="">Select City</option>
+              <option *ngFor="let city of filteredCities" [value]="city">
+                {{ city }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Venue -->
+        <div class="form-group">
+          <label for="location">Venue *</label>
+          <select
+            id="location"
+            formControlName="location"
+            (change)="onVenueChange()"
+            [disabled]="!selectedCity"
+            class="form-control"
+          >
+            <option value="">Select Venue</option>
+            <option *ngFor="let place of filteredPlaceNames" [value]="place">
+              {{ place }}
+            </option>
+          </select>
+          <div class="venue-info" *ngIf="selectedVenue">
+            <small
+              >Capacity: {{ selectedVenue.maxSeatingCapacity }} people</small
+            >
+          </div>
+        </div>
+
+        <!-- Category and Other Details -->
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label for="category">Category</label>
+            <select
+              id="category"
+              formControlName="category"
+              class="form-control"
+            >
+              <option value="">Select Category</option>
+              <option *ngFor="let cat of categories" [value]="cat">
+                {{ cat }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group half-width">
+            <label for="price">Price (₹)</label>
+            <input
+              type="number"
+              id="price"
+              formControlName="price"
+              min="0"
+              class="form-control"
+            />
+          </div>
+        </div>
+
+        <!-- Max Registrations -->
+        <div class="form-group">
+          <label for="maxRegistrations">Maximum Registrations *</label>
+          <input
+            type="number"
+            id="maxRegistrations"
+            formControlName="maxRegistrations"
+            min="1"
+            (change)="onMaxRegistrationsChange()"
+            class="form-control"
+          />
+          <div
+            class="error-message"
+            *ngIf="eventForm.get('maxRegistrations')?.errors?.['overCapacity']"
+          >
+            Maximum registrations cannot exceed venue capacity ({{
+            selectedVenue?.maxSeatingCapacity }})
+          </div>
+        </div>
+
+        <!-- Artist and Organization -->
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label for="artist">Artist/Performer</label>
+            <input
+              type="text"
+              id="artist"
+              formControlName="artist"
+              placeholder="Enter artist name"
+              class="form-control"
+            />
+          </div>
+          <div class="form-group half-width">
+            <label for="organization">Organization</label>
+            <input
+              type="text"
+              id="organization"
+              formControlName="organization"
+              placeholder="Enter organization name"
+              class="form-control"
+            />
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="closeModal()"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="eventForm.invalid || isLoading"
+          >
+            {{ isEditMode ? 'Update Event' : 'Create Event' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

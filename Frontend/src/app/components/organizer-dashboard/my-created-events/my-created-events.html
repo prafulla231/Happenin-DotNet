@@ -7,20 +7,6 @@
   >
   </app-header>
 
-  <!-- Page Title Section -->
-  <div class="page-title-section">
-    <div class="page-title-content">
-      <h1 class="page-title">My Created Events</h1>
-      <p class="page-subtitle">Manage and view all your approved events</p>
-    </div>
-    <div class="page-actions">
-      <button class="create-event-btn" (click)="createEvent()">
-        <span class="btn-icon">✚</span>
-        Create New Event
-      </button>
-    </div>
-  </div>
-
   <!-- Events Section -->
   <div class="events-section" *ngIf="events.length > 0">
     <div class="section-header">
@@ -356,3 +342,13 @@
   (alertCancelled)="handleAlertCancel()"
 >
 </app-custom-alert>
+
+<app-event-edit-overlay
+  [isVisible]="isEditOverlayVisible"
+  [eventToEdit]="eventToEdit"
+  [organizerId]="organizerId"
+  (closeOverlay)="onCloseEditOverlay()"
+  (eventUpdated)="onEventUpdated()"
+  (showAlert)="onShowAlertFromOverlay($event)"
+>
+</app-event-edit-overlay>

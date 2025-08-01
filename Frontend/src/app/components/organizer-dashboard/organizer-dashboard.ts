@@ -224,9 +224,6 @@ export class OrganizerDashboardComponent implements OnDestroy {
 
   /** Header buttons configuration for dashboard navigation. */
   organizerButtons: HeaderButton[] = [
-    { text: 'My Events', action: 'viewMyEvents' },
-    { text: 'Create Event', action: 'createEvent', style: 'primary' },
-    { text: 'Analytics', action: 'openAnalytics', style: 'primary' },
     { text: 'Contact', action: 'openContact' },
     { text: 'Logout', action: 'logout' },
   ];
@@ -237,15 +234,6 @@ export class OrganizerDashboardComponent implements OnDestroy {
    */
   handleHeaderAction(action: string): void {
     switch (action) {
-      case 'viewMyEvents':
-        this.viewMyEvents();
-        break;
-      case 'createEvent':
-        this.createEvent();
-        break;
-      case 'openAnalytics':
-        this.openAnalytics();
-        break;
       case 'openContact':
         this.openContact();
         break;
