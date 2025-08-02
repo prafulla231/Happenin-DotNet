@@ -13,15 +13,15 @@ export interface HeaderButton {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './header.html',
-  styleUrls: ['./header.scss']
+  styleUrls: ['./header.scss'],
 })
 export class HeaderComponent {
   @Input() userName: string = '';
-  title: string = 'Dashboard';
+  @Input() title: string = 'Dashboard';
   @Input() buttons: HeaderButton[] = [];
   @Output() buttonClick = new EventEmitter<string>();
 
-isMenuOpen: boolean = false;
+  isMenuOpen: boolean = false;
   onButtonClick(action: string): void {
     this.buttonClick.emit(action);
     this.isMenuOpen = false;

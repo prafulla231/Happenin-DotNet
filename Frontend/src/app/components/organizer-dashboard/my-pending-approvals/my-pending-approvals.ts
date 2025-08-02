@@ -16,6 +16,10 @@ import { HeaderComponent, HeaderButton } from '../../../common/header/header';
 import { FooterComponent } from '../../../common/footer/footer';
 import { CustomAlertComponent } from '../../custom-alert/custom-alert';
 import { PaginationComponent } from '../../../common/pagination/pagination';
+import {
+  EventEditOverlayComponent,
+  EventData,
+} from '../edit-event-overlay/edit-event-overlay'; // Import the overlay component
 
 // Interfaces (reuse from organizer-dashboard)
 export interface Event {
@@ -70,7 +74,8 @@ export interface CustomAlert {
     HeaderComponent,
     FooterComponent,
     CustomAlertComponent,
-    PaginationComponent
+    PaginationComponent,
+    EventEditOverlayComponent, // Add the overlay component to imports
   ],
   templateUrl: './my-pending-approvals.html',
   styleUrls: ['./my-pending-approvals.scss'],
@@ -88,6 +93,7 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
   // Events data
   pendingEvents: Event[] = [];
   filteredEvents: Event[] = [];
+  locations: any[] = [];
   // Pagination
   paginatedEvents: Event[] = [];
   currentPage = 1;
@@ -97,6 +103,10 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
   // Modal data
   selectedEvent: Event | null = null;
   isEventDetailVisible: boolean = false;
+
+  // Add properties for edit overlay
+  isEditOverlayVisible: boolean = false;
+  eventToEdit: Event | null = null;
 
   // Filter and sort options
   sortBy: string = 'date';
@@ -147,7 +157,7 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.decodeToken();
-    this.loadPendingEvents(1);
+    this.initializeData();
   }
 
   ngOnDestroy() {
@@ -183,24 +193,110 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
     }
   }
 
+  private async initializeData() {
+    if (!this.organizerId) {
+      console.error('No organizer ID found');
+      this.showAlert(
+        'error',
+        'Authentication Error',
+        'No organizer ID found. Please login again.'
+      );
+      this.logout();
+      return;
+    }
+
+    this.loadAllData();
+  }
+
+  private loadAllData(): void {
+    this.isLoading = true;
+    this.loadingService.show();
+
+    // Load locations first, then events
+    this.locationService
+      .fetchLocations()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.locations = Array.isArray(data) ? data : [];
+          // Load events after locations are loaded
+          this.loadPendingEvents();
+        },
+        error: (error) => {
+          console.error('Error loading locations:', error);
+          this.locations = [];
+          // Still try to load events even if locations failed
+          this.loadPendingEvents();
+        },
+      });
+  }
+
   // Data loading
   private loadPendingEvents(page: number = 1): void {
     if (!this.organizerId) {
       return;
     }
 
-    this.isLoading = true;
-    this.loadingService.show();
-
     this.eventService
-      .getEventsByOrganizerAndStatus(this.organizerId, 'Pending', page, this.eventsPerPage)
+      .getEventsByOrganizerAndStatus(
+        this.organizerId,
+        'Pending',
+        page,
+        this.eventsPerPage
+      )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           const pageEvents = response.data || [];
-          this.pendingEvents = pageEvents;
-          this.paginatedEvents = pageEvents;
-          this.filteredEvents = pageEvents;
+
+          // Map location details to events
+          this.pendingEvents = pageEvents.map((event: Event) => {
+            if (event.locationId && this.locations.length > 0) {
+              const locationDetails = this.locations.find(
+                (loc) => loc.id === event.locationId
+              );
+              if (locationDetails) {
+                event.location = {
+                  id: locationDetails.id,
+                  state: locationDetails.state,
+                  city: locationDetails.city,
+                  placeName: locationDetails.placeName,
+                  address: locationDetails.address,
+                  maxSeatingCapacity: locationDetails.maxSeatingCapacity,
+                  amenities: locationDetails.amenities || [],
+                  bookings: locationDetails.bookings || [],
+                };
+              } else {
+                // If location not found, create a minimal location object
+                event.location = {
+                  id: event.locationId,
+                  state: 'Not specified',
+                  city: 'Not specified',
+                  placeName: 'Not specified',
+                  address: 'Not specified',
+                  maxSeatingCapacity: 0,
+                  amenities: [],
+                  bookings: [],
+                };
+              }
+            } else if (!event.location) {
+              // If no location info at all, create default
+              event.location = {
+                id: '',
+                state: 'Not specified',
+                city: 'Not specified',
+                placeName: 'Not specified',
+                address: 'Not specified',
+                maxSeatingCapacity: 0,
+                amenities: [],
+                bookings: [],
+              };
+            }
+            return event;
+          });
+
+          this.paginatedEvents = this.pendingEvents;
+          this.filteredEvents = this.pendingEvents;
           this.currentPage = response.currentPage || page;
           this.totalPages = response.totalPages || 1;
           this.isLoading = false;
@@ -220,6 +316,7 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
   onPageChange(page: number): void {
     this.loadPendingEvents(page);
   }
+
   // Filtering and sorting
   applyFilters(): void {
     let filtered = [...this.pendingEvents];
@@ -278,10 +375,30 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
 
   // Event actions
   onEdit(event: Event): void {
-    // Navigate to main dashboard with edit mode
-    this.router.navigate(['/organizer-dashboard'], {
-      queryParams: { editEventId: event.id },
-    });
+    console.log('Editing event:', event); // Debug log
+    this.eventToEdit = event;
+    this.isEditOverlayVisible = true;
+  }
+
+  // Methods to handle overlay events
+  onCloseEditOverlay() {
+    console.log('Closing overlay'); // Debug log
+    this.isEditOverlayVisible = false;
+    this.eventToEdit = null;
+  }
+
+  onEventUpdated() {
+    // Reload the events list after successful update
+    this.loadAllData();
+    this.onCloseEditOverlay();
+  }
+
+  onShowAlertFromOverlay(alertData: {
+    type: string;
+    title: string;
+    message: string;
+  }) {
+    this.showAlert(alertData.type as any, alertData.title, alertData.message);
   }
 
   onDelete(eventId: string): void {
@@ -302,7 +419,7 @@ export class OrganizerPendingApprovalsComponent implements OnInit, OnDestroy {
                 'Success',
                 'Event deleted successfully!'
               );
-              this.loadPendingEvents(); // Reload the list
+              this.loadAllData(); // Reload the list
             },
             error: (error) => {
               console.error('Delete error:', error);

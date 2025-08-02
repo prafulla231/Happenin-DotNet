@@ -9,13 +9,6 @@
 
   <!-- Events Section -->
   <div class="events-section" *ngIf="events.length > 0">
-    <div class="section-header">
-      <h2 class="section-title">Your Approved Events</h2>
-      <div class="events-count">
-        {{ events.length }} {{ events.length === 1 ? 'Event' : 'Events' }}
-      </div>
-    </div>
-
     <div class="events-grid">
       <div class="event-card" *ngFor="let event of paginatedEvents">
         <div class="event-card-header">
@@ -35,9 +28,22 @@
                 >{{ event.date | date:'MMM dd, yyyy' }}</span
               >
             </div>
+            <!-- Updated Location Display -->
             <div class="event-detail">
               <span class="detail-icon">📍</span>
-              <span class="detail-text">{{ event.location.city }}</span>
+              <span class="detail-text">
+                {{ event.location.placeName || event.location.city }}
+                <span
+                  *ngIf="event.location.placeName && event.location.city !== event.location.placeName"
+                >
+                  , {{ event.location.city }}
+                </span>
+              </span>
+            </div>
+            <!-- Add Address if available -->
+            <div class="event-detail" *ngIf="event.location.address">
+              <span class="detail-icon">🏢</span>
+              <span class="detail-text">{{ event.location.address }}</span>
             </div>
             <div class="event-detail" *ngIf="event.timeSlot">
               <span class="detail-icon">🕐</span>
@@ -87,7 +93,6 @@
           </button>
         </div>
       </div>
-
     </div>
     <app-pagination
       [currentPage]="currentPage"
@@ -214,12 +219,12 @@
             </div>
           </div>
 
-          <!-- Location Section -->
+          <!-- Location Section - Enhanced -->
           <div class="detail-section">
-            <h4>📍 Location</h4>
+            <h4>📍 Location Details</h4>
             <div class="detail-grid">
               <div class="detail-item">
-                <span class="detail-label">Venue</span>
+                <span class="detail-label">Venue Name</span>
                 <span class="detail-value"
                   >{{ selectedEvent.location.placeName || 'Not specified'
                   }}</span
@@ -231,12 +236,43 @@
                   >{{ selectedEvent.location.city }}</span
                 >
               </div>
+              <div class="detail-item">
+                <span class="detail-label">State</span>
+                <span class="detail-value"
+                  >{{ selectedEvent.location.state || 'Not specified' }}</span
+                >
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Max Capacity</span>
+                <span class="detail-value"
+                  >{{ selectedEvent.location.maxSeatingCapacity || 'Not
+                  specified' }} people</span
+                >
+              </div>
             </div>
-            <div class="detail-item" *ngIf="selectedEvent.location.address">
-              <span class="detail-label">Address</span>
-              <span class="detail-value"
+            <div
+              class="detail-item full-width"
+              *ngIf="selectedEvent.location.address"
+            >
+              <span class="detail-label">Full Address</span>
+              <span class="detail-value address-value"
                 >{{ selectedEvent.location.address }}</span
               >
+            </div>
+            <!-- Amenities Section -->
+            <div
+              class="detail-item full-width"
+              *ngIf="selectedEvent.location.amenities && selectedEvent.location.amenities.length > 0"
+            >
+              <span class="detail-label">Available Amenities</span>
+              <div class="amenities-list">
+                <span
+                  class="amenity-tag"
+                  *ngFor="let amenity of selectedEvent.location.amenities"
+                >
+                  {{ amenity }}
+                </span>
+              </div>
             </div>
           </div>
 

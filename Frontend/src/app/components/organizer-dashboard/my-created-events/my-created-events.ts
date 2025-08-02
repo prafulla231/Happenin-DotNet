@@ -82,7 +82,7 @@ export interface CustomAlert {
     FooterComponent,
     CustomAlertComponent,
     EventEditOverlayComponent, // Add the overlay component to imports
-    PaginationComponent
+    PaginationComponent,
   ],
   templateUrl: './my-created-events.html',
   styleUrls: ['./my-created-events.scss'],
@@ -130,7 +130,6 @@ export class MyCreatedEventsComponent implements OnInit, OnDestroy {
 
   organizerButtons: HeaderButton[] = [
     { text: 'Dashboard', action: 'backToDashboard' },
-    { text: 'Create Event', action: 'createEvent', style: 'primary' },
     { text: 'Analytics', action: 'openAnalytics', style: 'primary' },
     { text: 'Contact', action: 'openContact' },
     { text: 'Logout', action: 'logout' },
@@ -200,36 +199,88 @@ export class MyCreatedEventsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.loadingService.show();
 
-    // Load locations
+    // Load locations first, then events
     this.locationService
       .fetchLocations()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
           this.locations = Array.isArray(data) ? data : [];
+          // Load events after locations are loaded
+          this.fetchPaginatedEvents();
         },
         error: (error) => {
           console.error('Error loading locations:', error);
           this.locations = [];
+          // Still try to load events even if locations failed
+          this.fetchPaginatedEvents();
         },
       });
-
-    // Load paginated approved events only
-    this.fetchPaginatedEvents();
   }
 
   // Fetch paginated events for this organizer and status
   fetchPaginatedEvents(page: number = 1): void {
     if (!this.organizerId) return;
-    this.isLoading = true;
+
     this.eventService
-      .getEventsByOrganizerAndStatus(this.organizerId, this.eventStatus, page, this.eventsPerPage)
+      .getEventsByOrganizerAndStatus(
+        this.organizerId,
+        this.eventStatus,
+        page,
+        this.eventsPerPage
+      )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           const pageEvents = response.data || [];
-          this.events = pageEvents;
-          this.paginatedEvents = pageEvents;
+
+          // Map location details to events
+          this.events = pageEvents.map((event: Event) => {
+            if (event.locationId && this.locations.length > 0) {
+              const locationDetails = this.locations.find(
+                (loc) => loc.id === event.locationId
+              );
+              if (locationDetails) {
+                event.location = {
+                  id: locationDetails.id,
+                  state: locationDetails.state,
+                  city: locationDetails.city,
+                  placeName: locationDetails.placeName,
+                  address: locationDetails.address,
+                  maxSeatingCapacity: locationDetails.maxSeatingCapacity,
+                  amenities: locationDetails.amenities || [],
+                  bookings: locationDetails.bookings || [],
+                };
+              } else {
+                // If location not found, create a minimal location object
+                event.location = {
+                  id: event.locationId,
+                  state: 'Not specified',
+                  city: 'Not specified',
+                  placeName: 'Not specified',
+                  address: 'Not specified',
+                  maxSeatingCapacity: 0,
+                  amenities: [],
+                  bookings: [],
+                };
+              }
+            } else if (!event.location) {
+              // If no location info at all, create default
+              event.location = {
+                id: '',
+                state: 'Not specified',
+                city: 'Not specified',
+                placeName: 'Not specified',
+                address: 'Not specified',
+                maxSeatingCapacity: 0,
+                amenities: [],
+                bookings: [],
+              };
+            }
+            return event;
+          });
+
+          this.paginatedEvents = this.events;
           this.currentPage = response.currentPage || page;
           this.totalPages = response.totalPages || 1;
           this.isLoading = false;
@@ -262,9 +313,6 @@ export class MyCreatedEventsComponent implements OnInit, OnDestroy {
     switch (action) {
       case 'backToDashboard':
         this.backToDashboard();
-        break;
-      case 'createEvent':
-        this.createEvent();
         break;
       case 'openAnalytics':
         this.openAnalytics();

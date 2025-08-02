@@ -7,62 +7,6 @@
   >
   </app-header>
 
-  <!-- Page Header -->
-  <div class="page-header">
-    <div class="header-content">
-      <div class="header-icon">⏳</div>
-      <div class="header-text">
-        <h1>Pending Approvals</h1>
-        <p>Events waiting for admin approval</p>
-      </div>
-    </div>
-    <div class="events-count-badge">
-      {{ pendingEvents.length }} {{ pendingEvents.length === 1 ? 'Event' :
-      'Events' }}
-    </div>
-  </div>
-
-  <!-- Filter and Sort Options -->
-  <div class="filter-section" *ngIf="pendingEvents.length > 0">
-    <div class="filter-group">
-      <label class="filter-label">Sort by:</label>
-      <select
-        class="filter-select"
-        [(ngModel)]="sortBy"
-        (change)="applySorting()"
-      >
-        <option value="date">Event Date</option>
-        <option value="created">Created Date</option>
-        <option value="title">Title</option>
-        <option value="category">Category</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label class="filter-label">Order:</label>
-      <select
-        class="filter-select"
-        [(ngModel)]="sortOrder"
-        (change)="applySorting()"
-      >
-        <option value="asc">Ascending</option>
-        <option value="desc">Descending</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <label class="filter-label">Category:</label>
-      <select
-        class="filter-select"
-        [(ngModel)]="selectedCategory"
-        (change)="applyFilters()"
-      >
-        <option value="">All Categories</option>
-        <option *ngFor="let category of categories" [value]="category">
-          {{ category }}
-        </option>
-      </select>
-    </div>
-  </div>
-
   <!-- Pending Events Grid -->
   <div class="events-section" *ngIf="filteredEvents.length > 0">
     <div class="events-grid">
@@ -407,3 +351,14 @@
   (alertCancelled)="handleAlertCancel()"
 >
 </app-custom-alert>
+
+<!-- Event Edit Overlay -->
+<app-event-edit-overlay
+  [isVisible]="isEditOverlayVisible"
+  [eventToEdit]="eventToEdit"
+  [organizerId]="organizerId"
+  (closeOverlay)="onCloseEditOverlay()"
+  (eventUpdated)="onEventUpdated()"
+  (showAlert)="onShowAlertFromOverlay($event)"
+>
+</app-event-edit-overlay>
