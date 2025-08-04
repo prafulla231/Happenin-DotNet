@@ -1,3 +1,8 @@
+/**
+ * Unit tests for LoginComponent.
+ * Covers all major functionalities: form validation, login, registration, OTP, navigation, popups, and utility methods.
+ * Each test suite is documented for clarity and maintainability.
+ */
 import {
   ComponentFixture,
   TestBed,
@@ -24,12 +29,16 @@ describe('LoginComponent', () => {
   let router: Router;
   let authService: jasmine.SpyObj<AuthService>;
 
-  // Mock AuthService
+  // Mock AuthService for dependency injection
   const authServiceSpy = jasmine.createSpyObj('AuthService', [
     'loginUser',
     'registerUser',
   ]);
 
+  /**
+   * Setup TestBed and spies before each test.
+   * Initializes component, dependencies, and spies for local/session storage and router navigation.
+   */
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
@@ -47,7 +56,7 @@ describe('LoginComponent', () => {
     router = TestBed.inject(Router);
     authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
 
-    // Setup spies
+    // Setup spies for navigation and storage
     spyOn(router, 'navigate');
     spyOn(localStorage, 'setItem');
     spyOn(localStorage, 'getItem').and.returnValue('mock-token');
@@ -56,6 +65,10 @@ describe('LoginComponent', () => {
     fixture.detectChanges();
   });
 
+  /**
+   * Cleanup after each test.
+   * Verifies HTTP requests and clears any running timers.
+   */
   afterEach(() => {
     httpMock.verify();
     // Clear any running timers
@@ -64,6 +77,9 @@ describe('LoginComponent', () => {
     }
   });
 
+  /**
+   * Tests for component initialization and form setup.
+   */
   describe('Component Initialization', () => {
     it('should create', () => {
       expect(component).toBeTruthy();
@@ -92,6 +108,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for toggling between login and registration forms.
+   */
   describe('Form Toggle Functionality', () => {
     it('should toggle between login and registration forms', () => {
       component.toggleForm(false);
@@ -118,6 +137,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for toggling between password and OTP login methods.
+   */
   describe('Login Method Toggle', () => {
     it('should toggle between password and OTP login', () => {
       component.toggleLoginMethod(true);
@@ -139,6 +161,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for form validation logic for login, registration, and OTP forms.
+   */
   describe('Form Validation', () => {
     describe('Login Form Validation', () => {
       it('should validate email format', () => {
@@ -169,9 +194,9 @@ describe('LoginComponent', () => {
         expect(form.invalid).toBe(true);
 
         form.patchValue({
-          name: 'John Doe',
-          phone: '1234567890',
-          email: 'john@example.com',
+          name: 'Rajat Mahajan',
+          phone: '9822964723',
+          email: 'rajat@gmail.com',
           password: 'Password123',
           confirmPassword: 'Password123',
           role: 'user',
@@ -243,6 +268,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for error message helper functions for password, confirm password, and OTP.
+   */
   describe('Error Message Functions', () => {
     it('should return correct password error messages', () => {
       const passwordControl = component.loginForm.get('password');
@@ -291,6 +319,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for login functionality, including success, failure, and invalid form submission.
+   */
   describe('Login Functionality', () => {
     it('should handle successful login', fakeAsync(() => {
       const mockResponse = {
@@ -367,6 +398,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for registration functionality, including auto-login after registration and error handling.
+   */
   describe('Registration Functionality', () => {
     it('should handle successful registration and auto-login', fakeAsync(() => {
       const mockRegisterResponse = { message: 'User registered successfully' };
@@ -429,6 +463,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for OTP functionality: sending, verifying, and resending OTP.
+   */
   describe('OTP Functionality', () => {
     it('should send OTP successfully', () => {
       component.otpForm.patchValue({ email: 'test@test.com' });
@@ -545,6 +582,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for resend timer functionality: starting, formatting, and resetting timer.
+   */
   describe('Timer Functionality', () => {
     it('should start resend timer correctly', fakeAsync(() => {
       component.startResendTimer();
@@ -582,6 +622,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for navigation and role-based routing after login.
+   */
   describe('Navigation and Role-based Routing', () => {
     it('should navigate based on user role', () => {
       const mockResponse = {
@@ -622,6 +665,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for popup management: showing/hiding success and alert popups.
+   */
   describe('Popup Management', () => {
     it('should show and hide success popup', fakeAsync(() => {
       component.showSuccessMessage('Test success message');
@@ -653,6 +699,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for utility functions, such as marking form groups as touched.
+   */
   describe('Utility Functions', () => {
     it('should mark form group as touched', () => {
       const formGroup = component.loginForm;
@@ -665,6 +714,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for custom validators: password strength and password match.
+   */
   describe('Custom Validators', () => {
     it('should validate password strength correctly', () => {
       // Test empty password
@@ -707,6 +759,9 @@ describe('LoginComponent', () => {
     });
   });
 
+  /**
+   * Tests for component cleanup, such as clearing timers on destroy.
+   */
   describe('Component Cleanup', () => {
     it('should clean up timer on destroy', () => {
       component.startResendTimer();
