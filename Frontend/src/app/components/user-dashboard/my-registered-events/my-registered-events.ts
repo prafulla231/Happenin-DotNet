@@ -314,10 +314,10 @@ export class MyRegisteredEvents implements OnInit, OnDestroy {
         { label: 'Description', value: event.description },
         { label: 'Date', value: this.formatDate(event.date) },
         { label: 'Time', value: event.timeSlot },
-        { label: 'Duration', value: event.duration },
+        { label: 'Duration', value: `${event.duration} min` },
         { label: 'Location', value: event.location.city },
         { label: 'Category', value: event.category || 'General' },
-        { label: 'Price', value: `$${event.price}` }, // Convert to string with currency formatting
+        { label: 'Price', value: `${event.price} rs` }, // Convert to string with currency formatting
         { label: 'Ticket Holder', value: this.userName || 'Guest' },
       ];
       console.log('Ticket Details:', details);

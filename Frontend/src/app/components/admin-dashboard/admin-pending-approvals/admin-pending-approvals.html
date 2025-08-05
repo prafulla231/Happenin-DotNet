@@ -134,15 +134,16 @@
         </div>
       </div>
       <div class="admin-modal-actions">
-        <button class="admin-modal-delete-btn"
-          (click)="confirmDenyEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title, selectedEvent.date, selectedEvent.timeSlot, selectedEvent.location.city); closeEventDetails()">
-          <span class="btn-icon">🗑️</span>
-          <span class="btn-text">Deny Event</span>
-        </button>
-        <button class="admin-modal-approve-btn"
+
+        <button  aria-label="Approve event" class="admin-modal-approve-btn"
           (click)="confirmApproveEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title); closeEventDetails()">
           <span class="btn-icon">✅</span>
           <span class="btn-text">Approve Event</span>
+        </button>
+        <button aria-label="Deny event" class="admin-modal-delete-btn"
+          (click)="confirmDenyEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title, selectedEvent.date, selectedEvent.timeSlot, selectedEvent.location.city); closeEventDetails()">
+          <span class="btn-icon">🗑️</span>
+          <span class="btn-text">Deny Event</span>
         </button>
       </div>
     </div>

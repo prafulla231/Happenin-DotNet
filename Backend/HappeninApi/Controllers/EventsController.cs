@@ -23,6 +23,57 @@ namespace HappeninApi.Controllers
             _locationRepo = locationRepo;
         }
 
+                [HttpPost]
+        public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto)
+        {
+            // Console.WriteLine($"📥 Creating Event: {dto.Title} by {dto.CreatedById}");
+ 
+            var evnt = new Event
+            {
+                Id = Guid.NewGuid(),
+                Title = dto.Title,
+                Description = dto.Description,
+                Date = dto.Date,
+                TimeSlot = dto.TimeSlot,
+                Duration = dto.Duration,
+                LocationId = dto.LocationId,
+                Category = dto.Category,
+                Price = dto.Price,
+                MaxRegistrations = dto.MaxRegistrations,
+                CurrentRegistrations = 0,
+                CreatedById = dto.CreatedById,
+                Artist = dto.Artist,
+                Organization = dto.Organization,
+                IsDeleted = false,
+                Status = EventStatus.Pending,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Location = new Location
+                {
+                    Id = dto.LocationId,
+                    State = "",
+                    City = "",
+                    PlaceName = "",
+                    Address = ""
+                },
+                CreatedBy = new User
+                {
+                    Id = dto.CreatedById,
+                    Name = "",
+                    Phone = "",
+                    Email = "",
+                    Password = ""
+                }
+            };
+ 
+            var created = await _repository.CreateEventAsync(evnt);
+ 
+            // Console.WriteLine("✅ Event created with ID: " + created.Id);
+ 
+            return CreatedAtAction(nameof(GetEvent), new { id = created.Id }, created);
+        }
+ 
+
         /// <summary>
         /// Gets events by organizer and status with pagination.
         /// </summary>

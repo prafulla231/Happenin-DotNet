@@ -20,6 +20,7 @@ yarn-error.log
 *.launch
 .settings/
 *.sublime-workspace
+/tests/e2e/env.ts
 
 # Visual Studio Code
 .vscode/*
