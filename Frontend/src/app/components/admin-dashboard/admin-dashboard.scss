@@ -76,9 +76,6 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
     z-index: 1000; // Ensure header is above other content
   }
 
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
 }
 
 // Container for both buttons in a single row
@@ -1657,9 +1654,6 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
 
 // Responsive Design
 @media (max-width: 768px) {
-  .admin-dashboard-container {
-    padding: 16px;
-  }
 
   .admin-dashboard-header {
     padding: 20px;
@@ -1670,6 +1664,9 @@ $admin-gradient-button: linear-gradient(135deg, $admin-primary-purple 0%, #8b5cf
     h2 {
       font-size: 24px;
     }
+  }
+  .admin-buttons-row{
+    padding: 16px;
   }
   .admin-events-grid {
   grid-template-columns: 1fr;

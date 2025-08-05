@@ -9,8 +9,16 @@
 
   <!-- Action Button -->
   <div class="action-section">
-    <button class="create-event-btn" (click)="toggleCreateForm()">
-      <span class="btn-icon">{{ showCreateForm ? '✕' : '✚' }}</span>
+    <button
+      class="create-event-btn"
+      (click)="toggleCreateForm()"
+      [attr.aria-expanded]="showCreateForm"
+      aria-controls="create-event-form"
+      [attr.aria-label]="showCreateForm ? 'Cancel creating event' : (isEditMode ? 'Edit existing event' : 'Create new event')"
+    >
+      <span class="btn-icon" aria-hidden="true"
+        >{{ showCreateForm ? '✕' : '✚' }}</span
+      >
       {{ showCreateForm ? 'Cancel' : (isEditMode ? 'Edit Event' : 'Create
       Event') }}
     </button>
@@ -373,12 +381,17 @@
               type="submit"
               class="submit-btn"
               [disabled]="eventForm.invalid || isLoading"
+              [attr.aria-label]="isEditMode ? 'Update the event' : 'Create a new event'"
+              [attr.aria-busy]="isLoading"
+              [attr.aria-disabled]="eventForm.invalid || isLoading"
             >
-              <span class="btn-icon">{{ isEditMode ? '📝' : '✨' }}</span>
-              <span class="btn-text"
-                >{{ isEditMode ? 'Update Event' : 'Create Event' }}</span
+              <span class="btn-icon" aria-hidden="true"
+                >{{ isEditMode ? '📝' : '✨' }}</span
               >
-              <div class="btn-shine"></div>
+              <span class="btn-text">
+                {{ isEditMode ? 'Update Event' : 'Create Event' }}
+              </span>
+              <div class="btn-shine" aria-hidden="true"></div>
             </button>
           </div>
         </form>
@@ -387,93 +400,146 @@
   </div>
 
   <!-- Navigation Cards Section -->
-  <div class="navigation-section">
+  <div
+    class="navigation-section"
+    role="navigation"
+    aria-label="Event management navigation"
+  >
     <div class="section-header">
-      <h2 class="section-title">Manage Your Events</h2>
-      <p class="section-subtitle">
+      <h2 class="section-title" id="manage-events-title">Manage Your Events</h2>
+      <p class="section-subtitle" aria-describedby="manage-events-title">
         Navigate to different sections of your event management
       </p>
     </div>
 
-    <div class="nav-cards-grid">
+    <div
+      class="nav-cards-grid"
+      role="list"
+      aria-label="Event management options"
+    >
       <!-- Created Events Card -->
-      <div class="nav-card created-events-card">
+      <div class="nav-card created-events-card" role="listitem">
         <div class="nav-card-header">
-          <div class="nav-card-icon">✅</div>
-          <div class="nav-card-badge">{{ events.length }}</div>
+          <div class="nav-card-icon" aria-hidden="true">✅</div>
+          <div class="nav-card-badge" aria-label="Created events">
+            {{ events.length }}
+          </div>
         </div>
         <div class="nav-card-body">
-          <h3 class="nav-card-title">Created Events</h3>
-          <p class="nav-card-description">
+          <h3 class="nav-card-title" id="created-events-title">
+            Created Events
+          </h3>
+          <p
+            class="nav-card-description"
+            aria-describedby="created-events-title"
+          >
             View and manage all your approved and active events
           </p>
-          <div class="nav-card-stats">
+          <div
+            class="nav-card-stats"
+            role="group"
+            aria-label="Created events statistics"
+          >
             <div class="stat-item">
-              <span class="stat-number">{{ events.length }}</span>
+              <span class="stat-number" aria-label="Number of active events"
+                >{{ events.length }}</span
+              >
               <span class="stat-label">Active Events</span>
             </div>
           </div>
         </div>
         <div class="nav-card-footer">
-          <button class="nav-card-btn" (click)="viewMyEvents()">
+          <button
+            class="nav-card-btn"
+            (click)="viewMyEvents()"
+            aria-label="View your created events"
+            aria-describedby="created-events-title"
+          >
             <span class="btn-text">View Events</span>
-            <span class="btn-arrow">→</span>
+            <span class="btn-arrow" aria-hidden="true">→</span>
           </button>
         </div>
       </div>
 
       <!-- Pending Approval Card -->
-      <div class="nav-card pending-events-card">
+      <div class="nav-card pending-events-card" role="listitem">
         <div class="nav-card-header">
-          <div class="nav-card-icon">⏳</div>
-          <div class="nav-card-badge pending">{{ pendingEvents.length }}</div>
+          <div class="nav-card-icon" aria-hidden="true">⏳</div>
+          <div class="nav-card-badge pending" aria-label="pending events">
+            {{ pendingEvents.length }}
+          </div>
         </div>
         <div class="nav-card-body">
-          <h3 class="nav-card-title">Pending Approval</h3>
-          <p class="nav-card-description">
+          <h3 class="nav-card-title" id="pending-events-title">
+            Pending Approval
+          </h3>
+          <p
+            class="nav-card-description"
+            aria-describedby="pending-events-title"
+          >
             Events waiting for admin approval before going live
           </p>
-          <div class="nav-card-stats">
+          <div
+            class="nav-card-stats"
+            role="group"
+            aria-label="Pending events statistics"
+          >
             <div class="stat-item">
-              <span class="stat-number">{{ pendingEvents.length }}</span>
+              <span class="stat-number" aria-label="Number of pending events"
+                >{{ pendingEvents.length }}</span
+              >
               <span class="stat-label">Pending Events</span>
             </div>
           </div>
         </div>
         <div class="nav-card-footer">
-          <button class="nav-card-btn" (click)="viewPendingEvents()">
+          <button
+            class="nav-card-btn"
+            (click)="viewPendingEvents()"
+            aria-label="View your pending events awaiting approval"
+            aria-describedby="pending-events-title"
+          >
             <span class="btn-text">View Pending</span>
-            <span class="btn-arrow">→</span>
+            <span class="btn-arrow" aria-hidden="true">→</span>
           </button>
         </div>
       </div>
+
       <!-- Analytics Card -->
-      <div class="nav-card analytics-card">
+      <div class="nav-card analytics-card" role="listitem">
         <div class="nav-card-header">
-          <div class="nav-card-icon">📊</div>
+          <div class="nav-card-icon" aria-hidden="true">📊</div>
         </div>
         <div class="nav-card-body">
-          <h3 class="nav-card-title">Analytics</h3>
-          <p class="nav-card-description">
-            Events waiting for admin approval before going live
+          <h3 class="nav-card-title" id="analytics-title">Analytics</h3>
+          <p class="nav-card-description" aria-describedby="analytics-title">
+            Analyze your created events
           </p>
-          <div class="nav-card-stats">
+          <div
+            class="nav-card-stats"
+            role="group"
+            aria-label="Analytics information"
+          >
             <div class="stat-item">
-              <span class="stat-number">🎯</span>
+              <span class="stat-number" aria-hidden="true">🎯</span>
               <span class="stat-label">Organizer Analytics</span>
             </div>
           </div>
         </div>
         <div class="nav-card-footer">
-          <button class="nav-card-btn" (click)="openAnalytics()">
-            <span class="btn-text">View Pending</span>
-            <span class="btn-arrow">→</span>
+          <button
+            class="nav-card-btn"
+            (click)="openAnalytics()"
+            aria-label="View analytics for your events"
+            aria-describedby="analytics-title"
+          >
+            <span class="btn-text">View Analytics</span>
+            <span class="btn-arrow" aria-hidden="true">→</span>
           </button>
         </div>
       </div>
     </div>
   </div>
-
   <!-- Empty State -->
   <div
     class="empty-state"

@@ -1,20 +1,30 @@
-<header class="dashboard-header">
+<header class="dashboard-header" role="banner" aria-label="Dashboard Header">
   <div class="header-content">
     <h1 class="main-title">
-      <span class="title-gradient">Welcome, {{userName}}</span>
-      <span class="title-highlight" *ngIf="title">{{title}}</span>
+      <span class="title-gradient" aria-label="Welcome message"
+        >Welcome, {{userName}}</span
+      >
+      <span class="title-highlight" *ngIf="title" aria-label="Dashboard section"
+        >{{title}}</span
+      >
     </h1>
 
     <!-- Desktop buttons (hidden on mobile) -->
-    <div class="header-buttons desktop-buttons">
+    <div
+      class="header-buttons desktop-buttons"
+      role="navigation"
+      aria-label="Header actions"
+    >
       <button
         *ngFor="let button of buttons"
         class="logout-btn"
         [class.btn-primary]="button.style === 'primary'"
         [class.btn-secondary]="button.style === 'secondary'"
-        (click)="onButtonClick(button.action)">
+        (click)="onButtonClick(button.action)"
+        [attr.aria-label]="button.text + ' button'"
+      >
         <span class="btn-text">{{button.text}}</span>
-        <div class="btn-glow"></div>
+        <div class="btn-glow" aria-hidden="true"></div>
       </button>
     </div>
 
@@ -24,8 +34,11 @@
         class="hamburger-btn"
         [class.active]="isMenuOpen"
         (click)="toggleMenu()"
-        aria-label="Toggle menu">
-        <div class="hamburger-lines">
+        aria-label="Toggle mobile navigation menu"
+        [attr.aria-expanded]="isMenuOpen"
+        aria-controls="mobileMenuContent"
+      >
+        <div class="hamburger-lines" aria-hidden="true">
           <span class="line line1"></span>
           <span class="line line2"></span>
           <span class="line line3"></span>
@@ -35,7 +48,13 @@
   </div>
 
   <!-- Mobile menu dropdown - moved outside header-content -->
-  <div class="mobile-menu" [class.open]="isMenuOpen">
+  <div
+    class="mobile-menu"
+    [class.open]="isMenuOpen"
+    id="mobileMenuContent"
+    role="navigation"
+    aria-label="Mobile navigation menu"
+  >
     <div class="mobile-menu-content">
       <button
         *ngFor="let button of buttons; let i = index"
@@ -43,11 +62,12 @@
         [class.btn-primary]="button.style === 'primary'"
         [class.btn-secondary]="button.style === 'secondary'"
         [style.animation-delay]="(i * 0.1) + 's'"
-        (click)="onButtonClick(button.action)">
+        (click)="onButtonClick(button.action)"
+        [attr.aria-label]="button.text + ' button'"
+      >
         <span class="btn-text">{{button.text}}</span>
-        <div class="btn-glow"></div>
+        <div class="btn-glow" aria-hidden="true"></div>
       </button>
     </div>
   </div>
-  <!-- </div> -->
 </header>

@@ -78,6 +78,7 @@
               <!-- Download Ticket Button -->
               <button
                 class="download-ticket-btn"
+                aria-label="Download your ticket"
                 (click)="downloadTicket(event)"
               >
                 <span class="btn-icon">📥</span>
@@ -87,6 +88,7 @@
               <!-- Deregister button -->
               <button
                 class="deregister-button"
+                aria-label="Cancel your registration"
                 (click)="deregister(userId!, event.id)"
               >
                 <span class="btn-text">Cancel Registration</span>

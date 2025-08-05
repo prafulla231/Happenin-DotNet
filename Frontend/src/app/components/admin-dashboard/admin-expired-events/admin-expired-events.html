@@ -26,17 +26,22 @@
         </p>
       </div>
 
-
-
       <div class="event-actions">
+        <!-- Delete Event Button -->
         <button
           class="delete-btn"
           (click)="confirmDeleteEvent(event.id, event.title)"
+          [attr.aria-label]="'Delete event titled ' + event.title"
         >
           Delete Event
         </button>
-        <button class="view-details-btn" (click)="showEventDetail(event)">
-          <!-- <span class="btn-icon">👁️</span> -->
+
+        <!-- View Details Button -->
+        <button
+          class="view-details-btn"
+          (click)="showEventDetail(event)"
+          [attr.aria-label]="'View details of event titled ' + event.title"
+        >
           <span class="btn-text">Details</span>
         </button>
       </div>
@@ -49,12 +54,12 @@
   </div>
 </div>
 
- <app-pagination
-      [currentPage]="currentPage"
-      [totalPages]="totalPages"
-      (pageChanged)="onPageChange($event)"
-    >
-    </app-pagination>
+<app-pagination
+  [currentPage]="currentPage"
+  [totalPages]="totalPages"
+  (pageChanged)="onPageChange($event)"
+>
+</app-pagination>
 
 <!-- Event Details Modal -->
 <div

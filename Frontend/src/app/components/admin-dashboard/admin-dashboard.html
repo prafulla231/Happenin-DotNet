@@ -7,29 +7,50 @@
   </app-header>
 
   <div class="admin-buttons-row">
+    <!-- Add New Admin Button -->
     <button
       *ngIf="isSuperAdmin"
       class="add-admin-btn"
       (click)="toggleRegisterForm()"
+      aria-label="Add a new administrator"
     >
-      ➕ Add New Admin
+      <span aria-hidden="true">➕</span> Add New Admin
     </button>
 
+    <!-- Add Location Button (visible when form is not shown) -->
     <ng-container *ngIf="!showLocationForm">
-      <button class="add-location-btn" (click)="toggleLocationForm()">
-        📍 Add Location
+      <button
+        class="add-location-btn"
+        (click)="toggleLocationForm()"
+        aria-label="Add a new location"
+        [attr.aria-expanded]="showLocationForm"
+        aria-controls="location-form"
+      >
+        <span aria-hidden="true">📍</span> Add Location
       </button>
     </ng-container>
 
+    <!-- Close Location Form Button (visible when form is shown) -->
     <ng-container *ngIf="showLocationForm">
-      <button class="close-location-btn" (click)="toggleLocationForm()">
-        ✖ Close Location Form
+      <button
+        class="close-location-btn"
+        (click)="toggleLocationForm()"
+        aria-label="Close the location form"
+        [attr.aria-expanded]="showLocationForm"
+        aria-controls="location-form"
+      >
+        <span aria-hidden="true">✖</span> Close Location Form
       </button>
     </ng-container>
 
-    <!--View All Locations Button -->
-    <button class="view-locations-btn" (click)="toggleViewLocations()">
-      👁️ View All Locations
+    <!-- View All Locations Button -->
+    <button
+      class="view-locations-btn"
+      (click)="toggleViewLocations()"
+      aria-label="View all saved locations"
+      aria-controls="locations-list"
+    >
+      <span aria-hidden="true">👁️</span> View All Locations
     </button>
   </div>
 
@@ -294,12 +315,20 @@
         class="card-image"
       />
       <div class="card-content">
-        <h3 class="card-title">Expired Events</h3>
-        <p class="card-description">
+        <h3 class="card-title" id="expired-events-title">Expired Events</h3>
+
+        <p class="card-description" id="expired-events-desc">
           Review past events, analyze attendance data, and archive completed
           event information.
         </p>
-        <button class="card-button">View Expired</button>
+
+        <button
+          class="card-button"
+          aria-label="View expired events"
+          aria-labelledby="expired-events-title expired-events-desc"
+        >
+          View Expired
+        </button>
       </div>
     </div>
 
@@ -319,12 +348,21 @@
         class="card-image"
       />
       <div class="card-content">
-        <h3 class="card-title">Waiting for Approval</h3>
-        <p class="card-description">
+        <h3 class="card-title" id="pending-events-title">
+          Waiting for Approval
+        </h3>
+
+        <p class="card-description" id="pending-events-desc">
           Review and approve pending event submissions. Manage event approval
           workflow efficiently.
         </p>
-        <button class="card-button">Review Pending</button>
+
+        <button
+          class="card-button"
+          aria-labelledby="pending-events-title pending-events-desc"
+        >
+          Review Pending
+        </button>
       </div>
     </div>
 
@@ -344,67 +382,100 @@
         class="card-image"
       />
       <div class="card-content">
-        <h3 class="card-title">Analytics</h3>
-        <p class="card-description">
+        <h3 class="card-title" id="analytics-title">Analytics</h3>
+
+        <p class="card-description" id="analytics-desc">
           View comprehensive reports, statistics, and insights about events,
           attendance, and performance metrics.
         </p>
-        <button class="card-button">View Analytics</button>
+
+        <button
+          class="card-button"
+          aria-labelledby="analytics-title analytics-desc"
+        >
+          View Analytics
+        </button>
       </div>
     </div>
   </div>
 
   <!-- User Data Cards Section -->
   <div class="user-data-section">
-    <h2 class="section-title">User Data Management</h2>
+    <h2 class="section-title" id="user-data-title">User Data Management</h2>
+
     <div class="user-data-cards">
       <!-- All Users Card -->
       <div class="user-data-card users-card">
-        <div class="user-data-icon">👥</div>
+        <div class="user-data-icon" aria-hidden="true">👥</div>
         <div class="user-data-content">
-          <h4>All Users</h4>
-          <p class="user-count">{{ userCounts.users }} users</p>
+          <h4 id="users-title">All Users</h4>
+          <p class="user-count" id="users-desc">{{ userCounts.users }} users</p>
           <button
             class="download-btn"
             (click)="downloadUserData('users')"
             [disabled]="downloadingData.users"
+            [attr.aria-busy]="downloadingData.users"
+            aria-labelledby="users-title users-desc"
+            [attr.aria-label]="downloadingData.users ? 'Downloading users data' : 'Download all users data as Excel file'"
           >
-            <span *ngIf="!downloadingData.users">📥 Download Excel</span>
-            <span *ngIf="downloadingData.users">⏳ Downloading...</span>
+            <span *ngIf="!downloadingData.users" aria-hidden="true"
+              >📥 Download Excel</span
+            >
+            <span *ngIf="downloadingData.users" aria-hidden="true"
+              >⏳ Downloading...</span
+            >
           </button>
         </div>
       </div>
 
       <!-- All Organizers Card -->
       <div class="user-data-card organizers-card">
-        <div class="user-data-icon">🎭</div>
+        <div class="user-data-icon" aria-hidden="true">🎭</div>
         <div class="user-data-content">
-          <h4>All Organizers</h4>
-          <p class="user-count">{{ userCounts.organizers }} organizers</p>
+          <h4 id="organizers-title">All Organizers</h4>
+          <p class="user-count" id="organizers-desc">
+            {{ userCounts.organizers }} organizers
+          </p>
           <button
             class="download-btn"
             (click)="downloadUserData('organizers')"
             [disabled]="downloadingData.organizers"
+            [attr.aria-busy]="downloadingData.organizers"
+            aria-labelledby="organizers-title organizers-desc"
+            [attr.aria-label]="downloadingData.organizers ? 'Downloading organizers data' : 'Download all organizers data as Excel file'"
           >
-            <span *ngIf="!downloadingData.organizers">📥 Download Excel</span>
-            <span *ngIf="downloadingData.organizers">⏳ Downloading...</span>
+            <span *ngIf="!downloadingData.organizers" aria-hidden="true"
+              >📥 Download Excel</span
+            >
+            <span *ngIf="downloadingData.organizers" aria-hidden="true"
+              >⏳ Downloading...</span
+            >
           </button>
         </div>
       </div>
 
       <!-- All Admins Card -->
       <div class="user-data-card admins-card">
-        <div class="user-data-icon">🛡️</div>
+        <div class="user-data-icon" aria-hidden="true">🛡️</div>
         <div class="user-data-content">
-          <h4>All Admins</h4>
-          <p class="user-count">{{ userCounts.admins }} admins</p>
+          <h4 id="admins-title">All Admins</h4>
+          <p class="user-count" id="admins-desc">
+            {{ userCounts.admins }} admins
+          </p>
           <button
             class="download-btn"
             (click)="downloadUserData('admins')"
             [disabled]="downloadingData.admins"
+            [attr.aria-busy]="downloadingData.admins"
+            aria-labelledby="admins-title admins-desc"
+            [attr.aria-label]="downloadingData.admins ? 'Downloading admins data' : 'Download all admins data as Excel file'"
           >
-            <span *ngIf="!downloadingData.admins">📥 Download Excel</span>
-            <span *ngIf="downloadingData.admins">⏳ Downloading...</span>
+            <span *ngIf="!downloadingData.admins" aria-hidden="true"
+              >📥 Download Excel</span
+            >
+            <span *ngIf="downloadingData.admins" aria-hidden="true"
+              >⏳ Downloading...</span
+            >
           </button>
         </div>
       </div>

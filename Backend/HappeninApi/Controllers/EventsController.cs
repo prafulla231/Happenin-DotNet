@@ -23,11 +23,10 @@ namespace HappeninApi.Controllers
             _locationRepo = locationRepo;
         }
 
-                [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto dto)
         {
-            // Console.WriteLine($"📥 Creating Event: {dto.Title} by {dto.CreatedById}");
- 
+
             var evnt = new Event
             {
                 Id = Guid.NewGuid(),
@@ -65,14 +64,14 @@ namespace HappeninApi.Controllers
                     Password = ""
                 }
             };
- 
+
             var created = await _repository.CreateEventAsync(evnt);
- 
+
             // Console.WriteLine("✅ Event created with ID: " + created.Id);
- 
+
             return CreatedAtAction(nameof(GetEvent), new { id = created.Id }, created);
         }
- 
+
 
         /// <summary>
         /// Gets events by organizer and status with pagination.
@@ -93,7 +92,7 @@ namespace HappeninApi.Controllers
             return Ok(response);
         }
 
-// Duplicate namespace and class removed. Only one EventsController class and namespace block should exist.
+        // Duplicate namespace and class removed. Only one EventsController class and namespace block should exist.
 
         [HttpGet("by-id/{id}")]
         public async Task<IActionResult> GetEvent(Guid id)
