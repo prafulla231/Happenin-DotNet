@@ -132,10 +132,6 @@
     box-sizing: border-box;
   }
 
-  /* Enhanced text rendering for better cross-browser typography */
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 
   // Main heading with enhanced browser support
   .main-heading {
