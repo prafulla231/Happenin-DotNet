@@ -29,25 +29,18 @@ namespace HappeninApi.Repositories
 
         public async Task SendTicketEmailAsync(TicketEmailDto dto)
         {
-            byte[]? pdfBytes = null;
+            string? pdfBase64 = null;
 
             if (dto.SendPDF && !string.IsNullOrWhiteSpace(dto.PdfBase64))
             {
-                try
-                {
-                    pdfBytes = Convert.FromBase64String(dto.PdfBase64);
-                }
-                catch
-                {
-                    throw new Exception("Invalid base64 PDF string.");
-                }
+                pdfBase64 = dto.PdfBase64; // Just pass the base64 string directly
             }
 
             await _emailHelper.SendRegistrationTicketAsync(
                 dto.UserEmail,
                 dto.UserName,
                 $"Event #{dto.EventId}", // Replace with actual event name if needed
-                pdfBytes
+                pdfBase64
             );
         }
 

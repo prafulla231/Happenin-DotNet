@@ -1,0 +1,71 @@
+# Page snapshot
+
+```yaml
+- main "User Dashboard":
+  - banner "Dashboard Header":
+    - heading "Welcome message Dashboard section" [level=1]: Welcome, Rajat Mahajan Dashboard
+    - navigation "Header actions":
+      - button "Available Events button": Available Events
+      - button "My Events button": My Events
+      - button "Contact button": Contact
+      - button "Logout button": Logout
+  - region "Available Events":
+    - heading "Available Events" [level=2]
+    - grid "Available events":
+      - 'gridcell "Event: Hack-O-Mania 5.0, Already booked"':
+        - heading "Hack-O-Mania 5.0" [level=3]
+        - text: Technical
+        - paragraph: A 36-hour national-level hackathon focusing on smart city solutions.
+        - text: "Date: Nov 26, 2025 Time: 15:00 - 20:00 Location: Coimbatore Price: ₹240"
+        - group "Event actions":
+          - button "Event already booked for Hack-O-Mania 5.0" [disabled] [pressed]: Booked
+          - button "View details for Hack-O-Mania 5.0": Details
+      - 'gridcell "Event: Shadows of the Mind, Already booked"':
+        - heading "Shadows of the Mind" [level=3]
+        - text: Theatre
+        - paragraph: A gripping psychological drama about memory, truth, and redemption.
+        - text: "Date: Oct 7, 2025 Time: 14:06 - 18:06 Location: Surat Price: ₹99"
+        - group "Event actions":
+          - button "Event already booked for Shadows of the Mind" [disabled] [pressed]: Booked
+          - button "View details for Shadows of the Mind": Details
+      - 'gridcell "Event: Canvas Chronicles, Already booked"':
+        - heading "Canvas Chronicles" [level=3]
+        - text: Exhibition
+        - paragraph: A contemporary art exhibition showcasing mixed-media works from emerging Indian artists.
+        - text: "Date: Nov 5, 2025 Time: 12:00 - 17:00 Location: Ahmedabad Price: ₹299"
+        - group "Event actions":
+          - button "Event already booked for Canvas Chronicles" [disabled] [pressed]: Booked
+          - button "View details for Canvas Chronicles": Details
+      - 'gridcell "Event: The Roast Room, Available to book"':
+        - heading "The Roast Room" [level=3]
+        - text: Comedy
+        - paragraph: A live roast battle between some of the wittiest comics in India. No topic is off-limits!
+        - text: "Date: Oct 27, 2025 Time: 18:06 - 21:06 Location: Coimbatore Price: ₹299"
+        - group "Event actions":
+          - button "Book now for The Roast Room": Book Now
+          - button "View details for The Roast Room": Details
+      - 'gridcell "Event: LOL with Nishant Tanwar - Updated, Already booked"':
+        - heading "LOL with Nishant Tanwar - Updated" [level=3]
+        - text: Comedy
+        - paragraph: A 90-minute stand-up special focusing on Indian families, social media culture, and life after marriage.
+        - text: "Date: Nov 20, 2025 Time: 19:05 - 21:05 Location: Coimbatore Price: ₹799"
+        - group "Event actions":
+          - button "Event already booked for LOL with Nishant Tanwar - Updated" [disabled] [pressed]: Booked
+          - button "View details for LOL with Nishant Tanwar - Updated": Details
+      - 'gridcell "Event: Hip-Hop Hustle Night, Already booked"':
+        - heading "Hip-Hop Hustle Night" [level=3]
+        - text: Dance
+        - paragraph: A high-energy street dance battle featuring top hip-hop crews from around the country. Cash prizes and DJ sets included.
+        - text: "Date: Sep 22, 2025 Time: 21:04 - 00:04 Location: Madurai Price: ₹499"
+        - group "Event actions":
+          - button "Event already booked for Hip-Hop Hustle Night" [disabled] [pressed]: Booked
+          - button "View details for Hip-Hop Hustle Night": Details
+    - button "◀ Prev" [disabled]
+    - button "1"
+    - button "2"
+    - button "3"
+    - button "4"
+    - button "Next ▶"
+  - heading "Happenin'" [level=2]
+  - paragraph: For any queries please reach out to us at ✉ happenin.events.app@gmail.com
+```

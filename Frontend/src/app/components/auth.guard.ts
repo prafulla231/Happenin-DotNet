@@ -1,13 +1,21 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import {
+  CanActivate,
+  Router,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+} from '@angular/router';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
   constructor(private router: Router) {}
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): boolean {
     const token = localStorage.getItem('token');
 
     if (!token) {
@@ -21,24 +29,26 @@ export class AuthGuard implements CanActivate {
       const decodedPayload = JSON.parse(atob(payloadBase64));
 
       const userRole =
-        decodedPayload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+        decodedPayload[
+          'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+        ] ||
         decodedPayload.role ||
         decodedPayload.Role ||
         decodedPayload.roles;
 
       const expectedRole = route.data['role'];
 
-
-
-      if (expectedRole && userRole?.toLowerCase() !== expectedRole.toLowerCase()) {
-        console.warn('🚫 Role mismatch. Access denied.');
+      if (
+        expectedRole &&
+        userRole?.toLowerCase() !== expectedRole.toLowerCase()
+      ) {
+        console.warn('Role mismatch. Access denied.');
         this.router.navigate(['/unauthorized']);
         return false;
       }
 
       return true;
     } catch (err) {
-
       this.router.navigate(['/login']);
       return false;
     }

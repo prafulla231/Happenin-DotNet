@@ -49,7 +49,7 @@ namespace HappeninApi.Helpers
         /// <param name="userName">Name of the user.</param>
         /// <param name="eventName">Name of the event.</param>
         /// <param name="pdfAttachment">PDF ticket attachment (optional).</param>
-        public async Task SendRegistrationTicketAsync(string toEmail, string userName, string eventName, byte[]? pdfAttachment = null)
+        public async Task SendRegistrationTicketAsync(string toEmail, string userName, string eventName, string? pdfBase64 = null)
         {
             var message = new MimeMessage();
             message.From.Add(MailboxAddress.Parse(_config["Email:User"]));
@@ -61,9 +61,19 @@ namespace HappeninApi.Helpers
                 HtmlBody = $"<h2>Hello {userName},</h2><p>You are registered for <strong>{eventName}</strong>.</p><p>Please find your ticket attached.</p>"
             };
 
-            if (pdfAttachment != null)
+            if (!string.IsNullOrEmpty(pdfBase64))
             {
-                builder.Attachments.Add("ticket.pdf", pdfAttachment, new ContentType("application", "pdf"));
+                try
+                {
+                    // Convert base64 string to byte array
+                    byte[] pdfBytes = Convert.FromBase64String(pdfBase64);
+                    builder.Attachments.Add("ticket.pdf", pdfBytes, new ContentType("application", "pdf"));
+                }
+                catch (Exception ex)
+                {
+                    // Log the error but continue sending email without attachment
+                    Console.WriteLine($"Error processing PDF attachment: {ex.Message}");
+                }
             }
 
             message.Body = builder.ToMessageBody();

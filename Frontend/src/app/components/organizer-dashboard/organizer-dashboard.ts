@@ -694,6 +694,7 @@ export class OrganizerDashboardComponent implements OnDestroy {
           console.log('Creating event with organizer ID:', this.organizerId);
 
           this.resetForm();
+          this.showCreateForm = false;
           this.loadAllData();
         },
         error: async (error) => {

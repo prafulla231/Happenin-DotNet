@@ -554,25 +554,32 @@ export class UserDashboardComponent implements OnDestroy {
     if (event) {
       // console.log('Event found:', event);
     }
-
+    this.loadingService.show();
     this.showConfirmation(
       'Register for Event',
       `Are you sure you want to register for "${eventTitle}"?`,
       () => {
         this.eventService.registerForEvent(this.userId!, eventId).subscribe({
           next: (response) => {
-            this.loadRegisteredEvents();
-            this.sendRegistrationEmail(event!);
+            this.loadingService.hide();
+            // this.loadRegisteredEvents();
+            const registeredEvent = this.events.find((e) => e.id === eventId);
+            if (
+              registeredEvent &&
+              !this.registeredEvents.some((e) => e.id === eventId)
+            ) {
+              this.registeredEvents.push(registeredEvent);
+            }
+            // this.sendRegistrationEmail(event!);
+
             this.showAlert(
               'success',
               'Registration Successful',
-              `You have successfully registered for "${eventTitle}"!`
+              `You have successfully registered for "${eventTitle}"! A confirmation email will be sent shortly.`
             );
-            this.showAlert(
-              'info',
-              'Email Sent',
-              'A confirmation email with your ticket has been sent to your email address.'
-            );
+            setTimeout(() => {
+              this.sendRegistrationEmail(event!);
+            }, 100);
           },
           error: (err) => {
             console.error('Registration failed:', err);
